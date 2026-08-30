@@ -137,7 +137,7 @@ function q(sorted: number[], p: number): number {
 function makeMetric(
   tensors: Tensor[], key: string, label: string, unit: string,
   get: (t: Tensor) => number | null | undefined,
-  opts: { log?: boolean; shift?: number; invert?: boolean; loT?: string; hiT?: string; digits?: number; fixed?: [number, number] },
+  opts: { log?: boolean; shift?: number; invert?: boolean; loT?: string; hiT?: string; digits?: number; fixed?: [number, number]; minSpan?: number },
 ): MetricDef {
   const g = (t: Tensor) => { const v = get(t); return v == null ? null : v; };
   const shift = opts.shift ?? 0;
@@ -147,6 +147,13 @@ function makeMetric(
     .sort((a, b) => a - b);
   let lo = q(vals, 0.02), hi = q(vals, 0.98);
   if (opts.fixed) { lo = opts.fixed[0]; hi = opts.fixed[1]; }
+  // вырожденный диапазон не растягиваем на всю палитру: разброс 0.2 дБ
+  // не должен рисовать драму «хрупко/прочно» там, где всё одинаковое
+  if (opts.minSpan && hi - lo < opts.minSpan) {
+    const mid = (hi + lo) / 2;
+    lo = mid - opts.minSpan / 2;
+    hi = mid + opts.minSpan / 2;
+  }
   if (hi - lo < 1e-9) { hi = lo + 1; }
   const d = opts.digits ?? 1;
   return {
@@ -255,7 +262,7 @@ export async function loadModel(entry: ManifestEntry): Promise<Model> {
   const defs: MetricDef[] = [
     M('int4', db, x => x.sqnr_int4_g128, {}),
     M('int8', db, x => x.sqnr_int8_ch, {}),
-    M('fp8', db, x => x.sqnr_fp8_e4m3, { digits: 2 }),
+    M('fp8', db, x => x.sqnr_fp8_e4m3, { digits: 2, minSpan: 8 }),
     M('kurt', '', x => x.kurtosis, { log: true, shift: 3, invert: true }),
     M('hot', '×', x => x.hot, { log: true, invert: true }),
     M('dyn', '×', x => x.dyn_range, { log: true, invert: true }),
