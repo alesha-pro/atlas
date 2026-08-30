@@ -1,0 +1,141 @@
+{
+  "blocks": [
+    {
+      "type": "intro",
+      "title": { "en": "What this model is", "ru": "Что это за модель" },
+      "text": {
+        "en": "Qwen3.8-27B is a dense vision-language model from the Qwen3.5 architecture family (model_type qwen3_5, Apache-2.0). 27.78B parameters in bf16 across 18 shards. The language stack is hybrid: 16 repetitions of the pattern 3 × (Gated DeltaNet → FFN) followed by 1 × (Gated Attention → FFN). Everything below is read from config.json and the checkpoint itself, not from marketing pages.",
+        "ru": "Qwen3.8-27B — dense vision-language модель семейства Qwen3.5 (model_type qwen3_5, Apache-2.0). 27.78 млрд параметров в bf16, 18 шардов. Языковой стек гибридный: 16 повторов паттерна 3 × (Gated DeltaNet → FFN) и затем 1 × (Gated Attention → FFN). Всё ниже прочитано из config.json и самого чекпойнта, не с маркетинговых страниц."
+      }
+    },
+    {
+      "type": "facts",
+      "title": { "en": "Passport (config.json)", "ru": "Паспорт (config.json)" },
+      "rows": [
+        [{ "en": "parameters", "ru": "параметры" }, "27.78B · bfloat16 · 18 shards"],
+        [{ "en": "hidden size", "ru": "скрытая размерность" }, "5120"],
+        [{ "en": "layers", "ru": "слои" }, { "en": "64 = 48 linear + 16 full, full every 4th (3, 7, 11 … 63)", "ru": "64 = 48 линейных + 16 полных, полный каждый 4-й (3, 7, 11 … 63)" }],
+        [{ "en": "FFN", "ru": "FFN" }, "SwiGLU 5120 → 17408 → 5120"],
+        [{ "en": "full attention", "ru": "полное внимание" }, { "en": "GQA 24 Q heads : 4 KV heads × 256, q/k per-head RMSNorm, swish output gate", "ru": "GQA 24 Q-головы : 4 KV × 256, RMSNorm по голове для q/k, swish-гейт на выходе" }],
+        [{ "en": "linear attention", "ru": "линейное внимание" }, { "en": "Gated DeltaNet: 48 V heads + 16 QK heads × 128, conv1d k=4, fp32 state", "ru": "Gated DeltaNet: 48 V-голов + 16 QK × 128, conv1d k=4, состояние в fp32" }],
+        [{ "en": "positions", "ru": "позиции" }, { "en": "partial RoPE 0.25 (64 of 256 dims), θ = 10⁷, interleaved mRoPE [11, 11, 10]", "ru": "частичный RoPE 0.25 (64 из 256 размерностей), θ = 10⁷, interleaved mRoPE [11, 11, 10]" }],
+        [{ "en": "context", "ru": "контекст" }, { "en": "262 144 native, extensible to 1M", "ru": "262 144 нативно, растягивается до 1M" }],
+        [{ "en": "vocabulary", "ru": "словарь" }, { "en": "248 320 (padded), embeddings NOT tied with lm_head", "ru": "248 320 (с паддингом), эмбеддинги НЕ разделены с lm_head" }],
+        [{ "en": "vision tower", "ru": "визуальная башня" }, { "en": "461M: 27 blocks × 1152, patch 16×16, spatial merge 2×2", "ru": "461M: 27 блоков × 1152, патч 16×16, spatial merge 2×2" }],
+        [{ "en": "MTP", "ru": "MTP" }, { "en": "1 extra layer, shared embeddings, trained with multiple steps", "ru": "1 дополнительный слой, общие эмбеддинги, обучена на несколько шагов вперёд" }]
+      ]
+    },
+    {
+      "type": "pattern",
+      "title": { "en": "The 3:1 rhythm", "ru": "Такт 3:1" },
+      "note": {
+        "en": "16 groups of 4 layers. In each group 3 layers keep a fixed-size recurrent state (cheap, O(1) per token) and the 4th looks at the full history (exact, O(n) per token). The full layers carry the long-range recall, the linear ones do the bulk of the work.",
+        "ru": "16 групп по 4 слоя. В каждой группе 3 слоя держат рекуррентное состояние фиксированного размера (дёшево, O(1) на токен), а 4-й смотрит на всю историю (точно, O(n) на токен). Полные слои отвечают за дальнюю память, линейные тащат основную работу."
+      }
+    },
+    {
+      "type": "diagram",
+      "title": { "en": "Full layer: Gated Attention", "ru": "Полный слой: Gated Attention" },
+      "note": {
+        "en": "q_proj is twice the expected size (12288 = 24×256×2) because half of it is a swish gate applied after attention. RoPE rotates only 64 of 256 dims per head; the other 192 carry position-free content. 24 query heads share 4 KV pairs, so the KV cache is 6x smaller.",
+        "ru": "q_proj вдвое больше ожидаемого (12288 = 24×256×2): половина уходит в swish-гейт, который применяется после внимания. RoPE крутит только 64 из 256 размерностей головы, остальные 192 несут содержимое без позиции. 24 Q-головы делят 4 KV-пары, поэтому KV-кеш в 6 раз меньше."
+      },
+      "h": 540,
+      "jump": "language_model.layers.3.self_attn.q_proj",
+      "nodes": [
+        { "id": "in", "x": 10, "y": 225, "w": 150, "kind": "norm", "label": "x · 5120" },
+        { "id": "norm", "x": 200, "y": 225, "w": 160, "kind": "norm", "label": "RMSNorm" },
+        { "id": "q", "x": 410, "y": 60, "w": 280, "kind": "attn", "label": "q_proj 5120 → 12288", "sub": { "en": "24 heads × 256, ×2: half becomes the gate", "ru": "24 головы × 256, ×2: половина уйдёт в гейт" } },
+        { "id": "k", "x": 410, "y": 225, "w": 280, "kind": "attn", "label": "k_proj 5120 → 1024", "sub": { "en": "4 KV heads × 256", "ru": "4 KV-головы × 256" } },
+        { "id": "v", "x": 410, "y": 390, "w": 280, "kind": "attn", "label": "v_proj 5120 → 1024" },
+        { "id": "qk", "x": 750, "y": 140, "w": 230, "kind": "norm", "label": "q_norm · k_norm", "sub": { "en": "RMS per head (256)", "ru": "RMS по голове (256)" } },
+        { "id": "rope", "x": 1040, "y": 140, "w": 270, "kind": "attn", "label": "partial RoPE", "sub": { "en": "64 of 256 dims · θ 10⁷ · mRoPE 11/11/10", "ru": "64 из 256 размерностей · θ 10⁷ · mRoPE 11/11/10" } },
+        { "id": "sdpa", "x": 1370, "y": 225, "w": 270, "kind": "attn", "label": "attention · GQA 24:4", "sub": { "en": "each 6 Q heads read 1 KV pair", "ru": "каждые 6 Q-голов читают 1 KV-пару" } },
+        { "id": "gate", "x": 1700, "y": 225, "w": 230, "kind": "attn", "label": "⊙ swish gate", "sub": { "en": "the 2nd half of q_proj", "ru": "вторая половина q_proj" } },
+        { "id": "o", "x": 1990, "y": 225, "w": 250, "kind": "attn", "label": "o_proj 6144 → 5120" }
+      ],
+      "edges": [["in", "norm"], ["norm", "q"], ["norm", "k"], ["norm", "v"], ["q", "qk"], ["k", "qk"], ["qk", "rope"], ["rope", "sdpa"], ["v", "sdpa"], ["sdpa", "gate"], ["q", "gate", 1], ["gate", "o"]]
+    },
+    {
+      "type": "diagram",
+      "title": { "en": "Linear layer: Gated DeltaNet", "ru": "Линейный слой: Gated DeltaNet" },
+      "note": {
+        "en": "Instead of a KV cache the layer keeps a state of 48 heads × 128×128 (fp32). The delta rule first erases what the state already predicts for key k, then writes the new value: an error-correcting memory, this is what separates DeltaNet from plain linear attention. a and b (one scalar per head, from A_log and dt_bias) control decay and write strength. conv1d with kernel 4 gives short local context before the recurrence. These in_proj_a / in_proj_b rows are the most fragile INT4 family in the language part: 16.1 and 16.6 dB.",
+        "ru": "Вместо KV-кеша слой держит состояние 48 голов × 128×128 (fp32). Дельта-правило сначала стирает то, что состояние уже предсказывает по ключу k, и потом записывает новое значение: память с коррекцией ошибки, этим DeltaNet и отличается от простого линейного внимания. a и b (по скаляру на голову, из A_log и dt_bias) управляют затуханием и силой записи. conv1d с ядром 4 даёт короткий локальный контекст до рекуррентности. Ряды in_proj_a / in_proj_b — самое хрупкое к INT4 семейство языковой части: 16.1 и 16.6 дБ."
+      },
+      "h": 560,
+      "jump": "language_model.layers.0.linear_attn.in_proj_qkv",
+      "nodes": [
+        { "id": "in", "x": 10, "y": 235, "w": 150, "kind": "norm", "label": "x · 5120" },
+        { "id": "norm", "x": 200, "y": 235, "w": 150, "kind": "norm", "label": "RMSNorm" },
+        { "id": "qkv", "x": 400, "y": 150, "w": 270, "kind": "lin", "label": "in_proj_qkv 5120 → 10240" },
+        { "id": "conv", "x": 730, "y": 150, "w": 230, "kind": "lin", "label": "conv1d · k=4", "sub": { "en": "short local memory", "ru": "короткая локальная память" } },
+        { "id": "split", "x": 1020, "y": 150, "w": 250, "kind": "lin", "label": "split q · k · v", "sub": "q 16×128 · k 16×128 · v 48×128" },
+        { "id": "ab", "x": 400, "y": 390, "w": 330, "kind": "lin", "label": "in_proj_a · in_proj_b 5120 → 48", "sub": { "en": "α decay and β write strength, per head (A_log, dt_bias)", "ru": "α затухание и β сила записи, на голову (A_log, dt_bias)" } },
+        { "id": "state", "x": 1330, "y": 225, "w": 330, "kind": "lin", "label": "S ← α·S + β·(v − S·k)·kᵀ", "sub": { "en": "state 48 × 128×128 in fp32 · O(1) per token · read: o = S·q", "ru": "состояние 48 × 128×128 в fp32 · O(1) на токен · чтение: o = S·q" } },
+        { "id": "z", "x": 1020, "y": 420, "w": 250, "kind": "lin", "label": "in_proj_z 5120 → 6144", "sub": { "en": "swish gate", "ru": "swish-гейт" } },
+        { "id": "gn", "x": 1720, "y": 235, "w": 250, "kind": "norm", "label": "RMSNorm(128) ⊙ gate" },
+        { "id": "o", "x": 2030, "y": 235, "w": 240, "kind": "lin", "label": "out_proj 6144 → 5120" }
+      ],
+      "edges": [["in", "norm"], ["norm", "qkv"], ["norm", "ab"], ["norm", "z"], ["qkv", "conv"], ["conv", "split"], ["split", "state"], ["ab", "state"], ["state", "gn"], ["z", "gn"], ["gn", "o"]]
+    },
+    {
+      "type": "diagram",
+      "title": { "en": "Vision tower", "ru": "Визуальная башня" },
+      "note": {
+        "en": "A separate 461M ViT. The image is cut into 16×16 patches (×2 frames for video), runs through 27 blocks, then 4 neighbouring patches merge into 1 and the merger projects into the language dimension: the picture becomes ordinary tokens. pos_embed is a learned 2304-position grid (48×48) interpolated to the actual image size, and it is the worst tensor of the entire model at INT4: 11.85 dB.",
+        "ru": "Отдельный ViT на 461M. Картинка режется на патчи 16×16 (×2 кадра для видео), проходит 27 блоков, затем 4 соседних патча склеиваются в 1 и merger проецирует в размерность языка: изображение становится обычными токенами. pos_embed — обучаемая сетка на 2304 позиции (48×48), интерполируется под реальный размер, и это худший тензор всей модели на INT4: 11.85 дБ."
+      },
+      "h": 470,
+      "jump": "visual.pos_embed",
+      "nodes": [
+        { "id": "img", "x": 10, "y": 180, "w": 200, "kind": "in", "label": { "en": "image / video", "ru": "картинка / видео" } },
+        { "id": "patch", "x": 270, "y": 180, "w": 260, "kind": "vision", "label": { "en": "patches 16×16×2", "ru": "патчи 16×16×2" }, "sub": "patch_embed 1176 → 1152" },
+        { "id": "pos", "x": 270, "y": 360, "w": 260, "kind": "vision", "label": "+ pos_embed · 2304", "sub": { "en": "48×48 grid, interpolated · worst tensor of the model", "ru": "сетка 48×48, интерполируется · худший тензор модели" } },
+        { "id": "blocks", "x": 590, "y": 180, "w": 300, "kind": "vision", "label": { "en": "27 × block", "ru": "27 × блок" }, "sub": { "en": "MHA 16 heads × 72 · MLP 1152 → 4304 · GELU", "ru": "MHA 16 голов × 72 · MLP 1152 → 4304 · GELU" } },
+        { "id": "merge", "x": 950, "y": 180, "w": 260, "kind": "vision", "label": "spatial merge 2×2", "sub": { "en": "4 patches become 1 token", "ru": "4 патча становятся 1 токеном" } },
+        { "id": "merger", "x": 1270, "y": 180, "w": 280, "kind": "vision", "label": "merger 4608 → 5120", "sub": { "en": "into the language dimension", "ru": "в размерность языка" } },
+        { "id": "lm", "x": 1610, "y": 180, "w": 300, "kind": "out", "label": { "en": "into the language stream", "ru": "в языковой поток" }, "sub": { "en": "position via interleaved mRoPE [11,11,10]", "ru": "позиция через interleaved mRoPE [11,11,10]" } }
+      ],
+      "edges": [["img", "patch"], ["patch", "blocks"], ["pos", "blocks"], ["blocks", "merge"], ["merge", "merger"], ["merger", "lm"]]
+    },
+    {
+      "type": "diagram",
+      "title": { "en": "MTP: the draft head", "ru": "MTP: черновая голова" },
+      "note": {
+        "en": "DeepSeek-V3 style multi-token prediction. Takes the hidden state of the last layer plus the embedding of the token just chosen, concatenates them through fc (10240 → 5120) and runs 1 more full-attention layer to guess the token after next. At inference this is a built-in speculative draft: the main model verifies the guess, and every accepted guess is a token for free. Embeddings and lm_head are shared with the main model, so the head costs only 425M extra. Its fc is the single worst INT8 tensor of the model: 17.8 dB.",
+        "ru": "Multi-token prediction в духе DeepSeek-V3. Берёт hidden последнего слоя плюс эмбеддинг только что выбранного токена, склеивает через fc (10240 → 5120) и прогоняет ещё 1 полный attention-слой, чтобы угадать токен через один. На инференсе это встроенный спекулятивный черновик: основная модель проверяет догадку, каждая принятая догадка — токен бесплатно. Эмбеддинги и lm_head общие с основной моделью, поэтому голова стоит всего 425M сверху. Её fc — худший INT8-тензор модели: 17.8 дБ."
+      },
+      "h": 450,
+      "jump": "mtp.fc",
+      "nodes": [
+        { "id": "h", "x": 10, "y": 90, "w": 280, "kind": "norm", "label": { "en": "hidden of last layer · 5120", "ru": "hidden последнего слоя · 5120" } },
+        { "id": "e", "x": 10, "y": 300, "w": 280, "kind": "in", "label": { "en": "embedding of chosen token · 5120", "ru": "эмбеддинг выбранного токена · 5120" }, "sub": { "en": "shared table", "ru": "таблица общая" } },
+        { "id": "n1", "x": 350, "y": 90, "w": 180, "kind": "norm", "label": "RMSNorm" },
+        { "id": "n2", "x": 350, "y": 300, "w": 180, "kind": "norm", "label": "RMSNorm" },
+        { "id": "cat", "x": 590, "y": 195, "w": 190, "kind": "out", "label": "concat · 10240" },
+        { "id": "fc", "x": 840, "y": 195, "w": 230, "kind": "out", "label": "fc 10240 → 5120", "sub": { "en": "worst INT8 tensor: 17.8 dB", "ru": "худший INT8-тензор: 17.8 дБ" } },
+        { "id": "layer", "x": 1130, "y": 195, "w": 330, "kind": "attn", "label": { "en": "1 × Gated Attention + FFN", "ru": "1 × Gated Attention + FFN" }, "sub": { "en": "same geometry as full layers", "ru": "та же геометрия, что у полных слоёв" } },
+        { "id": "head", "x": 1520, "y": 195, "w": 260, "kind": "out", "label": { "en": "shared lm_head · 248320", "ru": "общий lm_head · 248320" } },
+        { "id": "out", "x": 1840, "y": 195, "w": 300, "kind": "out", "label": { "en": "draft of token t+2", "ru": "черновик токена t+2" }, "sub": { "en": "verified by the main model", "ru": "проверяется основной моделью" } }
+      ],
+      "edges": [["h", "n1"], ["e", "n2"], ["n1", "cat"], ["n2", "cat"], ["cat", "fc"], ["fc", "layer"], ["layer", "head"], ["head", "out"]]
+    },
+    {
+      "type": "papers",
+      "title": { "en": "The papers this model is built from", "ru": "Статьи, из которых собрана модель" },
+      "items": [
+        { "id": "arXiv:2505.09388", "url": "https://arxiv.org/abs/2505.09388", "title": "Qwen3 Technical Report", "why": { "en": "the base line: tokenizer, training recipe, thinking control", "ru": "базовая линейка: токенизатор, рецепт обучения, thinking-режимы" } },
+        { "id": "arXiv:2412.06464", "url": "https://arxiv.org/abs/2412.06464", "title": "Gated Delta Networks: Improving Mamba2 with Delta Rule", "why": { "en": "the mechanism of all 48 linear layers: gating + delta rule", "ru": "механизм всех 48 линейных слоёв: гейтинг + дельта-правило" } },
+        { "id": "arXiv:2406.06484", "url": "https://arxiv.org/abs/2406.06484", "title": "Parallelizing Linear Transformers with the Delta Rule", "why": { "en": "how the delta rule trains fast on GPU (chunkwise form)", "ru": "как дельта-правило быстро обучается на GPU (chunkwise-форма)" } },
+        { "id": "arXiv:2405.21060", "url": "https://arxiv.org/abs/2405.21060", "title": "Transformers are SSMs (Mamba-2)", "why": { "en": "the state-decay family DeltaNet descends from", "ru": "семейство состояний с затуханием, от которого DeltaNet произошёл" } },
+        { "id": "arXiv:2305.13245", "url": "https://arxiv.org/abs/2305.13245", "title": "GQA: Generalized Multi-Query Attention", "why": { "en": "24 Q heads on 4 KV pairs in the full layers, 6x smaller KV cache", "ru": "24 Q-головы на 4 KV-пары в полных слоях, KV-кеш меньше в 6 раз" } },
+        { "id": "arXiv:2104.09864", "url": "https://arxiv.org/abs/2104.09864", "title": "RoFormer: Rotary Position Embedding", "why": { "en": "RoPE; here partial, 64 of 256 dims, θ = 10⁷", "ru": "RoPE; здесь частичный, 64 из 256 размерностей, θ = 10⁷" } },
+        { "id": "arXiv:2409.12191", "url": "https://arxiv.org/abs/2409.12191", "title": "Qwen2-VL", "why": { "en": "mRoPE and the vision-tower recipe this tower grew from", "ru": "mRoPE и рецепт визуальной башни, из которого выросла эта" } },
+        { "id": "arXiv:2002.05202", "url": "https://arxiv.org/abs/2002.05202", "title": "GLU Variants Improve Transformer", "why": { "en": "SwiGLU in every FFN: gate · up · down", "ru": "SwiGLU в каждом FFN: gate · up · down" } },
+        { "id": "arXiv:2412.19437", "url": "https://arxiv.org/abs/2412.19437", "title": "DeepSeek-V3 Technical Report", "why": { "en": "the MTP head follows this scheme", "ru": "MTP-голова устроена по этой схеме" } },
+        { "id": "huggingface.co", "url": "https://huggingface.co/Qwen/Qwen3.8-27B", "title": "Qwen3.8-27B model card", "why": { "en": "weights, config.json and the official spec", "ru": "веса, config.json и официальная спецификация" } }
+      ]
+    }
+  ]
+}

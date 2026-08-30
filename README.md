@@ -40,6 +40,7 @@ Metrics that do not apply (1-D tensors: norms, conv1d, biases) render as
 | **depth** | per-layer average of the current metric down the stack, plus quarters |
 | **herbarium** | treemap where area is parameter count |
 | **records** | extreme points: worst INT4, longest tail, hottest channel, lowest rank |
+| **deep dive** | the architecture itself: passport from config.json, block diagrams of Gated Attention / Gated DeltaNet / vision tower / MTP head, and the papers the model is assembled from |
 
 Click any cell, dot or node and the inspector opens: a plain-language verdict
 built from the real numbers, three SQNR figures, the actual histogram, the
@@ -66,6 +67,9 @@ derived from the data, so a new checkpoint drops in without code changes.
    ```json
    { "slug": "<slug>", "name": "Model name", "note": "how it was taken" }
    ```
+3. Optionally add `public/models/<slug>/dossier.json` — passport facts, block
+   diagrams (generic node/edge JSON, bilingual labels) and paper links. No
+   dossier, no deep-dive region; everything else still works.
 
 The model picker in the header does the rest.
 

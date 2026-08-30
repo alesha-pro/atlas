@@ -20,6 +20,9 @@ export function buildWall(store: Store, X: number, Y: number): {
   const slotSet = new Map<string, number>();
   for (const L of m.langLayers) for (const x of L.tensors)
     if (!slotSet.has(x.slot)) slotSet.set(x.slot, slotRank(x.slot));
+  // MTP-голова: собственный столбец с теми же рядами (self_attn + mlp)
+  const mtpTensors = m.tensors.filter(x => x.name.startsWith('mtp.layers.'));
+  for (const x of mtpTensors) if (!slotSet.has(x.slot)) slotSet.set(x.slot, slotRank(x.slot));
   const slots = [...slotSet.keys()].sort((a, b) => slotSet.get(a)! - slotSet.get(b)!);
 
   // ряды визуальной башни
@@ -28,7 +31,7 @@ export function buildWall(store: Store, X: number, Y: number): {
   const vslots = [...vslotSet];
 
   const nLang = m.langLayers.length, nVis = m.visBlocks.length;
-  const langW = nLang * (COL_W + COL_G);
+  const langW = (nLang + (mtpTensors.length ? 1 : 0)) * (COL_W + COL_G) + (mtpTensors.length ? 14 : 0);
   const visW = nVis * (VCOL_W + VCOL_G);
   const gridH = slots.length * (ROW_H + ROW_G);
   const gapLV = 40;
@@ -95,6 +98,21 @@ export function buildWall(store: Store, X: number, Y: number): {
     card.appendChild(num);
   });
 
+  // ── столбец MTP ──
+  if (mtpTensors.length) {
+    const cx = gx + nLang * (COL_W + COL_G) + 14;
+    const tick = el('div', 'mono', `position:absolute;left:${cx}px;top:${HEAD_H}px;width:${COL_W}px;height:${TICK_H - 4}px;
+      display:flex;align-items:flex-end;justify-content:center;font-size:9px;color:${kindOf('out').fg}`, '◆');
+    card.appendChild(tick);
+    for (const x0 of mtpTensors) {
+      const r = slots.indexOf(x0.slot);
+      if (r < 0) continue;
+      addCell(x0, cx, gy + r * (ROW_H + ROW_G), COL_W, ROW_H);
+    }
+    const num = el('div', 'mono', `position:absolute;left:${cx - 4}px;top:${gy + gridH + 2}px;width:${COL_W + 8}px;text-align:center;font-size:9px;color:${kindOf('out').fg}`, 'mtp');
+    card.appendChild(num);
+  }
+
   // ── визуальная башня (своя полоса подписей — ничего не накладывается) ──
   const vlx = gx + langW + gapLV;         // начало полосы подписей
   const vx = vlx + VLBL_W;                // начало сетки башни
@@ -123,7 +141,8 @@ export function buildWall(store: Store, X: number, Y: number): {
   // ── особые тензоры: вход/выход/mtp + внеблочные визуальные ──
   const sx = vx + visW + gapLV;
   card.appendChild(el('div', 'eyebrow mono', `position:absolute;left:${sx}px;top:${HEAD_H - 4}px`, tr('wall.outside')));
-  const specials = [...m.topLayer.tensors, ...m.visExtra];
+  const specials = [...m.topLayer.tensors, ...m.visExtra]
+    .filter(x => !x.name.startsWith('mtp.layers.')); // эти уже в столбце mtp
   specials.forEach((x0, i) => {
     const y = gy + i * (ROW_H + ROW_G);
     if (y + ROW_H > gy + gridH + 40) return;

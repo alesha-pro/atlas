@@ -177,6 +177,12 @@ const en: Record<string, Entry> = {
   'group.fragile': 'most fragile', 'group.robust': 'most robust',
   'group.row.sub': (v: string, k: string) => `INT4 ${v} dB · tail ${k}`,
 
+  // dossier
+  'sec.dossier.tag': 'deep dive', 'sec.dossier.title': 'Inside the architecture',
+  'sec.dossier.sub': 'block diagrams read from config.json, and the papers the model is assembled from',
+  'dossier.jump': 'show these tensors on the wall →',
+  'tour.dossier': 'deep dive',
+
   // ui
   'search.placeholder': 'tensor by name…',
   'tour.overview': 'overview', 'tour.intro': 'start', 'tour.arch': 'architecture', 'tour.wall': 'wall',
@@ -343,6 +349,11 @@ const ru: Record<string, Entry> = {
   'group.1d': 'Вся группа одномерная: квантование к ней неприменимо, эти веса остаются в полной точности при любой схеме.',
   'group.fragile': 'самые хрупкие', 'group.robust': 'самые прочные',
   'group.row.sub': (v: string, k: string) => `INT4 ${v} дБ · хвост ${k}`,
+
+  'sec.dossier.tag': 'разбор', 'sec.dossier.title': 'Архитектура изнутри',
+  'sec.dossier.sub': 'схемы блоков из config.json и статьи, из которых модель собрана',
+  'dossier.jump': 'показать эти тензоры на стене →',
+  'tour.dossier': 'разбор',
 
   'search.placeholder': 'тензор по имени…',
   'tour.overview': 'обзор', 'tour.intro': 'старт', 'tour.arch': 'архитектура', 'tour.wall': 'стена',

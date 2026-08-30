@@ -157,6 +157,18 @@ function makeMetric(
   };
 }
 
+// Досье модели: паспорт, схемы блоков, статьи. Файл опционален —
+// нет dossier.json, нет региона «разбор», остальное полотно работает как есть.
+export async function loadDossier(slug: string): Promise<any | null> {
+  try {
+    const r = await fetch(new URL(`models/${slug}/dossier.json`, document.baseURI));
+    if (!r.ok) return null;
+    return await r.json();
+  } catch {
+    return null;
+  }
+}
+
 export async function loadManifest(): Promise<ManifestEntry[]> {
   const r = await fetch(new URL('models/manifest.json', document.baseURI));
   return r.json();
@@ -170,11 +182,12 @@ export async function loadModel(entry: ManifestEntry): Promise<Model> {
     if (!line.trim()) continue;
     const t = JSON.parse(line) as Tensor;
     t.idx = tensors.length;
-    const m = t.name.match(/\.layers\.(\d+)\./);
+    // mtp.layers.N.* — не слои основного стека, это отдельная черновая голова
+    const m = t.name.match(/language_model\.layers\.(\d+)\./);
     const vm = t.name.match(/visual\.blocks\.(\d+)\./);
     const isVis = t.name.includes('visual.');
     t.stack = isVis ? 'vision' : m ? 'lang' : 'top';
-    t.langLayer = !isVis && m ? +m[1] : null;
+    t.langLayer = m ? +m[1] : null;
     t.visBlock = vm ? +vm[1] : null;
     t.slot = isVis ? visSlot(t) : slotOf(t);
     t.is2d = t.shape.length >= 2 && t.sqnr_int4_g128 != null;

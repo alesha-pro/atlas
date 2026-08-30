@@ -1,5 +1,5 @@
 import './style.css';
-import { loadManifest, loadModel, type ManifestEntry, type Tensor } from './data';
+import { loadDossier, loadManifest, loadModel, type Tensor } from './data';
 import { Store } from './store';
 import { World, el } from './world';
 import { buildIntro } from './sections/intro';
@@ -9,6 +9,7 @@ import { buildScatter } from './sections/scatter';
 import { buildTreemap } from './sections/treemap';
 import { buildRecords } from './sections/records';
 import { buildDepth } from './sections/depth';
+import { buildDossier } from './sections/dossier';
 import { buildPanel } from './panel';
 import { buildTopbar, buildBottombar, buildMinimap, type Tour } from './ui';
 import { kindOf } from './color';
@@ -28,14 +29,14 @@ async function boot(slug?: string, keep?: Keep) {
 
   const manifest = await loadManifest();
   const entry = manifest.find(e => e.slug === slug) || manifest[0];
-  const model = await loadModel(entry);
+  const [model, dossier] = await Promise.all([loadModel(entry), loadDossier(entry.slug)]);
   app.innerHTML = '';
 
   const store = new Store(model);
   if (keep) store.metric = keep.metric;
   // scrollIntoView/focus умеют скроллить даже overflow:hidden — гасим
   app.addEventListener('scroll', () => { app.scrollTop = 0; app.scrollLeft = 0; });
-  const world = new World(app, { w: 6400, h: 3300 });
+  const world = new World(app, dossier ? { w: 9260, h: 4950 } : { w: 6400, h: 3300 });
 
   // цветовые пятна фона
   const washes: [number, number, number, number, string][] = [
@@ -74,6 +75,15 @@ async function boot(slug?: string, keep?: Keep) {
     if (r) world.flyTo({ x: r.x - 260, y: r.y - 200, w: r.w + 520, h: r.h + 400 }, { padRight: panelPad(), maxZoom: 1.6 });
   };
 
+  // ── разбор модели (если у модели есть dossier.json) ──
+  let dossierSec: ReturnType<typeof buildDossier> | null = null;
+  if (dossier) {
+    dossierSec = buildDossier(store, dossier, 6560, 150, (x) => flyToTensor(x));
+    world.world.appendChild(dossierSec.root);
+    world.world.appendChild(el('div', 'wash', `left:6700px;top:600px;width:2200px;height:1600px;
+      background:radial-gradient(ellipse at 50% 50%,rgba(219,208,236,0.4),transparent 66%)`));
+  }
+
   const keepNow = (): Keep => ({ metric: store.metric, pan: { ...world.pan }, zoom: world.zoom });
   const onLang = (l: Lang) => { setLang(l); boot(entry.slug, keepNow()); };
   app.appendChild(buildPanel(store, flyToTensor));
@@ -90,6 +100,7 @@ async function boot(slug?: string, keep?: Keep) {
     { label: t('tour.treemap'), rect: treemap.rect },
     { label: t('tour.records'), rect: records.rect },
   ];
+  if (dossierSec) tours.push({ label: t('tour.dossier'), rect: { ...dossierSec.rect, h: 1500 } });
   app.appendChild(buildBottombar(world, tours, panelPad));
   const minimap = buildMinimap(world, [
     { rect: introRect, color: 'rgba(120,106,84,0.18)' },
@@ -99,6 +110,7 @@ async function boot(slug?: string, keep?: Keep) {
     { rect: wall.rect, color: kindOf('lin').bg },
     { rect: scatter.rect, color: kindOf('vision').bg },
     { rect: depth.rect, color: kindOf('norm').bg },
+    ...(dossierSec ? [{ rect: dossierSec.rect, color: kindOf('in').bg }] : []),
   ]);
   app.appendChild(minimap);
   const placeMinimap = () => {
