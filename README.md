@@ -15,8 +15,17 @@ taken off the original bf16 shards.
 
 ## What the data is
 
-Produced by `weight_atlas.py` from the original safetensors shards, one JSON line
-per tensor:
+Produced by [`scripts/weight_atlas.py`](scripts/weight_atlas.py) from the
+original safetensors shards, one JSON line per tensor:
+
+```bash
+pip install torch safetensors
+python3 scripts/weight_atlas.py /path/to/checkpoint atlas.jsonl --device cuda
+```
+
+Any transformers-style checkpoint works (the component patterns cover dense,
+MoE and hybrid linear-attention stacks; unknown tensors land in `other`).
+Qwen3.8-27B took 116 s on one GPU. Fields per tensor:
 
 - **distribution shape** — mean/std/absmax, |w| percentiles p50…p99.99, kurtosis,
   skew, sparsity, outlier fractions beyond 3/4/6σ, dynamic range
@@ -61,7 +70,8 @@ npm run build    # static output in dist/ — self-contained, host it anywhere
 Nothing is hardcoded: layers, components, wall rows and metric ranges are all
 derived from the data, so a new checkpoint drops in without code changes.
 
-1. Put the atlas at `public/models/<slug>/atlas.jsonl`
+1. Scan the checkpoint: `python3 scripts/weight_atlas.py <ckpt_dir> atlas.jsonl`
+   and put the result at `public/models/<slug>/atlas.jsonl`
 2. Add an entry to `public/models/manifest.json`:
    ```json
    { "slug": "<slug>", "name": "Model name", "note": "how it was taken" }

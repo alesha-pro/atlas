@@ -19,10 +19,19 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-OUT = Path("out/live")
-CARVE = Path("out")
-MODEL_DIR = Path("/mnt/ssd/models/Qwen3.8-27B")
-DEST = Path("live.json")
+import argparse
+
+_ap = argparse.ArgumentParser(description="fold atlas_live/carve artifacts into live.json")
+_ap.add_argument("--artifacts", default="out/live", help="atlas_live.py output dir")
+_ap.add_argument("--carve", default="out", help="dir with neuron_stats.parquet / layer_io_sim.parquet")
+_ap.add_argument("--model-dir", default="/mnt/ssd/models/Qwen3.8-27B", help="checkpoint dir (A_log/dt_bias for lambda)")
+_ap.add_argument("--dest", default="live.json", help="output live.json path")
+_args = _ap.parse_args()
+
+OUT = Path(_args.artifacts)
+CARVE = Path(_args.carve)
+MODEL_DIR = Path(_args.model_dir)
+DEST = Path(_args.dest)
 DOMAINS = ("en", "code", "agent")
 
 
