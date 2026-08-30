@@ -25,6 +25,76 @@ export class World {
     this.board.appendChild(this.world);
     parent.appendChild(this.board);
 
+    this.board.style.touchAction = 'none';
+
+    // клик после реального пана не должен ничего выбирать
+    this.board.addEventListener('click', e => {
+      if (this.moved) { e.stopPropagation(); e.preventDefault(); }
+    }, true);
+
+    // ── тач: один палец пан, два пальца пинч-зум ──
+    let ts: { mode: 'pan' | 'zoom'; sx: number; sy: number; px: number; py: number;
+      dist: number; midX: number; midY: number; zoom0: number } | null = null;
+    const dist2 = (e: TouchEvent) => Math.hypot(
+      e.touches[0].clientX - e.touches[1].clientX,
+      e.touches[0].clientY - e.touches[1].clientY);
+    const mid2 = (e: TouchEvent) => {
+      const r = this.board.getBoundingClientRect();
+      return {
+        x: (e.touches[0].clientX + e.touches[1].clientX) / 2 - r.left,
+        y: (e.touches[0].clientY + e.touches[1].clientY) / 2 - r.top,
+      };
+    };
+    this.board.addEventListener('touchstart', e => {
+      this.anim = null;
+      if (e.touches.length === 1) {
+        const t0 = e.touches[0];
+        ts = { mode: 'pan', sx: t0.clientX, sy: t0.clientY, px: this.pan.x, py: this.pan.y,
+          dist: 0, midX: 0, midY: 0, zoom0: this.zoom };
+        this.moved = false;
+      } else if (e.touches.length >= 2) {
+        const m = mid2(e);
+        ts = { mode: 'zoom', sx: 0, sy: 0, px: this.pan.x, py: this.pan.y,
+          dist: dist2(e), midX: m.x, midY: m.y, zoom0: this.zoom };
+        this.moved = true;
+      }
+    }, { passive: true });
+    this.board.addEventListener('touchmove', e => {
+      if (!ts) return;
+      e.preventDefault();
+      if (ts.mode === 'pan' && e.touches.length === 1) {
+        const t0 = e.touches[0];
+        const dx = t0.clientX - ts.sx, dy = t0.clientY - ts.sy;
+        if (Math.abs(dx) + Math.abs(dy) > 8) this.moved = true;
+        this.pan.x = ts.px + dx;
+        this.pan.y = ts.py + dy;
+        this.apply();
+      } else if (e.touches.length >= 2) {
+        if (ts.mode !== 'zoom') {
+          const m0 = mid2(e);
+          ts = { mode: 'zoom', sx: 0, sy: 0, px: this.pan.x, py: this.pan.y,
+            dist: dist2(e), midX: m0.x, midY: m0.y, zoom0: this.zoom };
+        }
+        const m = mid2(e);
+        const z2 = Math.max(0.05, Math.min(2.6, ts.zoom0 * dist2(e) / ts.dist));
+        this.pan.x = m.x - (ts.midX - ts.px) * (z2 / ts.zoom0);
+        this.pan.y = m.y - (ts.midY - ts.py) * (z2 / ts.zoom0);
+        this.zoom = z2;
+        this.moved = true;
+        this.apply();
+      }
+    }, { passive: false });
+    this.board.addEventListener('touchend', e => {
+      if (e.touches.length === 0) {
+        ts = null;
+        setTimeout(() => { this.moved = false; }, 0);
+      } else if (e.touches.length === 1 && ts) {
+        const t0 = e.touches[0];
+        ts = { mode: 'pan', sx: t0.clientX, sy: t0.clientY, px: this.pan.x, py: this.pan.y,
+          dist: 0, midX: 0, midY: 0, zoom0: this.zoom };
+      }
+    });
+
     this.board.addEventListener('mousedown', e => {
       if ((e.target as HTMLElement).closest('.no-pan')) return;
       this.drag = { mx: e.clientX, my: e.clientY, px: this.pan.x, py: this.pan.y };

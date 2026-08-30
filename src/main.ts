@@ -67,8 +67,9 @@ async function boot(slug?: string, keep?: Keep) {
   world.world.appendChild(depth.root);
 
   // ── панель и оверлеи ──
+  const mobile = () => window.innerWidth < 760;
   const panelOpen = () => store.sel.type !== 'model';
-  const panelPad = () => panelOpen() ? Math.min(430, window.innerWidth * 0.36) + 30 : 0;
+  const panelPad = () => (panelOpen() && !mobile()) ? Math.min(430, window.innerWidth * 0.36) + 30 : 0;
 
   const flyToTensor = (t: Tensor) => {
     const r = store.cellRect.get(t.idx);
@@ -114,7 +115,7 @@ async function boot(slug?: string, keep?: Keep) {
   ]);
   app.appendChild(minimap);
   const placeMinimap = () => {
-    minimap.style.right = panelOpen() ? `${Math.min(430, window.innerWidth * 0.36) + 44}px` : '22px';
+    minimap.style.right = (panelOpen() && !mobile()) ? `${Math.min(430, window.innerWidth * 0.36) + 44}px` : '22px';
   };
   store.addEventListener('sel', placeMinimap);
   placeMinimap();
@@ -128,7 +129,10 @@ async function boot(slug?: string, keep?: Keep) {
     world.pan = { x: 40, y: 60 };
     world.zoom = 0.2;
     world.apply();
-    requestAnimationFrame(() => world.fitAll(0));
+    // на телефоне общий план нечитаем: стартуем со вводной карточки
+    requestAnimationFrame(() => mobile()
+      ? world.flyTo({ x: 60, y: 130, w: 720, h: 980 }, { maxZoom: 1 })
+      : world.fitAll(0));
   }
 
   // клавиатура

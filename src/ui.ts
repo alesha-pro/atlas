@@ -12,7 +12,7 @@ export function buildTopbar(
   onModelChange: (slug: string) => void, onFlyTensor: (t: Tensor) => void,
   onLangChange: (l: Lang) => void,
 ): HTMLElement {
-  const bar = el('div', 'overlay no-pan', 'left:22px;top:18px;right:22px;display:flex;align-items:center;gap:12px;row-gap:6px;padding:10px 16px;z-index:20;flex-wrap:wrap');
+  const bar = el('div', 'overlay no-pan topbar', 'left:22px;top:18px;right:22px;display:flex;align-items:center;gap:12px;row-gap:6px;padding:10px 16px;z-index:20;flex-wrap:wrap');
 
   // титул
   const title = el('div', '', 'display:flex;flex-direction:column;gap:1px;margin-right:6px');
@@ -75,7 +75,7 @@ export function buildTopbar(
   syncScale();
 
   // легенда
-  const legend = el('div', '', 'display:flex;align-items:center;gap:8px;margin-left:4px');
+  const legend = el('div', 'tb-legend', 'display:flex;align-items:center;gap:8px;margin-left:4px');
   const legendLo = el('div', 'mono', 'font-size:11px;color:var(--faint);white-space:nowrap', store.md.loT);
   const legendHi = el('div', 'mono', 'font-size:11px;color:var(--faint);white-space:nowrap', store.md.hiT);
   legend.appendChild(legendLo);
@@ -146,7 +146,7 @@ function buildSearch(store: Store, onFlyTensor: (t: Tensor) => void): HTMLElemen
 }
 
 export function buildBottombar(world: World, tours: Tour[], panelPad: () => number): HTMLElement {
-  const bar = el('div', 'overlay no-pan', 'left:22px;bottom:22px;display:flex;align-items:center;gap:10px;padding:9px 13px;z-index:20');
+  const bar = el('div', 'overlay no-pan bottombar', 'left:22px;bottom:22px;display:flex;align-items:center;gap:10px;padding:9px 13px;z-index:20');
   const zo = el('div', 'zbtn', '', '−');
   const zl = el('div', 'mono', 'font-size:12.5px;color:var(--muted);width:46px;text-align:center', '100%');
   const zi = el('div', 'zbtn', '', '+');
