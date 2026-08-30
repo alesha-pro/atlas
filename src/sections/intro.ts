@@ -27,7 +27,7 @@ export function buildIntro(store: Store, x: number, y: number): HTMLElement {
           [fmtN(m.visParams), t('intro.stat.vision')],
           [`${n2d}`, t('intro.stat.sqnr')],
         ].map(([v, l]) => `
-          <div style="flex:1;border:1px solid var(--line);background:rgba(255,253,248,0.7);border-radius:4px;padding:12px 13px;display:flex;flex-direction:column;gap:4px">
+          <div style="flex:1;border:1px solid var(--line);background:var(--glass-soft);border-radius:4px;padding:12px 13px;display:flex;flex-direction:column;gap:4px">
             <div class="mono" style="font-size:19px;color:var(--ink)">${v}</div>
             <div style="font-size:12.5px;color:var(--faint);line-height:1.3">${l}</div>
           </div>`).join('')}

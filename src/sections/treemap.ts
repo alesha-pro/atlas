@@ -80,7 +80,7 @@ export function buildTreemap(store: Store, X: number, Y: number): {
     const g = m.groups.find(x => x.label === pg.label)!;
     const k = kindOf(g.kind);
     const box = el('div', '', `position:absolute;left:${pg.x}px;top:${pg.y}px;width:${pg.w - 4}px;height:${pg.h - 4}px;
-      border:1.5px solid ${k.bd};border-radius:6px;overflow:hidden;background:rgba(255,253,248,0.4)`);
+      border:1.5px solid ${k.bd};border-radius:6px;overflow:hidden;background:var(--glass-soft)`);
     inner.appendChild(box);
 
     const title = el('div', 'mono', `position:absolute;left:7px;top:5px;z-index:4;font-size:11px;letter-spacing:0.1em;text-transform:uppercase;

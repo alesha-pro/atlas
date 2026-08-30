@@ -82,12 +82,26 @@ export function buildTopbar(
   legend.appendChild(el('div', '', `width:130px;height:9px;border-radius:5px;background:${rampCSS()};border:1px solid rgba(0,0,0,0.06)`));
   legend.appendChild(legendHi);
   const na = el('div', '', 'display:flex;align-items:center;gap:5px;margin-left:6px');
-  na.appendChild(el('div', '', `width:12px;height:12px;border-radius:2px;background:${HATCH};border:1px solid #ddd5c6`));
+  na.appendChild(el('div', '', `width:12px;height:12px;border-radius:2px;background:${HATCH};border:1px solid var(--card-bd)`));
   na.appendChild(el('div', 'mono', 'font-size:10.5px;color:var(--faint)', t('na')));
   legend.appendChild(na);
   bar.appendChild(legend);
 
   bar.appendChild(el('div', '', 'flex:1'));
+
+  // тема: переключение живое, все цвета на CSS-переменных
+  const themeChip = el('div', 'chip mini', 'margin-right:2px');
+  const syncTheme = () => {
+    themeChip.textContent = document.documentElement.dataset.theme === 'dark' ? '☀' : '☾';
+  };
+  themeChip.addEventListener('click', () => {
+    const next = document.documentElement.dataset.theme === 'dark' ? 'light' : 'dark';
+    document.documentElement.dataset.theme = next;
+    localStorage.setItem('atlas.theme', next);
+    syncTheme();
+  });
+  syncTheme();
+  bar.appendChild(themeChip);
 
   // язык
   const langWrap = el('div', '', 'display:flex;gap:4px;margin-right:4px');
@@ -105,7 +119,7 @@ export function buildTopbar(
 }
 
 function buildSearch(store: Store, onFlyTensor: (t: Tensor) => void): HTMLElement {
-  const wrap = el('div', 'search-box', 'position:relative;display:flex;align-items:center;gap:6px;border:1px solid var(--line-strong);border-radius:10px;padding:0 10px;background:rgba(255,253,248,0.9)');
+  const wrap = el('div', 'search-box', 'position:relative;display:flex;align-items:center;gap:6px;border:1px solid var(--line-strong);border-radius:10px;padding:0 10px;background:var(--glass)');
   wrap.innerHTML = `<span class="mono" style="color:var(--ghost);font-size:13px">⌕</span>`;
   const input = document.createElement('input');
   input.placeholder = t('search.placeholder');

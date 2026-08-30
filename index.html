@@ -4,6 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
 <title>Weight Atlas</title>
+<script>
+try {
+  var t = localStorage.getItem('atlas.theme');
+  if (!t) t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  document.documentElement.dataset.theme = t;
+} catch (e) { document.documentElement.dataset.theme = 'light'; }
+</script>
 <meta name="description" content="An interactive canvas for taking a model apart, tensor by tensor: measured INT8/INT4/FP8 error, distributions, spectra and outlier channels for every weight tensor.">
 <meta property="og:title" content="Weight Atlas">
 <meta property="og:description" content="Every weight tensor of a model on one canvas, with measured quantization error. What can be compressed losslessly, what falls apart, and why.">

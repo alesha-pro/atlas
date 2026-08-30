@@ -130,7 +130,7 @@ async function boot(slug?: string, keep?: Keep) {
   if (liveSec) tours.push({ label: t('tour.live'), rect: liveSec.rect });
   app.appendChild(buildBottombar(world, tours, panelPad));
   const minimap = buildMinimap(world, [
-    { rect: introRect, color: 'rgba(120,106,84,0.18)' },
+    { rect: introRect, color: 'var(--line-strong)' },
     { rect: arch.rect, color: kindOf('attn').bg },
     { rect: treemap.rect, color: kindOf('mlp').bg },
     { rect: records.rect, color: kindOf('out').bg },

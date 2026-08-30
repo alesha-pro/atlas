@@ -94,7 +94,7 @@ function cardShell(w: number, title: string, sub?: string): { card: HTMLElement;
 }
 
 function yLabel(svg: SVGElement, x: number, y: number, text: string): void {
-  const e = svgEl('text', { x, y, 'font-size': 10, fill: '#a49c8d' });
+  const e = svgEl('text', { x, y, 'font-size': 10, fill: 'var(--ghost)' });
   e.textContent = text;
   svg.appendChild(e);
 }
@@ -113,14 +113,14 @@ function flowCard(live: Live, store: Store): HTMLElement | null {
   const ctl = el('div', 'no-pan', 'display:flex;gap:8px;align-items:center;flex-wrap:wrap');
   if (hasStream) for (const d of ['all', ...DOMAINS]) {
     const b = el('div', 'mono no-pan',
-      `font-size:10px;padding:3px 9px;border-radius:10px;cursor:pointer;border:1px solid rgba(120,106,84,0.25);
-       background:${d === 'all' ? 'rgba(120,106,84,0.12)' : 'transparent'};color:${DOM_COLOR[d]}`, tr('live.dom.' + d));
+      `font-size:10px;padding:3px 9px;border-radius:10px;cursor:pointer;border:1px solid var(--line-strong);
+       background:${d === 'all' ? 'var(--line)' : 'transparent'};color:${DOM_COLOR[d]}`, tr('live.dom.' + d));
     b.onclick = (e: MouseEvent) => {
       e.stopPropagation();
       domSel = d;
       ctl.querySelectorAll('[data-dom]').forEach(x => {
         const elx = x as HTMLElement;
-        elx.style.background = elx.dataset.dom === d ? 'rgba(120,106,84,0.12)' : 'transparent';
+        elx.style.background = elx.dataset.dom === d ? 'var(--line)' : 'transparent';
       });
       draw();
     };
@@ -129,14 +129,14 @@ function flowCard(live: Live, store: Store): HTMLElement | null {
   }
   if (hasStream) for (const [k, lbl] of [['h_rms', 'live.flow.h'], ['delta_rms', 'live.flow.delta']] as const) {
     const b = el('div', 'mono no-pan',
-      `font-size:10px;padding:3px 9px;border-radius:10px;cursor:pointer;border:1px solid rgba(120,106,84,0.25);
-       background:${k === 'h_rms' ? 'rgba(120,106,84,0.12)' : 'transparent'}`, tr(lbl));
+      `font-size:10px;padding:3px 9px;border-radius:10px;cursor:pointer;border:1px solid var(--line-strong);
+       background:${k === 'h_rms' ? 'var(--line)' : 'transparent'}`, tr(lbl));
     b.onclick = (e: MouseEvent) => {
       e.stopPropagation();
       keySel = k;
       ctl.querySelectorAll('[data-key]').forEach(x => {
         const elx = x as HTMLElement;
-        elx.style.background = elx.dataset.key === k ? 'rgba(120,106,84,0.12)' : 'transparent';
+        elx.style.background = elx.dataset.key === k ? 'var(--line)' : 'transparent';
       });
       draw();
     };
@@ -144,7 +144,7 @@ function flowCard(live: Live, store: Store): HTMLElement | null {
     ctl.appendChild(b);
   }
   if (!hasStream) ctl.appendChild(el('div', 'mono',
-    'font-size:10px;padding:3px 9px;border-radius:10px;border:1px dashed rgba(120,106,84,0.4);color:var(--faint)',
+    'font-size:10px;padding:3px 9px;border-radius:10px;border:1px dashed var(--line-strong);color:var(--faint)',
     tr('live.pending')));
   body.appendChild(ctl);
 
@@ -169,7 +169,7 @@ function flowCard(live: Live, store: Store): HTMLElement | null {
     }
 
     if (hasStream)
-      svg.appendChild(svgEl('rect', { x: 38, y: 4, width: W2, height: H2, fill: 'rgba(255,253,248,0.55)', stroke: 'rgba(120,106,84,0.16)', rx: 6 }));
+      svg.appendChild(svgEl('rect', { x: 38, y: 4, width: W2, height: H2, fill: 'var(--chart-bg)', stroke: 'var(--line)', rx: 6 }));
 
     if (hasStream) {
       // вклад слоя — мягкая подложка при просмотре ||h||
@@ -221,7 +221,7 @@ function flowCard(live: Live, store: Store): HTMLElement | null {
       let clo = Math.min(...cio), chi = Math.max(...cio);
       const cp = (chi - clo) * 0.2 || 0.01; clo -= cp; chi += cp;
       const py2 = (v: number) => y0 + 12 + (1 - (v - clo) / (chi - clo)) * bandH;
-      svg.appendChild(svgEl('rect', { x: 38, y: y0 + 6, width: W2, height: bandH + 12, fill: 'rgba(255,253,248,0.55)', stroke: 'rgba(120,106,84,0.16)', rx: 6 }));
+      svg.appendChild(svgEl('rect', { x: 38, y: y0 + 6, width: W2, height: bandH + 12, fill: 'var(--chart-bg)', stroke: 'var(--line)', rx: 6 }));
       svg.appendChild(svgEl('path', { d: linePath(f.io_cos, px, py2), fill: 'none', stroke: 'rgba(122,86,140,0.65)', 'stroke-width': 1.6 }));
       f.io_cos.forEach((v, i) => {
         if (v == null) return;
@@ -264,7 +264,7 @@ function actqCard(live: Live): HTMLElement | null {
   const lo = 20, hi = 50;
   const bx = (v: number) => lblW + ((v - lo) / (hi - lo)) * barW;
   for (const g of [20, 30, 40, 50]) {
-    svg.appendChild(svgEl('line', { x1: bx(g), x2: bx(g), y1: 4, y2: chartH - 18, stroke: 'rgba(120,106,84,0.14)' }));
+    svg.appendChild(svgEl('line', { x1: bx(g), x2: bx(g), y1: 4, y2: chartH - 18, stroke: 'var(--line)' }));
     yLabel(svg, bx(g) - 6, chartH - 6, String(g));
   }
   entries.forEach(([site, s], i) => {
@@ -275,7 +275,7 @@ function actqCard(live: Live): HTMLElement | null {
     yLabel(svg, 0, y + 12, site.slice(dot + 1) || site);
     (svg.lastChild as SVGElement).setAttribute('fill', kindOf(kind).fg);
     svg.appendChild(svgEl('rect', { x: lblW, y: y + 1, width: Math.max(2, bx(s.int8) - lblW), height: 8.5, fill: kindOf(kind).solid, rx: 2 }));
-    svg.appendChild(svgEl('rect', { x: lblW, y: y + 11, width: Math.max(2, bx(s.fp8) - lblW), height: 8.5, fill: 'rgba(120,106,84,0.38)', rx: 2 }));
+    svg.appendChild(svgEl('rect', { x: lblW, y: y + 11, width: Math.max(2, bx(s.fp8) - lblW), height: 8.5, fill: 'var(--line-strong)', rx: 2 }));
     yLabel(svg, Math.max(bx(s.int8), bx(s.fp8)) + 6, y + 12, s.int8.toFixed(1));
   });
   body.appendChild(el('div', 'mono', 'font-size:10px;color:var(--faint);display:flex;gap:16px', `
@@ -299,7 +299,7 @@ function attnCard(live: Live, store: Store): HTMLElement | null {
   const n = a.layers.length;
   const chartW = 560, entH = 190, x0 = 46;
   const px = (i: number) => x0 + (i / Math.max(1, n - 1)) * (chartW - 10);
-  svg.appendChild(svgEl('rect', { x: x0 - 8, y: 4, width: chartW, height: entH + 16, fill: 'rgba(255,253,248,0.55)', stroke: 'rgba(120,106,84,0.16)', rx: 6 }));
+  svg.appendChild(svgEl('rect', { x: x0 - 8, y: 4, width: chartW, height: entH + 16, fill: 'var(--chart-bg)', stroke: 'var(--line)', rx: 6 }));
   yLabel(svg, 2, 16, tr('live.attn.ent'));
   a.ent.forEach((v, i) => {
     const h = v * entH;
@@ -403,7 +403,7 @@ function mapCard(live: Live): HTMLElement | null {
   const plotWrap = el('div', '', `position:relative;width:${SIZE + 150}px;height:${SIZE + 130}px`);
   scene.appendChild(plotWrap);
   const canvas = el('canvas', 'no-pan', `border-radius:6px;position:absolute;left:120px;top:0;
-    box-shadow:0 0 0 1px rgba(120,106,84,0.25);cursor:crosshair`);
+    box-shadow:0 0 0 1px var(--line-strong);cursor:crosshair`);
   canvas.width = N; canvas.height = N;
   canvas.style.width = SIZE + 'px'; canvas.style.height = SIZE + 'px';
   plotWrap.appendChild(canvas);
@@ -421,9 +421,9 @@ function mapCard(live: Live): HTMLElement | null {
     const step = Math.max(1, Math.round(N / 24));
     for (let i = 0; i < N; i += step) {
       const frac = i / Math.max(1, N - 1);
-      xLabels.appendChild(el('div', '', `position:absolute;left:${(frac * (SIZE - 24)).toFixed(0)}px;font-size:9px;color:#a49c8d;
+      xLabels.appendChild(el('div', '', `position:absolute;left:${(frac * (SIZE - 24)).toFixed(0)}px;font-size:9px;color:var(--ghost);
         transform:rotate(60deg);transform-origin:left top;white-space:nowrap`, tokStr(am.tokens[i] || '')));
-      yLabels.appendChild(el('div', '', `position:absolute;right:8px;top:${(frac * (SIZE - 8)).toFixed(0)}px;font-size:9px;color:#a49c8d;white-space:nowrap`, tokStr(am.tokens[i] || '')));
+      yLabels.appendChild(el('div', '', `position:absolute;right:8px;top:${(frac * (SIZE - 8)).toFixed(0)}px;font-size:9px;color:var(--ghost);white-space:nowrap`, tokStr(am.tokens[i] || '')));
     }
   }
 
@@ -457,20 +457,20 @@ function mapCard(live: Live): HTMLElement | null {
     });
     viewRow.querySelectorAll('div').forEach(d => {
       (d as HTMLElement).style.background =
-        (d as HTMLElement).dataset.v === selView ? 'rgba(120,106,84,0.12)' : 'transparent';
+        (d as HTMLElement).dataset.v === selView ? 'var(--line)' : 'transparent';
     });
   }
 
   for (const l of layers) {
     const b = el('div', 'mono no-pan', `font-size:10px;padding:3px 8px;border-radius:9px;cursor:pointer;
-      border:1px solid rgba(120,106,84,0.25)`, String(l));
+      border:1px solid var(--line-strong)`, String(l));
     b.dataset.l = String(l);
     b.onclick = (e: MouseEvent) => { e.stopPropagation(); selLayer = l; render(); };
     layerRow.appendChild(b);
   }
   for (const [v, lbl] of [['mean', 'live.map.mean'], ['star', 'live.map.star']] as const) {
     const b = el('div', 'mono no-pan', `font-size:10px;padding:3px 9px;border-radius:9px;cursor:pointer;
-      border:1px solid rgba(120,106,84,0.25)`, tr(lbl));
+      border:1px solid var(--line-strong)`, tr(lbl));
     b.dataset.v = v;
     b.onclick = (e: MouseEvent) => { e.stopPropagation(); selView = v; render(); };
     viewRow.appendChild(b);
@@ -508,7 +508,7 @@ function linattnCard(live: Live, store: Store): HTMLElement | null {
   const W = hasBars ? 1180 : 720, H = 400;
   const { card, body } = cardShell(W, tr('live.la.title'), tr('live.la.sub'));
   if (!hasBars) body.appendChild(el('div', 'mono no-pan',
-    'align-self:flex-start;font-size:10px;padding:3px 9px;border-radius:10px;border:1px dashed rgba(120,106,84,0.4);color:var(--faint)',
+    'align-self:flex-start;font-size:10px;padding:3px 9px;border-radius:10px;border:1px dashed var(--line-strong);color:var(--faint)',
     tr('live.pending')));
   const wrap = el('div', 'no-pan', `position:relative;width:${W}px;height:${H}px`);
   body.appendChild(wrap);
@@ -519,7 +519,7 @@ function linattnCard(live: Live, store: Store): HTMLElement | null {
   const chartW = 540, chartH = 330, x0 = 40;
   const px = (i: number) => x0 + (i / Math.max(1, n - 1)) * (chartW - 10);
   if (hasBars)
-    svg.appendChild(svgEl('rect', { x: x0 - 8, y: 4, width: chartW, height: chartH, fill: 'rgba(255,253,248,0.55)', stroke: 'rgba(120,106,84,0.16)', rx: 6 }));
+    svg.appendChild(svgEl('rect', { x: x0 - 8, y: 4, width: chartW, height: chartH, fill: 'var(--chart-bg)', stroke: 'var(--line)', rx: 6 }));
 
   if (hasBars) {
     yLabel(svg, 2, 16, tr('live.la.beta'));
@@ -541,7 +541,7 @@ function linattnCard(live: Live, store: Store): HTMLElement | null {
         let lo = Math.min(...hv), hi = Math.max(...hv);
         const p = (hi - lo) * 0.15 || 0.1; lo -= p; hi += p;
         const py = (v: number) => 42 + (1 - (v - lo) / (hi - lo)) * (chartH - 110);
-        svg.appendChild(svgEl('path', { d: linePath(hl, px, py), fill: 'none', stroke: '#b0492a', 'stroke-width': 1.6 }));
+        svg.appendChild(svgEl('path', { d: linePath(hl, px, py), fill: 'none', stroke: 'var(--bad)', 'stroke-width': 1.6 }));
         for (const f of [0, 0.5, 1]) {
           const val = Math.pow(10, hi - f * (hi - lo));
           yLabel(svg, x0 + chartW - 68, py(Math.log10(val)) + 4, val >= 100 ? String(Math.round(val)) : val.toFixed(1));
@@ -681,7 +681,7 @@ function neuronsCard(live: Live): HTMLElement | null {
   // кривые: мёртвые / концентрация / специализация
   const cy = stripY + rows * (cellH + 1) + 32;
   const curves: [string, (number | null)[], string][] = [
-    [tr('live.neu.dead'), nb.dead_frac, '#b0492a'],
+    [tr('live.neu.dead'), nb.dead_frac, 'var(--bad)'],
     [tr('live.neu.conc'), nb.conc, kindOf('mlp').solid],
     [tr('live.neu.spec'), nb.spec_frac, kindOf('lin').solid],
   ];
@@ -734,9 +734,9 @@ function statusCard(live: Live): HTMLElement {
     [tr('live.vis.title'), live.vision?.img_share ? 'ok' : 'wait', tr('live.status.src.pass')],
   ];
   for (const [name, st, src] of rows) {
-    const color = st === 'ok' ? '#4d7a63' : st === 'part' ? '#a2701f' : 'var(--ghost)';
+    const color = st === 'ok' ? 'var(--good)' : st === 'part' ? 'var(--warn)' : 'var(--ghost)';
     const label = st === 'ok' ? src : st === 'part' ? `${tr('live.status.part')} · ${src}` : tr('live.status.wait');
-    body.appendChild(el('div', '', 'display:flex;align-items:baseline;gap:10px;border-top:1px solid rgba(120,106,84,0.1);padding:6px 0', `
+    body.appendChild(el('div', '', 'display:flex;align-items:baseline;gap:10px;border-top:1px solid var(--line);padding:6px 0', `
       <span style="width:9px;height:9px;border-radius:5px;background:${color};flex-shrink:0;transform:translateY(1px);${st === 'wait' ? 'opacity:0.45' : ''}"></span>
       <span style="font-size:14px;flex:1">${name}</span>
       <span class="mono" style="font-size:10px;color:${st === 'wait' ? 'var(--ghost)' : color}">${label}</span>`));
@@ -762,7 +762,7 @@ function fragCard(live: Live, store: Store): HTMLElement | null {
   const chartW = 520, chartH = 330, x0 = 40;
   const px = (i: number) => x0 + (i / Math.max(1, n - 1)) * (chartW - 12);
   const kmax = Math.max(...fr.kl) * 1.1 || 1;
-  svg.appendChild(svgEl('rect', { x: x0 - 8, y: 4, width: chartW, height: chartH, fill: 'rgba(255,253,248,0.55)', stroke: 'rgba(120,106,84,0.16)', rx: 6 }));
+  svg.appendChild(svgEl('rect', { x: x0 - 8, y: 4, width: chartW, height: chartH, fill: 'var(--chart-bg)', stroke: 'var(--line)', rx: 6 }));
   yLabel(svg, 2, 16, tr('live.frag.kl'));
   fr.kl.forEach((v, i) => {
     const h = (v / kmax) * (chartH - 40);
@@ -788,7 +788,7 @@ function fragCard(live: Live, store: Store): HTMLElement | null {
     const xlo = Math.min(...xs), xhi = Math.max(...xs), yhi = Math.max(...ys) * 1.1;
     const sx = (v: number) => bx0 + 30 + ((v - xlo) / (xhi - xlo || 1)) * (bw - 50);
     const sy = (v: number) => 44 + (1 - v / yhi) * (chartH - 100);
-    svg.appendChild(svgEl('rect', { x: bx0 + 24, y: 32, width: bw - 34, height: chartH - 84, fill: 'rgba(255,253,248,0.55)', stroke: 'rgba(120,106,84,0.16)', rx: 6 }));
+    svg.appendChild(svgEl('rect', { x: bx0 + 24, y: 32, width: bw - 34, height: chartH - 84, fill: 'var(--chart-bg)', stroke: 'var(--line)', rx: 6 }));
     for (const p of pts) {
       const L = store.model.langLayers[p.i];
       svg.appendChild(svgEl('circle', {
@@ -828,7 +828,7 @@ function visionCard(live: Live, store: Store): HTMLElement | null {
   const { card, body } = cardShell(W, tr('live.vis.title'), tr('live.vis.sub'));
   const row = el('div', '', 'display:flex;gap:20px;align-items:flex-start');
   body.appendChild(row);
-  const img = el('img', 'no-pan', 'width:250px;border-radius:6px;box-shadow:0 0 0 1px rgba(120,106,84,0.25)');
+  const img = el('img', 'no-pan', 'width:250px;border-radius:6px;box-shadow:0 0 0 1px var(--line-strong)');
   img.src = `models/${store.model.slug}/atlas_shot.png`;
   img.alt = 'the screenshot the model is looking at';
   row.appendChild(img);

@@ -53,7 +53,7 @@ export function buildScatter(store: Store, X: number, Y: number): {
 
     // оси и сетка
     const gx0 = ML, gy0 = MT, gw = PLOT_W, gh = PLOT_H;
-    svg.appendChild(svgEl('rect', { x: gx0, y: gy0, width: gw, height: gh, fill: 'rgba(255,253,248,0.55)', stroke: 'rgba(120,106,84,0.18)', rx: 6 }));
+    svg.appendChild(svgEl('rect', { x: gx0, y: gy0, width: gw, height: gh, fill: 'var(--chart-bg)', stroke: 'var(--line-strong)', rx: 6 }));
 
     const px = (t: Tensor) => { const v = dx.get(t); return v == null ? null : gx0 + norm(v, dx) * gw; };
     const py = (t: Tensor) => { const v = dy.get(t); return v == null ? null : gy0 + (1 - norm(v, dy)) * gh; };
@@ -66,11 +66,11 @@ export function buildScatter(store: Store, X: number, Y: number): {
         const label = d.fmt(raw) + (d.unit && !d.log ? '' : '');
         if (axis === 'x') {
           const x = gx0 + f * gw;
-          svg.appendChild(svgEl('line', { x1: x, y1: gy0, x2: x, y2: gy0 + gh, stroke: 'rgba(120,106,84,0.10)' }));
+          svg.appendChild(svgEl('line', { x1: x, y1: gy0, x2: x, y2: gy0 + gh, stroke: 'var(--line)' }));
           svg.appendChild(text(label, x, gy0 + gh + 18, 'middle'));
         } else {
           const y = gy0 + (1 - f) * gh;
-          svg.appendChild(svgEl('line', { x1: gx0, y1: y, x2: gx0 + gw, y2: y, stroke: 'rgba(120,106,84,0.10)' }));
+          svg.appendChild(svgEl('line', { x1: gx0, y1: y, x2: gx0 + gw, y2: y, stroke: 'var(--line)' }));
           svg.appendChild(text(label, gx0 - 8, y + 4, 'end'));
         }
       }
@@ -101,7 +101,7 @@ export function buildScatter(store: Store, X: number, Y: number): {
       });
       c.addEventListener('mouseleave', hideTip);
       if (store.sel.type === 'tensor' && store.sel.tensor.idx === t.idx) {
-        c.setAttribute('stroke', '#ff8a3d');
+        c.setAttribute('stroke', 'var(--accent)');
         c.setAttribute('stroke-width', '2.5');
       }
       svg.appendChild(c);
@@ -146,7 +146,7 @@ function mkSelect(metrics: Record<string, MetricDef>, value: string): HTMLSelect
 }
 
 function text(str: string, x: number, y: number, anchor = 'start', size = 10.5): SVGElement {
-  const t = svgEl('text', { x, y, 'text-anchor': anchor, fill: '#8c8578', 'font-size': size, 'font-family': "'IBM Plex Mono',monospace" });
+  const t = svgEl('text', { x, y, 'text-anchor': anchor, fill: 'var(--faint)', 'font-size': size, 'font-family': "'IBM Plex Mono',monospace" });
   t.textContent = str;
   return t;
 }

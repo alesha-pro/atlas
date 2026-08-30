@@ -20,7 +20,7 @@ export function buildWidget(kind: string): HTMLElement | null {
   }
 }
 
-const box = () => el('div', '', `border:1px solid var(--line);background:rgba(255,253,248,0.7);border-radius:12px;padding:16px 18px;display:flex;flex-direction:column;gap:14px`);
+const box = () => el('div', '', `border:1px solid var(--line);background:var(--glass-soft);border-radius:12px;padding:16px 18px;display:flex;flex-direction:column;gap:14px`);
 const lbl = (s: string) => el('div', 'mono wlabel', '', s);
 function slider(min: number, max: number, val: number, step: number, on: (v: number) => void): HTMLInputElement {
   const s = document.createElement('input');
@@ -44,7 +44,7 @@ function btn(label: string, on: () => void): HTMLElement {
 const rnd = (() => { let s = 42; return () => { s = (s * 1664525 + 1013904223) % 4294967296; return s / 4294967296; }; })();
 const randVec = (n: number) => { const v = Array.from({ length: n }, () => rnd() * 2 - 1); const m = Math.hypot(...v); return v.map(x => x / m); };
 const cellColor = (v: number) => Math.abs(v) < 0.03
-  ? 'rgba(120,106,84,0.09)'
+  ? 'var(--line)'
   : v >= 0
     ? `rgba(176,73,42,${Math.min(1, 0.12 + Math.abs(v)).toFixed(2)})`
     : `rgba(78,106,134,${Math.min(1, 0.12 + Math.abs(v)).toFixed(2)})`;
@@ -60,7 +60,7 @@ function deltaWidget(): HTMLElement {
   const grid = el('div', '', `display:grid;grid-template-columns:repeat(${N},22px);gap:2px;align-self:center`);
   const cells: HTMLElement[] = [];
   for (let i = 0; i < N * N; i++) {
-    const c = el('div', '', 'width:22px;height:22px;border-radius:3px;background:rgba(120,106,84,0.06)');
+    const c = el('div', '', 'width:22px;height:22px;border-radius:3px;background:var(--line)');
     cells.push(c); grid.appendChild(c);
   }
   const barsWrap = el('div', '', 'display:flex;gap:22px;justify-content:center');
@@ -70,7 +70,7 @@ function deltaWidget(): HTMLElement {
     const bars: HTMLElement[] = [];
     for (let i = 0; i < N; i++) {
       const holder = el('div', '', 'width:9px;height:44px;position:relative');
-      const b = el('div', '', 'position:absolute;left:0;width:9px;border-radius:2px;background:#a2701f');
+      const b = el('div', '', 'position:absolute;left:0;width:9px;border-radius:2px;background:var(--warn)');
       holder.appendChild(b); row.appendChild(holder); bars.push(b);
     }
     w.appendChild(row); w.appendChild(lbl(title));
@@ -97,7 +97,7 @@ function deltaWidget(): HTMLElement {
     const pred = S.map(row => row.reduce((a, x, j) => a + x * k[j], 0));
     const err = v.map((x, i) => x - alpha * pred[i]);
     S = S.map((row, i) => row.map((x, j) => alpha * x + beta * err[i] * k[j]));
-    setBars(bV, v, '#4d7a63'); setBars(bP, pred, '#a2701f'); setBars(bE, err, '#b0492a');
+    setBars(bV, v, 'var(--good)'); setBars(bP, pred, 'var(--warn)'); setBars(bE, err, 'var(--bad)');
     paint();
   };
   const reset = () => { S = Array.from({ length: N }, () => Array(N).fill(0)); step = 0; paint(); };
@@ -129,8 +129,8 @@ function ropeWidget(): HTMLElement {
   freqs.forEach((_, i) => {
     const w = el('div', '', 'display:flex;flex-direction:column;align-items:center;gap:4px');
     const svg = svgEl('svg', { width: 74, height: 74 });
-    svg.appendChild(svgEl('circle', { cx: 37, cy: 37, r: 33, fill: 'rgba(255,253,248,0.9)', stroke: 'rgba(120,106,84,0.3)' }));
-    const n = svgEl('line', { x1: 37, y1: 37, x2: 37, y2: 8, stroke: '#d9701f', 'stroke-width': 2.5, 'stroke-linecap': 'round' });
+    svg.appendChild(svgEl('circle', { cx: 37, cy: 37, r: 33, fill: 'var(--glass)', stroke: 'var(--line-strong)' }));
+    const n = svgEl('line', { x1: 37, y1: 37, x2: 37, y2: 8, stroke: 'var(--accent-deep)', 'stroke-width': 2.5, 'stroke-linecap': 'round' });
     svg.appendChild(n); needles.push(n);
     w.appendChild(svg as any);
     w.appendChild(lbl(i === 0 ? t('w.fast') : i === freqs.length - 1 ? t('w.slow') : `θ${i}`));
@@ -139,8 +139,8 @@ function ropeWidget(): HTMLElement {
   // замороженная пара (partial rotary)
   const fw = el('div', '', 'display:flex;flex-direction:column;align-items:center;gap:4px');
   const fsvg = svgEl('svg', { width: 74, height: 74 });
-  fsvg.appendChild(svgEl('circle', { cx: 37, cy: 37, r: 33, fill: 'rgba(120,106,84,0.06)', stroke: 'rgba(120,106,84,0.25)', 'stroke-dasharray': '4 4' }));
-  fsvg.appendChild(svgEl('line', { x1: 37, y1: 37, x2: 37, y2: 8, stroke: 'rgba(120,106,84,0.4)', 'stroke-width': 2.5 }));
+  fsvg.appendChild(svgEl('circle', { cx: 37, cy: 37, r: 33, fill: 'var(--line)', stroke: 'var(--line-strong)', 'stroke-dasharray': '4 4' }));
+  fsvg.appendChild(svgEl('line', { x1: 37, y1: 37, x2: 37, y2: 8, stroke: 'var(--line-strong)', 'stroke-width': 2.5 }));
   fw.appendChild(fsvg as any); fw.appendChild(lbl(t('w.frozen')));
   dials.appendChild(fw);
 
@@ -218,7 +218,7 @@ function convWidget(): HTMLElement {
   const setP = (p: number) => {
     toks.forEach((c, i) => {
       const inWin = i <= p && i >= p - 3;
-      c.style.background = i === p ? '#d9701f' : inWin ? 'rgba(224,164,92,0.55)' : 'rgba(143,178,189,0.35)';
+      c.style.background = i === p ? 'var(--accent-deep)' : inWin ? 'rgba(224,164,92,0.55)' : 'rgba(143,178,189,0.35)';
       c.style.color = i === p ? '#fff' : inWin ? '#7a4a12' : '#3f6f6a';
       c.style.transform = inWin ? 'translateY(-3px)' : '';
     });
@@ -239,10 +239,10 @@ function gateWidget(): HTMLElement {
   const silu = (x: number) => x / (1 + Math.exp(-x));
   let d = '';
   for (let x = -6; x <= 6; x += 0.15) d += (d ? ' L ' : 'M ') + X(x).toFixed(1) + ' ' + Y(silu(x)).toFixed(1);
-  svg.appendChild(svgEl('line', { x1: 10, y1: Y(0), x2: W - 10, y2: Y(0), stroke: 'rgba(120,106,84,0.2)' }));
-  svg.appendChild(svgEl('line', { x1: X(0), y1: 8, x2: X(0), y2: H - 16, stroke: 'rgba(120,106,84,0.2)' }));
-  svg.appendChild(svgEl('path', { d, fill: 'none', stroke: '#d9701f', 'stroke-width': 2.4 }));
-  const dot = svgEl('circle', { r: 6, fill: '#b0492a', stroke: '#fff', 'stroke-width': 1.5 });
+  svg.appendChild(svgEl('line', { x1: 10, y1: Y(0), x2: W - 10, y2: Y(0), stroke: 'var(--line-strong)' }));
+  svg.appendChild(svgEl('line', { x1: X(0), y1: 8, x2: X(0), y2: H - 16, stroke: 'var(--line-strong)' }));
+  svg.appendChild(svgEl('path', { d, fill: 'none', stroke: 'var(--accent-deep)', 'stroke-width': 2.4 }));
+  const dot = svgEl('circle', { r: 6, fill: 'var(--bad)', stroke: '#fff', 'stroke-width': 1.5 });
   svg.appendChild(dot);
   const out = el('div', 'mono wlabel');
   const set = (x: number) => {
@@ -292,7 +292,7 @@ function normWidget(): HTMLElement {
 // ── pos_embed: сетка 48×48 и интерполяция ──
 function posembedWidget(): HTMLElement {
   const root = box();
-  const area = el('div', '', `align-self:center;position:relative;width:240px;height:240px;border:1px solid rgba(120,106,84,0.3);border-radius:6px;
+  const area = el('div', '', `align-self:center;position:relative;width:240px;height:240px;border:1px solid var(--line-strong);border-radius:6px;
     background-image:repeating-linear-gradient(0deg,rgba(150,130,200,0.25) 0 1px,transparent 1px 5px),repeating-linear-gradient(90deg,rgba(150,130,200,0.25) 0 1px,transparent 1px 5px)`);
   const ov = el('div', '', 'position:absolute;left:0;top:0;border:2px solid var(--accent);border-radius:4px;background:rgba(255,138,61,0.08);transition:all 150ms');
   area.appendChild(ov);
@@ -344,9 +344,9 @@ function mergeWidget(): HTMLElement {
 // ── MTP: сколько токенов за проход ──
 function mtpWidget(): HTMLElement {
   const root = box();
-  const bar = el('div', '', 'height:26px;border-radius:6px;background:rgba(120,106,84,0.12);overflow:hidden;display:flex');
+  const bar = el('div', '', 'height:26px;border-radius:6px;background:var(--line);overflow:hidden;display:flex');
   const b1 = el('div', '', 'background:#e0955c;height:100%;width:50%');
-  const b2 = el('div', '', 'background:#4d7a63;height:100%;width:30%;transition:width 120ms');
+  const b2 = el('div', '', 'background:var(--good);height:100%;width:30%;transition:width 120ms');
   bar.append(b1, b2);
   const out = el('div', 'mono', 'font-size:14px;color:var(--ink-soft);text-align:center');
   const set = (p: number) => {
@@ -364,7 +364,7 @@ function costWidget(): HTMLElement {
   const rows = el('div', '', 'display:flex;flex-direction:column;gap:10px');
   const mk = (color: string) => {
     const r = el('div', '', 'display:flex;align-items:center;gap:10px');
-    const track = el('div', '', 'flex:1;height:14px;border-radius:7px;background:rgba(120,106,84,0.1);overflow:hidden');
+    const track = el('div', '', 'flex:1;height:14px;border-radius:7px;background:var(--line);overflow:hidden');
     const fill = el('div', '', `height:100%;border-radius:7px;background:${color};transition:width 120ms`);
     track.appendChild(fill);
     const val = el('div', 'mono', 'font-size:12px;width:88px;text-align:right;color:var(--ink-soft)');

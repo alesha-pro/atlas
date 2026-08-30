@@ -53,12 +53,12 @@ export function buildDepth(store: Store, X: number, Y: number): {
     const py = (v: number) => 10 + (1 - (d.transform(v) - lo) / (hi - lo)) * (CH_H - 20);
 
     // фон
-    svg.appendChild(svgEl('rect', { x: 36, y: 4, width: CH_W - 46, height: CH_H, fill: 'rgba(255,253,248,0.55)', stroke: 'rgba(120,106,84,0.16)', rx: 6 }));
+    svg.appendChild(svgEl('rect', { x: 36, y: 4, width: CH_W - 46, height: CH_H, fill: 'var(--chart-bg)', stroke: 'var(--line)', rx: 6 }));
 
     // линия
     let path = '';
     pts.forEach((p, i) => { path += (i ? ' L ' : 'M ') + px(i).toFixed(1) + ' ' + py(p.v).toFixed(1); });
-    svg.appendChild(svgEl('path', { d: path, fill: 'none', stroke: 'rgba(120,106,84,0.4)', 'stroke-width': 1.6 }));
+    svg.appendChild(svgEl('path', { d: path, fill: 'none', stroke: 'var(--line-strong)', 'stroke-width': 1.6 }));
 
     // точки
     pts.forEach((p, i) => {
@@ -78,7 +78,7 @@ export function buildDepth(store: Store, X: number, Y: number): {
       c.addEventListener('mouseleave', hideTip);
       svg.appendChild(c);
       if (p.L.idx % 8 === 0 || p.L.idx === pts.length - 1) {
-        const t = svgEl('text', { x: px(i), y: CH_H + 26, 'text-anchor': 'middle', fill: '#a49c8d', 'font-size': 10, 'font-family': "'IBM Plex Mono',monospace" });
+        const t = svgEl('text', { x: px(i), y: CH_H + 26, 'text-anchor': 'middle', fill: 'var(--ghost)', 'font-size': 10, 'font-family': "'IBM Plex Mono',monospace" });
         t.textContent = p.L.label;
         svg.appendChild(t);
       }
@@ -88,7 +88,7 @@ export function buildDepth(store: Store, X: number, Y: number): {
     for (const f of [0, 0.5, 1]) {
       const tv = lo + f * (hi - lo);
       const raw = d.log ? Math.pow(10, tv) : tv;
-      const t = svgEl('text', { x: 30, y: 12 + (1 - f) * (CH_H - 20), 'text-anchor': 'end', fill: '#a49c8d', 'font-size': 10, 'font-family': "'IBM Plex Mono',monospace" });
+      const t = svgEl('text', { x: 30, y: 12 + (1 - f) * (CH_H - 20), 'text-anchor': 'end', fill: 'var(--ghost)', 'font-size': 10, 'font-family': "'IBM Plex Mono',monospace" });
       t.textContent = d.fmt(raw);
       svg.appendChild(t);
     }

@@ -53,7 +53,7 @@ function introBlock(b: any): HTMLElement {
 function factsBlock(b: any): HTMLElement {
   const card = el('div', 'card', `width:${CARD_W}px;padding:24px 32px`);
   const rows = (b.rows as [L10n, L10n][]).map(([k, v]) => `
-    <div style="display:flex;gap:18px;padding:8px 0;border-top:1px solid rgba(120,106,84,0.12);align-items:baseline">
+    <div style="display:flex;gap:18px;padding:8px 0;border-top:1px solid var(--line);align-items:baseline">
       <div class="mono" style="width:260px;flex-shrink:0;font-size:12px;letter-spacing:0.06em;text-transform:uppercase;color:var(--faint)">${pick(k)}</div>
       <div class="mono" style="font-size:14.5px;color:var(--ink-soft)">${pick(v)}</div>
     </div>`).join('');
@@ -108,7 +108,7 @@ function patternBlock(store: Store, b: any): HTMLElement {
   let strip = `<div style="display:flex;align-items:flex-end;gap:5px;margin:14px 0 6px;flex-wrap:nowrap">`;
   strip += `<div class="mono" style="font-size:10px;color:var(--ghost);margin-right:8px">embed</div>`;
   for (let g = 0; g < 16; g++) {
-    strip += `<div style="display:flex;gap:2.5px;padding:4px;border:1px solid rgba(120,106,84,0.14);border-radius:4px;background:rgba(255,253,248,0.5)">`;
+    strip += `<div style="display:flex;gap:2.5px;padding:4px;border:1px solid var(--line);border-radius:4px;background:var(--glass-soft)">`;
     for (let i = 0; i < 3; i++) strip += `<div style="width:26px;height:40px;border-radius:2px;background:${lin.solid};opacity:0.75"></div>`;
     strip += `<div style="width:26px;height:52px;border-radius:2px;background:${attn.solid}"></div></div>`;
   }
@@ -142,7 +142,7 @@ function diagramBlock(store: Store, b: any, flyToTensor: (t: Tensor) => void): H
   for (const n of b.nodes) {
     const k = kindOf(n.kind || 'norm');
     const node = el('div', n.detail ? 'node-click no-pan' : '', `position:absolute;left:${n.x}px;top:${n.y}px;width:${n.w}px;
-      background:rgba(255,253,248,0.92);border:1px solid ${k.bd};border-radius:12px;padding:12px 14px;
+      background:var(--glass);border:1px solid ${k.bd};border-radius:12px;padding:12px 14px;
       box-shadow:0 10px 24px -20px rgba(60,50,35,0.5)`);
     node.innerHTML = `
       <div class="mono" style="font-size:13.5px;color:${k.fg};line-height:1.3">${pick(n.label)}</div>
@@ -202,7 +202,7 @@ function papersBlock(b: any): HTMLElement {
   const card = el('div', 'card', `width:${CARD_W}px;padding:24px 32px`);
   const items = (b.items || []).map((p: any) => `
     <a href="${p.url}" target="_blank" rel="noopener" class="no-pan" style="display:flex;flex-direction:column;gap:5px;
-      border:1px solid var(--line);background:rgba(255,253,248,0.75);border-radius:10px;padding:14px 16px;
+      border:1px solid var(--line);background:var(--glass-soft);border-radius:10px;padding:14px 16px;
       text-decoration:none;color:inherit">
       <div class="mono" style="font-size:10.5px;letter-spacing:0.1em;color:var(--accent-deep)">${p.id}</div>
       <div style="font-size:16.5px;line-height:1.25;color:var(--ink)">${p.title}</div>

@@ -68,7 +68,7 @@ function groupNode(store: Store, g: GroupInfo, geom: NodeGeom): HTMLElement {
   const m = store.model;
   const k = kindOf(g.kind);
   const node = el('div', 'fade-in', `position:absolute;left:${geom.x}px;top:${geom.y}px;width:${geom.w}px;
-    background:rgba(255,253,248,0.94);border:1px solid ${k.bd};border-radius:18px;padding:20px 22px;
+    background:var(--glass);border:1px solid ${k.bd};border-radius:18px;padding:20px 22px;
     box-shadow:0 20px 44px -32px rgba(60,50,35,0.55);cursor:pointer`);
   node.dataset.node = g.key;
 
@@ -114,7 +114,7 @@ function groupNode(store: Store, g: GroupInfo, geom: NodeGeom): HTMLElement {
 function railNode(store: Store, geom: NodeGeom): HTMLElement {
   const m = store.model;
   const node = el('div', '', `position:absolute;left:${geom.x}px;top:${geom.y}px;width:${geom.w}px;
-    background:rgba(255,253,248,0.94);border:1px solid var(--line-strong);border-radius:18px;padding:18px 20px;
+    background:var(--glass);border:1px solid var(--line-strong);border-radius:18px;padding:18px 20px;
     box-shadow:0 20px 44px -32px rgba(60,50,35,0.55)`);
   node.dataset.node = 'rail';
 

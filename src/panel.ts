@@ -90,7 +90,7 @@ function histBlock(x: Tensor): string {
         <div class="eyebrow mono">${tr('hist.title')}</div>
         <div class="mono" style="font-size:10.5px;color:var(--ghost)">${tr('hist.sub', bins.length)}</div>
       </div>
-      <div style="height:112px;display:flex;align-items:flex-end;gap:1.5px;padding:8px 10px;background:rgba(120,106,84,0.05);border:1px solid rgba(120,106,84,0.12);border-radius:10px">${bars}</div>
+      <div style="height:112px;display:flex;align-items:flex-end;gap:1.5px;padding:8px 10px;background:var(--chart-bg);border:1px solid var(--line);border-radius:10px">${bars}</div>
       <div class="mono" style="display:flex;justify-content:space-between;font-size:10px;color:var(--ghost)">
         <div>${tr('hist.x0')}</div><div>2⁻¹⁰</div><div>2⁰</div><div>2⁴</div>
       </div>
@@ -112,7 +112,7 @@ function spectrumBlock(x: Tensor): string {
         <div class="eyebrow mono">${tr('spec.title')}</div>
         <div class="mono" style="font-size:10.5px;color:var(--ghost)">${tr('spec.rank')} ${x.stable_rank?.toFixed(1)}</div>
       </div>
-      <div style="height:104px;display:flex;align-items:flex-end;gap:2px;padding:6px 10px;background:rgba(120,106,84,0.05);border:1px solid rgba(120,106,84,0.12);border-radius:10px">${bars}</div>
+      <div style="height:104px;display:flex;align-items:flex-end;gap:2px;padding:6px 10px;background:var(--chart-bg);border:1px solid var(--line);border-radius:10px">${bars}</div>
       <div class="small-note">${x.stable_rank != null && x.stable_rank < 15 ? tr('spec.note.low') : tr('spec.note.dense')}</div>
     </div>`;
 }
@@ -139,7 +139,7 @@ function rowsBlock(store: Store, x: Tensor): string {
             <div style="font-size:14px">${label} <span class="mono" style="font-size:9.5px;color:var(--ghost)">${key}</span></div>
             <div class="mono" style="font-size:13.5px;color:var(--ink-soft)">${has ? (v as number).toFixed(key === 'sparsity' || key === 'outlier_3s' ? 3 : 2) : tr('na')}</div>
           </div>
-          ${d ? `<div class="bar-track"><div class="bar-fill" style="width:${w}%;background:${has ? colorFor(v as number, d) : '#cdbfa6'}"></div></div>` : ''}
+          ${d ? `<div class="bar-track"><div class="bar-fill" style="width:${w}%;background:${has ? colorFor(v as number, d) : 'var(--na-fill)'}"></div></div>` : ''}
           <div class="small-note" style="font-size:12px">${plain}</div>
         </div>`;
       }).join('')}
@@ -154,7 +154,7 @@ function percentileBlock(x: Tensor): string {
     <div style="display:flex;flex-direction:column;gap:7px">
       <div class="eyebrow mono">${tr('pct.title')}</div>
       <div style="display:flex;gap:5px">${items.map(([l, v]) => `
-        <div style="flex:1;border:1px solid var(--line);border-radius:8px;padding:7px 4px;text-align:center;background:rgba(255,255,255,0.5)">
+        <div style="flex:1;border:1px solid var(--line);border-radius:8px;padding:7px 4px;text-align:center;background:var(--glass-soft)">
           <div class="mono" style="font-size:9px;color:var(--ghost)">${l}</div>
           <div class="mono" style="font-size:10.5px;color:var(--ink-soft);margin-top:2px">${fmtVal(v)}</div>
         </div>`).join('')}</div>
@@ -262,11 +262,11 @@ function renderGroup(store: Store, head: HTMLElement, body: HTMLElement, key: st
     </div>
     ${d2.length ? `
       <div style="display:flex;flex-direction:column;gap:6px">
-        <div class="eyebrow mono" style="color:#b0492a">${tr('group.fragile')}</div>
+        <div class="eyebrow mono" style="color:var(--bad)">${tr('group.fragile')}</div>
         ${worst.map(mkRow).join('')}
       </div>
       <div style="display:flex;flex-direction:column;gap:6px">
-        <div class="eyebrow mono" style="color:#4d7a63">${tr('group.robust')}</div>
+        <div class="eyebrow mono" style="color:var(--good)">${tr('group.robust')}</div>
         ${best.map(mkRow).join('')}
       </div>` : ''}`;
 

@@ -34,9 +34,9 @@ export function buildRecords(store: Store, X: number, Y: number): {
   const md4 = m.metrics.int4, md8 = m.metrics.int8;
   const db = tr('unit.db');
   const recs: { label: string; t: Tensor | null; val: (t: Tensor) => string; note: string; inkc?: string }[] = [
-    { label: tr('rec.worst4.label'), t: by(t => t.sqnr_int4_g128), val: t => t.sqnr_int4_g128!.toFixed(2) + ' ' + db, note: tr('rec.worst4.note'), inkc: '#b0492a' },
-    { label: tr('rec.best4.label'), t: by(t => t.sqnr_int4_g128, false), val: t => t.sqnr_int4_g128!.toFixed(2) + ' ' + db, note: tr('rec.best4.note'), inkc: '#4d7a63' },
-    { label: tr('rec.worst8.label'), t: by(t => t.sqnr_int8_ch), val: t => t.sqnr_int8_ch!.toFixed(1) + ' ' + db, note: tr('rec.worst8.note'), inkc: '#b0492a' },
+    { label: tr('rec.worst4.label'), t: by(t => t.sqnr_int4_g128), val: t => t.sqnr_int4_g128!.toFixed(2) + ' ' + db, note: tr('rec.worst4.note'), inkc: 'var(--bad)' },
+    { label: tr('rec.best4.label'), t: by(t => t.sqnr_int4_g128, false), val: t => t.sqnr_int4_g128!.toFixed(2) + ' ' + db, note: tr('rec.best4.note'), inkc: 'var(--good)' },
+    { label: tr('rec.worst8.label'), t: by(t => t.sqnr_int8_ch), val: t => t.sqnr_int8_ch!.toFixed(1) + ' ' + db, note: tr('rec.worst8.note'), inkc: 'var(--bad)' },
     { label: tr('rec.kurt.label'), t: by(t => t.kurtosis, false), val: t => tr('rec.kurt.val', t.kurtosis.toFixed(0)), note: tr('rec.kurt.note') },
     { label: tr('rec.hot.label'), t: by(t => t.hot, false), val: t => '×' + t.hot!.toFixed(1), note: tr('rec.hot.note') },
     { label: tr('rec.dyn.label'), t: by(t => t.dyn_range, false), val: t => '×' + t.dyn_range.toFixed(0), note: tr('rec.dyn.note') },
@@ -57,7 +57,7 @@ export function buildRecords(store: Store, X: number, Y: number): {
       <div class="small-note">${r.note}</div>`;
     c.addEventListener('click', () => store.select({ type: 'tensor', tensor: t }));
     c.addEventListener('mouseenter', () => c.style.borderColor = 'var(--accent)');
-    c.addEventListener('mouseleave', () => c.style.borderColor = '#e2dacb');
+    c.addEventListener('mouseleave', () => c.style.borderColor = 'var(--card-bd)');
     grid.appendChild(c);
   }
 

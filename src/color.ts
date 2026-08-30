@@ -9,8 +9,8 @@ const STOPS: [number, number, number, number][] = [
   [1.00, 0.86, 0.058, 215],
 ];
 
-export const HATCH = 'repeating-linear-gradient(45deg,#e6e0d3,#e6e0d3 3px,#f2eee4 3px,#f2eee4 6px)';
-export const NA_INK = '#a49c8d';
+export const HATCH = 'repeating-linear-gradient(45deg,var(--hatch-a),var(--hatch-a) 3px,var(--hatch-b) 3px,var(--hatch-b) 6px)';
+export const NA_INK = 'var(--ghost)';
 
 export function ramp(t: number): string {
   t = Math.max(0, Math.min(1, t));
@@ -46,7 +46,7 @@ export function colorForTensor(t: Tensor, d: MetricDef): string {
 export function ink(v: number | null, d: MetricDef): string {
   const t = tOf(v, d);
   if (t == null) return NA_INK;
-  return t < 0.34 ? '#b0492a' : t < 0.62 ? '#a2701f' : '#4d7a63';
+  return t < 0.34 ? 'var(--bad)' : t < 0.62 ? 'var(--warn)' : 'var(--good)';
 }
 
 // стабильные цвета «пород» (виды блоков)
@@ -55,7 +55,7 @@ export const KIND: Record<string, { bg: string; fg: string; solid: string; bd: s
   attn:   { bg: 'rgba(247,225,201,0.7)', fg: '#9a6a2c', solid: '#d3a05a', bd: 'rgba(200,160,105,0.36)' },
   lin:    { bg: 'rgba(210,231,228,0.7)', fg: '#3f6f6a', solid: '#8fb2bd', bd: 'rgba(130,175,170,0.36)' },
   mlp:    { bg: 'rgba(226,214,240,0.7)', fg: '#6a4f8c', solid: '#a891cf', bd: 'rgba(160,135,195,0.34)' },
-  norm:   { bg: 'rgba(226,220,205,0.8)', fg: '#6b6459', solid: '#b7ac96', bd: 'rgba(120,106,84,0.26)' },
+  norm:   { bg: 'rgba(226,220,205,0.8)', fg: 'var(--muted)', solid: '#b7ac96', bd: 'var(--line-strong)' },
   out:    { bg: 'rgba(255,222,190,0.7)', fg: '#a35c1c', solid: '#e0955c', bd: 'rgba(220,160,100,0.36)' },
   vision: { bg: 'rgba(224,216,243,0.7)', fg: '#5c4a8f', solid: '#a98cc0', bd: 'rgba(150,130,200,0.34)' },
 };

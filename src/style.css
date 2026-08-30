@@ -1,5 +1,6 @@
 /* ── Атлас весов · тёплая бумага ─────────────────────────────── */
 :root {
+  color-scheme: light;
   --paper: #efe9dd;
   --card: #fbf8f1;
   --card-solid: #fdfbf6;
@@ -17,8 +18,67 @@
   --mono: 'IBM Plex Mono', ui-monospace, monospace;
   --shadow-card: 0 1px 2px rgba(60, 50, 35, 0.05), 0 22px 52px -34px rgba(60, 50, 35, 0.42);
   --shadow-float: 0 12px 34px -22px rgba(60, 50, 35, 0.55);
-  --hatch: repeating-linear-gradient(45deg, #e6e0d3, #e6e0d3 3px, #f2eee4 3px, #f2eee4 6px);
+  --card-bd: #e2dacb;
+  --glass: rgba(255, 253, 248, 0.93);
+  --glass-soft: rgba(255, 253, 248, 0.65);
+  --chart-bg: rgba(255, 253, 248, 0.55);
+  --overlay-bg: rgba(255, 253, 248, 0.88);
+  --chip-bg: rgba(255, 253, 248, 0.85);
+  --modal-bg: rgba(253, 250, 244, 0.97);
+  --track: #efe9dc;
+  --na-fill: #cdbfa6;
+  --dot: rgba(120, 106, 84, 0.26);
+  --scroll: #cfc4ae;
+  --sel-bg: #f4ead9;
+  --bad: #b0492a;
+  --warn: #a2701f;
+  --good: #4d7a63;
+  --hatch-a: #e6e0d3;
+  --hatch-b: #f2eee4;
+  --hatch: repeating-linear-gradient(45deg, var(--hatch-a), var(--hatch-a) 3px, var(--hatch-b) 3px, var(--hatch-b) 6px);
+  --card-glow:
+    radial-gradient(ellipse 520px 300px at 0% 0%, rgba(255, 218, 186, 0.30), transparent 60%),
+    radial-gradient(ellipse 560px 320px at 100% 100%, rgba(200, 224, 226, 0.28), transparent 62%);
 }
+
+[data-theme="dark"] {
+  color-scheme: dark;
+  --paper: #211d17;
+  --card: #2a251d;
+  --card-solid: #2f2921;
+  --ink: #ece5d7;
+  --ink-soft: #d8cfbf;
+  --muted: #b5aa96;
+  --faint: #9a9280;
+  --ghost: #7c7466;
+  --line: rgba(235, 220, 195, 0.13);
+  --line-strong: rgba(235, 220, 195, 0.22);
+  --shadow-card: 0 1px 2px rgba(0, 0, 0, 0.2), 0 22px 52px -34px rgba(0, 0, 0, 0.7);
+  --shadow-float: 0 12px 34px -22px rgba(0, 0, 0, 0.75);
+  --card-bd: #3b342a;
+  --glass: rgba(43, 37, 30, 0.93);
+  --glass-soft: rgba(52, 45, 36, 0.6);
+  --chart-bg: rgba(255, 250, 240, 0.045);
+  --overlay-bg: rgba(38, 33, 27, 0.9);
+  --chip-bg: rgba(48, 42, 34, 0.85);
+  --modal-bg: rgba(36, 31, 25, 0.97);
+  --track: #3a332a;
+  --na-fill: #4c4436;
+  --dot: rgba(235, 220, 195, 0.1);
+  --scroll: #4c4436;
+  --sel-bg: #3f3627;
+  --bad: #e0795a;
+  --warn: #d9a648;
+  --good: #85b394;
+  --hatch-a: #332d25;
+  --hatch-b: #2a251d;
+  --card-glow: none;
+}
+
+[data-theme="dark"] .wash { opacity: 0.22; }
+[data-theme="dark"] .veil { background: rgba(0, 0, 0, 0.55); }
+[data-theme="dark"] .tip { background: rgba(20, 17, 14, 0.96); color: #ece5d7; box-shadow: 0 14px 30px -18px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(235, 220, 195, 0.14); }
+[data-theme="dark"] .tip .mono { color: #ffce9e; }
 
 * { box-sizing: border-box; }
 html, body { margin: 0; height: 100%; overflow: hidden; background: var(--paper); }
@@ -27,7 +87,7 @@ body { font-family: var(--serif); color: var(--ink); }
 
 ::-webkit-scrollbar { width: 9px; height: 9px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: #cfc4ae; border-radius: 5px; }
+::-webkit-scrollbar-thumb { background: var(--scroll); border-radius: 5px; }
 
 .mono { font-family: var(--mono); }
 
@@ -35,7 +95,7 @@ body { font-family: var(--serif); color: var(--ink); }
 .board {
   position: absolute; inset: 0; cursor: grab;
   background-color: var(--paper);
-  background-image: radial-gradient(circle, rgba(120, 106, 84, 0.26) 1.1px, transparent 1.1px);
+  background-image: radial-gradient(circle, var(--dot) 1.1px, transparent 1.1px);
 }
 .board.dragging { cursor: grabbing; }
 .world { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
@@ -52,10 +112,8 @@ body { font-family: var(--serif); color: var(--ink); }
 .section-sub { font-size: 15px; font-style: italic; color: var(--faint); }
 .card {
   background: var(--card);
-  background-image:
-    radial-gradient(ellipse 520px 300px at 0% 0%, rgba(255, 218, 186, 0.30), transparent 60%),
-    radial-gradient(ellipse 560px 320px at 100% 100%, rgba(200, 224, 226, 0.28), transparent 62%);
-  border: 1px solid #e2dacb; border-radius: 4px; box-shadow: var(--shadow-card);
+  background-image: var(--card-glow);
+  border: 1px solid var(--card-bd); border-radius: 4px; box-shadow: var(--shadow-card);
   overflow: hidden;
 }
 
@@ -69,12 +127,12 @@ body { font-family: var(--serif); color: var(--ink); }
 
 /* ── оверлеи ── */
 .overlay {
-  position: absolute; background: rgba(255, 253, 248, 0.88); backdrop-filter: blur(10px);
+  position: absolute; background: var(--overlay-bg); backdrop-filter: blur(10px);
   border: 1px solid var(--line); border-radius: 13px; box-shadow: var(--shadow-float);
 }
 .chip {
   font-family: var(--mono); font-size: 12.5px; padding: 7px 13px; border-radius: 18px;
-  cursor: pointer; border: 1px solid var(--line-strong); background: rgba(255, 253, 248, 0.85);
+  cursor: pointer; border: 1px solid var(--line-strong); background: var(--chip-bg);
   color: var(--muted); white-space: nowrap; user-select: none;
 }
 .chip:hover { border-color: var(--accent); color: var(--accent-deep); }
@@ -91,7 +149,7 @@ body { font-family: var(--serif); color: var(--ink); }
 /* ── панель-инспектор ── */
 .panel {
   position: absolute; right: 22px; top: 86px; bottom: 22px; width: min(430px, 36vw);
-  background: rgba(253, 250, 244, 0.96); backdrop-filter: blur(14px);
+  background: var(--modal-bg); backdrop-filter: blur(14px);
   border: 1px solid var(--line-strong); border-radius: 16px;
   box-shadow: 0 24px 60px -34px rgba(60, 50, 35, 0.55);
   display: flex; flex-direction: column; overflow: hidden;
@@ -106,19 +164,19 @@ body { font-family: var(--serif); color: var(--ink); }
 }
 
 .stat-card {
-  border: 1px solid var(--line); background: rgba(255, 255, 255, 0.6); border-radius: 11px;
+  border: 1px solid var(--line); background: var(--glass-soft); border-radius: 11px;
   padding: 12px 13px; display: flex; flex-direction: column; gap: 6px; flex: 1;
 }
 .metric-row { display: flex; flex-direction: column; gap: 5px; padding: 9px 0; border-top: 1px solid rgba(120, 106, 84, 0.12); }
-.bar-track { height: 6px; border-radius: 3px; background: rgba(120, 106, 84, 0.12); overflow: hidden; }
+.bar-track { height: 6px; border-radius: 3px; background: var(--track); overflow: hidden; }
 .bar-fill { height: 100%; border-radius: 3px; }
 
 .t-row {
   display: flex; align-items: center; gap: 11px; padding: 8px 11px; border-radius: 9px;
-  background: rgba(255, 255, 255, 0.55); border: 1px solid rgba(120, 106, 84, 0.13); cursor: pointer;
+  background: var(--glass-soft); border: 1px solid var(--line); cursor: pointer;
 }
 .t-row:hover { border-color: var(--accent); }
-.t-row.on { background: rgba(255, 240, 224, 0.9); border-color: #e8b07a; }
+.t-row.on { background: var(--sel-bg); border-color: #e8b07a; }
 
 /* ── поиск ── */
 .search-box input {
@@ -127,7 +185,7 @@ body { font-family: var(--serif); color: var(--ink); }
 }
 .search-drop {
   position: absolute; top: 44px; left: 0; right: 0; max-height: 380px; overflow-y: auto;
-  background: rgba(253, 250, 244, 0.98); border: 1px solid var(--line-strong); border-radius: 10px;
+  background: var(--modal-bg); border: 1px solid var(--line-strong); border-radius: 10px;
   box-shadow: var(--shadow-float); display: flex; flex-direction: column; padding: 6px;
 }
 .search-item { padding: 7px 10px; border-radius: 7px; cursor: pointer; display: flex; align-items: center; gap: 9px; }
@@ -150,7 +208,7 @@ body { font-family: var(--serif); color: var(--ink); }
 .minimap .mm-view { position: absolute; border: 1.6px solid var(--accent); border-radius: 3px; background: rgba(255, 138, 61, 0.08); }
 
 select.plain {
-  font-family: var(--mono); font-size: 12.5px; color: var(--muted); background: rgba(255, 253, 248, 0.9);
+  font-family: var(--mono); font-size: 12.5px; color: var(--muted); background: var(--chip-bg);
   border: 1px solid var(--line-strong); border-radius: 9px; padding: 7px 9px; cursor: pointer; outline: none;
 }
 
@@ -171,7 +229,7 @@ select.plain {
 }
 .modal {
   width: min(800px, 92vw); max-height: 86vh;
-  background: rgba(253, 250, 244, 0.98);
+  background: var(--modal-bg);
   border: 1px solid var(--line-strong); border-radius: 18px;
   box-shadow: 0 40px 90px -40px rgba(60, 50, 35, 0.7);
   display: flex; flex-direction: column; overflow: hidden;
