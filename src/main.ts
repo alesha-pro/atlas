@@ -89,9 +89,19 @@ async function boot(slug?: string, keep?: Keep) {
   // ── живая модель (если есть live.json) ──
   let liveSec: LiveSection | null = null;
   if (live) {
-    liveSec = buildLive(store, live, 80, 2760);
+    // строго ниже второго ряда, чтобы не лечь на стену и скаттер
+    const row2Bottom = Math.max(
+      wall.rect.y + wall.rect.h,
+      scatter.rect.y + scatter.rect.h,
+      depth.rect.y + depth.rect.h);
+    liveSec = buildLive(store, live, 80, row2Bottom + 140);
     world.world.appendChild(liveSec.root);
-    world.world.appendChild(el('div', 'wash', `left:600px;top:3100px;width:3400px;height:1500px;
+    // регион уже в DOM: настоящие размеры известны до туров и миникарты
+    liveSec.rect.h = liveSec.root.offsetHeight + 40;
+    const liveCards = [...liveSec.root.querySelectorAll('.card')] as HTMLElement[];
+    if (liveCards.length)
+      liveSec.rect.w = Math.max(...liveCards.map(c => c.offsetLeft + c.offsetWidth)) + 60;
+    world.world.appendChild(el('div', 'wash', `left:600px;top:${liveSec.rect.y + 200}px;width:3400px;height:${Math.max(600, liveSec.rect.h - 200)}px;
       background:radial-gradient(ellipse at 50% 50%,rgba(206,228,224,0.42),transparent 66%)`));
     const needH = liveSec.rect.y + liveSec.rect.h + 240;
     if (needH > world.size.h) {

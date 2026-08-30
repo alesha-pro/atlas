@@ -111,8 +111,7 @@ function flowCard(live: Live, store: Store): HTMLElement | null {
   let domSel = 'all', keySel: 'h_rms' | 'delta_rms' = 'h_rms';
 
   const ctl = el('div', 'no-pan', 'display:flex;gap:8px;align-items:center;flex-wrap:wrap');
-  const redraw = () => draw();
-  for (const d of ['all', ...DOMAINS]) {
+  if (hasStream) for (const d of ['all', ...DOMAINS]) {
     const b = el('div', 'mono no-pan',
       `font-size:10px;padding:3px 9px;border-radius:10px;cursor:pointer;border:1px solid rgba(120,106,84,0.25);
        background:${d === 'all' ? 'rgba(120,106,84,0.12)' : 'transparent'};color:${DOM_COLOR[d]}`, tr('live.dom.' + d));
@@ -128,7 +127,7 @@ function flowCard(live: Live, store: Store): HTMLElement | null {
     b.dataset.dom = d;
     ctl.appendChild(b);
   }
-  for (const [k, lbl] of [['h_rms', 'live.flow.h'], ['delta_rms', 'live.flow.delta']] as const) {
+  if (hasStream) for (const [k, lbl] of [['h_rms', 'live.flow.h'], ['delta_rms', 'live.flow.delta']] as const) {
     const b = el('div', 'mono no-pan',
       `font-size:10px;padding:3px 9px;border-radius:10px;cursor:pointer;border:1px solid rgba(120,106,84,0.25);
        background:${k === 'h_rms' ? 'rgba(120,106,84,0.12)' : 'transparent'}`, tr(lbl));
@@ -144,7 +143,9 @@ function flowCard(live: Live, store: Store): HTMLElement | null {
     b.dataset.key = k;
     ctl.appendChild(b);
   }
-  void redraw;
+  if (!hasStream) ctl.appendChild(el('div', 'mono',
+    'font-size:10px;padding:3px 9px;border-radius:10px;border:1px dashed rgba(120,106,84,0.4);color:var(--faint)',
+    tr('live.pending')));
   body.appendChild(ctl);
 
   const chartWrap = el('div', 'no-pan', `position:relative;width:${W}px;height:${H}px`);
@@ -214,13 +215,22 @@ function flowCard(live: Live, store: Store): HTMLElement | null {
     // нижние полосы: io_cos + каналы-выбросы
     let y0 = hasStream ? H2 + 26 : 12;
     if (f.io_cos?.length) {
+      const bandH = hasStream ? 52 : 150;
       yLabel(svg, 6, y0 + 4, tr('live.flow.io'));
       const cio = f.io_cos.filter((v): v is number => v != null);
       let clo = Math.min(...cio), chi = Math.max(...cio);
       const cp = (chi - clo) * 0.2 || 0.01; clo -= cp; chi += cp;
-      const py2 = (v: number) => y0 + (1 - (v - clo) / (chi - clo)) * 52;
-      svg.appendChild(svgEl('path', { d: linePath(f.io_cos, px, py2), fill: 'none', stroke: 'rgba(122,86,140,0.55)', 'stroke-width': 1.4 }));
-      y0 += 68;
+      const py2 = (v: number) => y0 + 12 + (1 - (v - clo) / (chi - clo)) * bandH;
+      svg.appendChild(svgEl('rect', { x: 38, y: y0 + 6, width: W2, height: bandH + 12, fill: 'rgba(255,253,248,0.55)', stroke: 'rgba(120,106,84,0.16)', rx: 6 }));
+      svg.appendChild(svgEl('path', { d: linePath(f.io_cos, px, py2), fill: 'none', stroke: 'rgba(122,86,140,0.65)', 'stroke-width': 1.6 }));
+      f.io_cos.forEach((v, i) => {
+        if (v == null) return;
+        svg.appendChild(svgEl('circle', { cx: px(i), cy: py2(v), r: i % 4 === 3 ? 3 : 1.8, fill: i % 4 === 3 ? kindOf('attn').solid : 'rgba(122,86,140,0.75)' }));
+      });
+      yLabel(svg, 8, py2(chi - cp) + 4, (chi - cp).toFixed(2));
+      yLabel(svg, 8, py2(clo + cp) + 4, (clo + cp).toFixed(2));
+      if (!hasStream) for (let i = 0; i < n; i += 8) yLabel(svg, px(i) - 6, y0 + bandH + 34, String(i));
+      y0 += bandH + 16;
     }
     if (f.n_out_dims?.some(v => v != null)) {
       yLabel(svg, 6, y0 + 4, tr('live.flow.outdims'));
@@ -495,8 +505,11 @@ function linattnCard(live: Live, store: Store): HTMLElement | null {
   if (!la) return null;
   const hasBars = !!la.layers?.length && !!(la.beta?.en?.length);
   if (!hasBars && !la.layers_lambda) return null;
-  const W = 1180, H = 400;
+  const W = hasBars ? 1180 : 720, H = 400;
   const { card, body } = cardShell(W, tr('live.la.title'), tr('live.la.sub'));
+  if (!hasBars) body.appendChild(el('div', 'mono no-pan',
+    'align-self:flex-start;font-size:10px;padding:3px 9px;border-radius:10px;border:1px dashed rgba(120,106,84,0.4);color:var(--faint)',
+    tr('live.pending')));
   const wrap = el('div', 'no-pan', `position:relative;width:${W}px;height:${H}px`);
   body.appendChild(wrap);
   const svg = svgEl('svg', { width: W, height: H });
@@ -505,7 +518,8 @@ function linattnCard(live: Live, store: Store): HTMLElement | null {
   const n = la.layers?.length || 1;
   const chartW = 540, chartH = 330, x0 = 40;
   const px = (i: number) => x0 + (i / Math.max(1, n - 1)) * (chartW - 10);
-  svg.appendChild(svgEl('rect', { x: x0 - 8, y: 4, width: chartW, height: chartH, fill: 'rgba(255,253,248,0.55)', stroke: 'rgba(120,106,84,0.16)', rx: 6 }));
+  if (hasBars)
+    svg.appendChild(svgEl('rect', { x: x0 - 8, y: 4, width: chartW, height: chartH, fill: 'rgba(255,253,248,0.55)', stroke: 'rgba(120,106,84,0.16)', rx: 6 }));
 
   if (hasBars) {
     yLabel(svg, 2, 16, tr('live.la.beta'));
@@ -542,7 +556,7 @@ function linattnCard(live: Live, store: Store): HTMLElement | null {
   // λ: слои × головы, из весов A_log/dt_bias
   const lam = la.layers_lambda;
   if (lam && Object.keys(lam).length) {
-    const hx = x0 + chartW + 56;
+    const hx = hasBars ? x0 + chartW + 56 : x0;
     const keys = Object.keys(lam).map(Number).sort((x, y) => x - y);
     const heads = lam[keys[0]]?.length || 48;
     const cellW = Math.min(10.5, 330 / heads), cellH = Math.min(6.2, 300 / keys.length);
@@ -581,23 +595,26 @@ function linattnCard(live: Live, store: Store): HTMLElement | null {
     svg.addEventListener('mouseleave', hideTip);
   }
 
-  svg.addEventListener('mousemove', (e: MouseEvent) => {
-    const r = svg.getBoundingClientRect();
-    const wx = (e.clientX - r.left) / r.width * W;
-    if (wx < x0 || wx > x0 + chartW) return;
-    const i = Math.round((wx - x0) / ((chartW - 10) / Math.max(1, n - 1)));
-    if (i < 0 || i >= n) return;
-    tip(`<b>${tr('live.layer')} ${la.layers[i]}</b><br>
-      β ${la.beta?.en?.[i]?.toFixed(3)}<br>
-      ${tr('live.la.hl')} ${la.half_life?.[i] ?? '—'}`, e.clientX, e.clientY);
-  });
-  svg.addEventListener('mouseleave', hideTip);
-  svg.addEventListener('click', (e: MouseEvent) => {
-    const r = svg.getBoundingClientRect();
-    const i = Math.round(((e.clientX - r.left) / r.width * W - x0) / ((chartW - 10) / Math.max(1, n - 1)));
-    const L = store.model.langLayers[la.layers[i]];
-    if (L) store.select({ type: 'layer', layer: L });
-  });
+  if (hasBars) {
+    svg.addEventListener('mousemove', (e: MouseEvent) => {
+      const r = svg.getBoundingClientRect();
+      const wx = (e.clientX - r.left) / r.width * W;
+      if (wx < x0 || wx > x0 + chartW) return;
+      const i = Math.round((wx - x0) / ((chartW - 10) / Math.max(1, n - 1)));
+      if (i < 0 || i >= n || la.layers?.[i] == null) return;
+      tip(`<b>${tr('live.layer')} ${la.layers[i]}</b><br>
+        β ${la.beta?.en?.[i]?.toFixed(3) ?? '—'}<br>
+        ${tr('live.la.hl')} ${la.half_life?.[i] ?? '—'}`, e.clientX, e.clientY);
+    });
+    svg.addEventListener('mouseleave', hideTip);
+    svg.addEventListener('click', (e: MouseEvent) => {
+      const r = svg.getBoundingClientRect();
+      const i = Math.round(((e.clientX - r.left) / r.width * W - x0) / ((chartW - 10) / Math.max(1, n - 1)));
+      if (la.layers?.[i] == null) return;
+      const L = store.model.langLayers[la.layers[i]];
+      if (L) store.select({ type: 'layer', layer: L });
+    });
+  }
   body.appendChild(el('div', 'small-note', `max-width:${W - 60}px`, tr('live.la.foot')));
   return card;
 }
@@ -700,6 +717,35 @@ function neuronsCard(live: Live): HTMLElement | null {
 
 export interface LiveSection { root: HTMLElement; rect: { x: number; y: number; w: number; h: number } }
 
+// ─────────────────────────── что уже снято ───────────────────────────
+
+function statusCard(live: Live): HTMLElement {
+  const { card, body } = cardShell(560, tr('live.status.title'), tr('live.status.sub'));
+  const rows: [string, 'ok' | 'part' | 'wait', string][] = [
+    [tr('live.flow.title'), live.flow?.h_rms?.all?.length ? 'ok' : live.flow?.io_cos?.length ? 'part' : 'wait',
+      live.flow?.h_rms?.all?.length ? tr('live.status.src.pass') : tr('live.status.src.carve')],
+    [tr('live.actq.title'), live.flow?.actq ? 'ok' : 'wait', tr('live.status.src.pass')],
+    [tr('live.attn.title'), live.attn?.layers?.length ? 'ok' : 'wait', tr('live.status.src.pass')],
+    [tr('live.map.title'), live.attn_maps?.maps ? 'ok' : 'wait', tr('live.status.src.pass')],
+    [tr('live.la.title'), live.linattn?.beta?.en?.length ? 'ok' : live.linattn?.layers_lambda ? 'part' : 'wait',
+      live.linattn?.beta?.en?.length ? tr('live.status.src.pass') : tr('live.status.src.weights')],
+    [tr('live.neu.title'), live.neurons?.heat?.length ? 'ok' : 'wait', tr('live.status.src.carve')],
+    [tr('live.frag.title'), live.fragility?.kl?.length ? 'ok' : 'wait', tr('live.status.src.pass')],
+    [tr('live.vis.title'), live.vision?.img_share ? 'ok' : 'wait', tr('live.status.src.pass')],
+  ];
+  for (const [name, st, src] of rows) {
+    const color = st === 'ok' ? '#4d7a63' : st === 'part' ? '#a2701f' : 'var(--ghost)';
+    const label = st === 'ok' ? src : st === 'part' ? `${tr('live.status.part')} · ${src}` : tr('live.status.wait');
+    body.appendChild(el('div', '', 'display:flex;align-items:baseline;gap:10px;border-top:1px solid rgba(120,106,84,0.1);padding:6px 0', `
+      <span style="width:9px;height:9px;border-radius:5px;background:${color};flex-shrink:0;transform:translateY(1px);${st === 'wait' ? 'opacity:0.45' : ''}"></span>
+      <span style="font-size:14px;flex:1">${name}</span>
+      <span class="mono" style="font-size:10px;color:${st === 'wait' ? 'var(--ghost)' : color}">${label}</span>`));
+  }
+  const when = (live.meta as any)?.when;
+  if (when) body.appendChild(el('div', 'small-note', '', `${tr('live.status.when')} ${when}`));
+  return card;
+}
+
 // ─────────────────────────── fragility ───────────────────────────
 
 function fragCard(live: Live, store: Store): HTMLElement | null {
@@ -775,7 +821,7 @@ function fragCard(live: Live, store: Store): HTMLElement | null {
 
 // ─────────────────────────── vision showcase ───────────────────────────
 
-function visionCard(live: Live): HTMLElement | null {
+function visionCard(live: Live, store: Store): HTMLElement | null {
   const v = live.vision;
   if (!v?.img_share || !Object.keys(v.img_share).length) return null;
   const W = 640, H = 320;
@@ -783,7 +829,7 @@ function visionCard(live: Live): HTMLElement | null {
   const row = el('div', '', 'display:flex;gap:20px;align-items:flex-start');
   body.appendChild(row);
   const img = el('img', 'no-pan', 'width:250px;border-radius:6px;box-shadow:0 0 0 1px rgba(120,106,84,0.25)');
-  img.src = 'models/qwen3.8-27b/atlas_shot.png';
+  img.src = `models/${store.model.slug}/atlas_shot.png`;
   img.alt = 'the screenshot the model is looking at';
   row.appendChild(img);
   const wrap = el('div', 'no-pan', `position:relative;width:330px;height:${H - 80}px`);
@@ -799,6 +845,8 @@ function visionCard(live: Live): HTMLElement | null {
     svg.appendChild(svgEl('rect', { x: 34, y, width: Math.max(2, w), height: 11, fill: kindOf('vision').solid, rx: 2 }));
     yLabel(svg, 38 + Math.max(2, w), y + 10, (val * 100).toFixed(1) + '%');
   });
+  body.appendChild(el('div', 'small-note', `max-width:${W - 60}px`, tr('live.vis.foot')));
+  return card;
 }
 
 // ─────────────────────────── сборка региона ───────────────────────────
@@ -815,10 +863,12 @@ export function buildLive(store: Store, live: Live, X: number, Y: number): LiveS
   root.appendChild(flow);
 
   for (const c of [
+    statusCard(live),
     flowCard(live, store), mapCard(live), attnCard(live, store), linattnCard(live, store),
-    actqCard(live), fragCard(live, store), neuronsCard(live), visionCard(live),
+    actqCard(live), fragCard(live, store), neuronsCard(live), visionCard(live, store),
   ].filter((c): c is HTMLElement => c != null))
     flow.appendChild(c);
 
-  return { root, rect: { x: X, y: Y, w: W, h: flow.offsetHeight + 80 } };
+  // высота до монтирования неизвестна: вызывающий меряет root.offsetHeight и обновляет rect.h
+  return { root, rect: { x: X, y: Y, w: W, h: 900 } };
 }
