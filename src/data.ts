@@ -59,6 +59,7 @@ export interface MetricDef {
   loT: string; hiT: string;
   transform: (v: number) => number;
   fmt: (v: number) => string;
+  abs?: [number, number];   // общая абсолютная ось (дБ) для сравнения схем
 }
 
 export interface Model {
@@ -137,7 +138,7 @@ function q(sorted: number[], p: number): number {
 function makeMetric(
   tensors: Tensor[], key: string, label: string, unit: string,
   get: (t: Tensor) => number | null | undefined,
-  opts: { log?: boolean; shift?: number; invert?: boolean; loT?: string; hiT?: string; digits?: number; fixed?: [number, number]; minSpan?: number },
+  opts: { log?: boolean; shift?: number; invert?: boolean; loT?: string; hiT?: string; digits?: number; fixed?: [number, number]; minSpan?: number; abs?: [number, number] },
 ): MetricDef {
   const g = (t: Tensor) => { const v = get(t); return v == null ? null : v; };
   const shift = opts.shift ?? 0;
@@ -159,7 +160,7 @@ function makeMetric(
   return {
     key, label, unit, log: !!opts.log, invert: !!opts.invert, lo, hi,
     loT: opts.loT ?? '', hiT: opts.hiT ?? '',
-    get: g, transform,
+    get: g, transform, abs: opts.abs,
     fmt: (v: number) => opts.log && v >= 1000 ? fmtN(v) : v.toFixed(d),
   };
 }
@@ -260,9 +261,9 @@ export async function loadModel(entry: ManifestEntry): Promise<Model> {
       { ...opts, loT: t(`sc.${key}.lo`), hiT: t(`sc.${key}.hi`) });
   const db = t('unit.db');
   const defs: MetricDef[] = [
-    M('int4', db, x => x.sqnr_int4_g128, {}),
-    M('int8', db, x => x.sqnr_int8_ch, {}),
-    M('fp8', db, x => x.sqnr_fp8_e4m3, { digits: 2, minSpan: 8 }),
+    M('int4', db, x => x.sqnr_int4_g128, { abs: [12, 42] }),
+    M('int8', db, x => x.sqnr_int8_ch, { abs: [12, 42] }),
+    M('fp8', db, x => x.sqnr_fp8_e4m3, { digits: 2, minSpan: 8, abs: [12, 42] }),
     M('kurt', '', x => x.kurtosis, { log: true, shift: 3, invert: true }),
     M('hot', '×', x => x.hot, { log: true, invert: true }),
     M('dyn', '×', x => x.dyn_range, { log: true, invert: true }),

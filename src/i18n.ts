@@ -208,6 +208,10 @@ const en: Record<string, Entry> = {
   'dossier.jump': 'show these tensors on the wall →',
   'tour.dossier': 'deep dive',
 
+  // scale toggle
+  'scale.rel': 'within model', 'scale.rel.tip': 'colour = position within the range of this metric across the model',
+  'scale.abs': 'absolute dB', 'scale.abs.tip': 'one shared 12–42 dB axis for INT8/INT4/FP8: colour = actual noise vs the bf16 originals',
+
   // ui
   'search.placeholder': 'tensor by name…',
   'tour.overview': 'overview', 'tour.intro': 'start', 'tour.arch': 'architecture', 'tour.wall': 'wall',
@@ -403,6 +407,9 @@ const ru: Record<string, Entry> = {
   'w.cost.note': 'KV-кеш 16 полных слоёв растёт с каждым токеном. Состояние 48 линейных слоёв — константа 151 MB на любой длине. Именно это делает контекст 262K практичным.',
   'dossier.jump': 'показать эти тензоры на стене →',
   'tour.dossier': 'разбор',
+
+  'scale.rel': 'по модели', 'scale.rel.tip': 'цвет = позиция внутри диапазона метрики по модели',
+  'scale.abs': 'абсолютные дБ', 'scale.abs.tip': 'одна ось 12–42 дБ для INT8/INT4/FP8: цвет = фактический шум относительно bf16-исходников',
 
   'search.placeholder': 'тензор по имени…',
   'tour.overview': 'обзор', 'tour.intro': 'старт', 'tour.arch': 'архитектура', 'tour.wall': 'стена',

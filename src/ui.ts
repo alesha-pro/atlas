@@ -54,6 +54,26 @@ export function buildTopbar(
     legendHi.textContent = store.md.hiT;
   });
 
+  // шкала: относительная / абсолютная (для SQNR-метрик)
+  const scaleWrap = el('div', '', 'display:flex;gap:4px;margin-left:2px');
+  const scaleChips = new Map<string, HTMLElement>();
+  for (const mode of ['rel', 'abs'] as const) {
+    const c = el('div', 'chip mini' + (store.scale === mode ? ' on' : ''), '', t('scale.' + mode));
+    c.title = t('scale.' + mode + '.tip');
+    c.addEventListener('click', () => store.setScale(mode));
+    scaleWrap.appendChild(c);
+    scaleChips.set(mode, c);
+  }
+  bar.appendChild(scaleWrap);
+  const syncScale = () => {
+    for (const [m, c] of scaleChips) c.classList.toggle('on', store.scale === m);
+    const has = !!store.model.metrics[store.metric].abs;
+    scaleWrap.style.opacity = has ? '1' : '0.35';
+    scaleWrap.style.pointerEvents = has ? 'auto' : 'none';
+  };
+  store.addEventListener('metric', syncScale);
+  syncScale();
+
   // легенда
   const legend = el('div', '', 'display:flex;align-items:center;gap:8px;margin-left:4px');
   const legendLo = el('div', 'mono', 'font-size:11px;color:var(--faint);white-space:nowrap', store.md.loT);

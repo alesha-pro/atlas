@@ -9,6 +9,7 @@ export type Sel =
 export class Store extends EventTarget {
   model: Model;
   metric = 'int4';
+  scale: 'rel' | 'abs' = 'rel';
   sel: Sel = { type: 'model' };
   // мировые координаты клетки каждого тензора (заполняет стена)
   cellRect = new Map<number, { x: number; y: number; w: number; h: number }>();
@@ -18,11 +19,23 @@ export class Store extends EventTarget {
     this.model = model;
   }
 
-  get md() { return this.model.metrics[this.metric]; }
+  get md() {
+    const d = this.model.metrics[this.metric];
+    if (this.scale === 'abs' && d.abs) {
+      return { ...d, lo: d.abs[0], hi: d.abs[1], loT: d.abs[0] + ' ' + d.unit, hiT: d.abs[1] + ' ' + d.unit };
+    }
+    return d;
+  }
 
   setMetric(k: string) {
     if (this.metric === k) return;
     this.metric = k;
+    this.dispatchEvent(new Event('metric'));
+  }
+
+  setScale(s: 'rel' | 'abs') {
+    if (this.scale === s) return;
+    this.scale = s;
     this.dispatchEvent(new Event('metric'));
   }
 
