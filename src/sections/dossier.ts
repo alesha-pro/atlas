@@ -5,6 +5,7 @@ import type { Tensor } from '../data';
 import { t as tr, lang } from '../i18n';
 import { kindOf } from '../color';
 import { el, svgEl } from '../world';
+import { buildWidget } from '../widgets';
 import type { Store } from '../store';
 
 const W = 2480, CARD_W = 2480, INNER = CARD_W - 70;
@@ -60,6 +61,46 @@ function factsBlock(b: any): HTMLElement {
   return card;
 }
 
+// ── всплывающая карточка «как это работает» ──
+function openDetail(title: string, subtitle: string, detail: any) {
+  const app = document.getElementById('app')!;
+  const veil = el('div', 'veil no-pan');
+  const modal = el('div', 'modal');
+  modal.innerHTML = `
+    <div class="modal-head">
+      <div style="display:flex;justify-content:space-between;gap:12px;align-items:flex-start">
+        <div>
+          <div class="eyebrow accent mono">${subtitle}</div>
+          <div class="mono" style="font-size:24px;line-height:1.2;margin-top:7px">${title}</div>
+        </div>
+        <div class="mono close-x" style="cursor:pointer;color:var(--ghost);font-size:16px;padding:2px 6px">✕</div>
+      </div>
+    </div>`;
+  const body = el('div', 'modal-body');
+  body.appendChild(el('div', 'note', 'font-size:15.5px;line-height:1.6', pick(detail.text)));
+  let widget: HTMLElement | null = null;
+  if (detail.widget) {
+    widget = buildWidget(detail.widget);
+    if (widget) body.appendChild(widget);
+  }
+  modal.appendChild(body);
+  veil.appendChild(modal);
+  app.appendChild(veil);
+
+  const close = () => {
+    (widget as any)?.cleanup?.();
+    veil.remove();
+    window.removeEventListener('keydown', onKey, true);
+  };
+  const onKey = (e: KeyboardEvent) => {
+    if (e.key === 'Escape') { e.stopPropagation(); close(); }
+  };
+  window.addEventListener('keydown', onKey, true);
+  veil.addEventListener('click', e => { if (e.target === veil) close(); });
+  veil.addEventListener('mousedown', e => e.stopPropagation());
+  modal.querySelector('.close-x')!.addEventListener('click', close);
+}
+
 function patternBlock(store: Store, b: any): HTMLElement {
   const card = el('div', 'card', `width:${CARD_W}px;padding:24px 32px`);
   const lin = kindOf('lin'), attn = kindOf('attn');
@@ -76,8 +117,11 @@ function patternBlock(store: Store, b: any): HTMLElement {
     <div style="display:flex;align-items:center;gap:6px"><div style="width:9px;height:14px;border-radius:2px;background:${lin.solid}"></div>Gated DeltaNet → FFN · ×48</div>
     <div style="display:flex;align-items:center;gap:6px"><div style="width:9px;height:18px;border-radius:2px;background:${attn.solid}"></div>Gated Attention → FFN · ×16</div>
   </div>`;
-  card.innerHTML = blockHead(pick(b.title)) + strip +
+  const howChip = b.detail ? `<div class="chip mini no-pan" data-how>${tr('dossier.how')}</div>` : '';
+  card.innerHTML = blockHead(pick(b.title), howChip) + strip +
     `<div class="note" style="max-width:2100px">${pick(b.note)}</div>`;
+  card.querySelector('[data-how]')?.addEventListener('click', () =>
+    openDetail(pick(b.title), tr('sec.dossier.title'), b.detail));
   return card;
 }
 
@@ -97,12 +141,16 @@ function diagramBlock(store: Store, b: any, flyToTensor: (t: Tensor) => void): H
   const geom = new Map<string, { x: number; y: number; w: number; h: number }>();
   for (const n of b.nodes) {
     const k = kindOf(n.kind || 'norm');
-    const node = el('div', '', `position:absolute;left:${n.x}px;top:${n.y}px;width:${n.w}px;
+    const node = el('div', n.detail ? 'node-click no-pan' : '', `position:absolute;left:${n.x}px;top:${n.y}px;width:${n.w}px;
       background:rgba(255,253,248,0.92);border:1px solid ${k.bd};border-radius:12px;padding:12px 14px;
       box-shadow:0 10px 24px -20px rgba(60,50,35,0.5)`);
     node.innerHTML = `
       <div class="mono" style="font-size:13.5px;color:${k.fg};line-height:1.3">${pick(n.label)}</div>
       ${n.sub ? `<div style="font-size:12.5px;color:var(--faint);line-height:1.35;margin-top:4px;text-wrap:pretty">${pick(n.sub)}</div>` : ''}`;
+    if (n.detail) {
+      node.appendChild(el('div', 'node-more', '', '+'));
+      node.addEventListener('click', () => openDetail(pick(n.label), pick(b.title), n.detail));
+    }
     area.appendChild(node);
     geom.set(n.id, { x: n.x, y: n.y, w: n.w, h: 0 });
   }

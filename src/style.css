@@ -162,3 +162,31 @@ select.plain {
 
 .fade-in { animation: fadein 300ms ease-out; }
 @keyframes fadein { from { opacity: 0; } to { opacity: 1; } }
+
+/* ── всплывающая карточка разбора ── */
+.veil {
+  position: absolute; inset: 0; z-index: 50;
+  background: rgba(47, 43, 37, 0.35); backdrop-filter: blur(3px);
+  display: flex; align-items: center; justify-content: center;
+}
+.modal {
+  width: min(800px, 92vw); max-height: 86vh;
+  background: rgba(253, 250, 244, 0.98);
+  border: 1px solid var(--line-strong); border-radius: 18px;
+  box-shadow: 0 40px 90px -40px rgba(60, 50, 35, 0.7);
+  display: flex; flex-direction: column; overflow: hidden;
+  animation: modalin 200ms cubic-bezier(0.22, 1, 0.36, 1);
+}
+@keyframes modalin { from { opacity: 0; transform: translateY(14px) scale(0.98); } to { opacity: 1; } }
+.modal-head { padding: 20px 26px 16px; border-bottom: 1px solid var(--line); flex-shrink: 0; }
+.modal-body { padding: 18px 26px 30px; overflow-y: auto; display: flex; flex-direction: column; gap: 18px; min-height: 0; }
+.wctl { display: flex; align-items: center; gap: 12px; }
+.wlabel { font-size: 11.5px; color: var(--faint); white-space: nowrap; }
+input[type=range] { accent-color: var(--accent); height: 22px; cursor: pointer; }
+.node-more {
+  position: absolute; right: -7px; top: -7px; width: 18px; height: 18px; border-radius: 10px;
+  background: var(--accent); color: #fffaf3; font-family: var(--mono); font-size: 12px;
+  display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(60,50,35,0.25);
+}
+.node-click { cursor: pointer; transition: box-shadow 130ms, transform 130ms; }
+.node-click:hover { box-shadow: 0 0 0 2.5px rgba(255,138,61,0.45), 0 14px 30px -20px rgba(60,50,35,0.6) !important; transform: translateY(-1px); }

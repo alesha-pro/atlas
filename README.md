@@ -40,7 +40,7 @@ Metrics that do not apply (1-D tensors: norms, conv1d, biases) render as
 | **depth** | per-layer average of the current metric down the stack, plus quarters |
 | **herbarium** | treemap where area is parameter count |
 | **records** | extreme points: worst INT4, longest tail, hottest channel, lowest rank |
-| **deep dive** | the architecture itself: passport from config.json, block diagrams of Gated Attention / Gated DeltaNet / vision tower / MTP head, and the papers the model is assembled from |
+| **deep dive** | the architecture itself: passport from config.json, block diagrams of Gated Attention / Gated DeltaNet / vision tower / MTP head, and the papers the model is assembled from. Every diagram node opens a popup with how the mechanism works and a live interactive demo: a delta-rule memory simulator, RoPE dials, a GQA KV-cache calculator, gates, norms, the KV-vs-state cost curve |
 
 Click any cell, dot or node and the inspector opens: a plain-language verdict
 built from the real numbers, three SQNR figures, the actual histogram, the
