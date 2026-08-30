@@ -2,6 +2,6 @@
   {
     "slug": "qwen3.8-27b",
     "name": "Qwen3.8-27B",
-    "note": "bf16-шарды, снято weight_atlas.py на RTX PRO 6000, 116 c"
+    "note": "bf16-шарды, снято weight_atlas.py на RTX PRO 6000, 116 c; живой проход atlas_live.py — нейроны FFN (4M токенов), λ из весов; активации/внимание/хрупкость — ждёт GPU-окна"
   }
 ]

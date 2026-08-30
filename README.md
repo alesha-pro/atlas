@@ -39,8 +39,7 @@ Metrics that do not apply (1-D tensors: norms, conv1d, biases) render as
 | **links** | scatter of any metric against any other, with presets (tail→INT4, hot channels→INT4, rank→INT4) |
 | **depth** | per-layer average of the current metric down the stack, plus quarters |
 | **herbarium** | treemap where area is parameter count |
-| **records** | extreme points: worst INT4, longest tail, hottest channel, lowest rank |
-| **deep dive** | the architecture itself: passport from config.json, block diagrams of Gated Attention / Gated DeltaNet / vision tower / MTP head, and the papers the model is assembled from. Every diagram node opens a popup with how the mechanism works and a live interactive demo: a delta-rule memory simulator, RoPE dials, a GQA KV-cache calculator, gates, norms, the KV-vs-state cost curve |
+| **living model** | the same checkpoint, running: signal flow down the stack, measured activation-quantization SQNR, attention entropy/sink/decay/gates, real attention maps on a real paragraph, the 48 linear-attention memories (write gate β, half-life, per-head λ), a million FFN neurons fingerprinted by domain, per-layer fragility (actual KL of INT4-ing one layer) and the model looking at its own screenshot |
 
 Click any cell, dot or node and the inspector opens: a plain-language verdict
 built from the real numbers, three SQNR figures, the actual histogram, the
@@ -73,6 +72,15 @@ derived from the data, so a new checkpoint drops in without code changes.
 
 The model picker in the header does the rest.
 
+
+Optionally, a **live pass**: `scripts/atlas_live.py` runs the bf16 checkpoint
+over a calibration mix (english / code / agent traces) with hooks — residual
+flow, activation quantizability, full-attention entropy/sink/decay/gates,
+real attention maps, linear-attention gates and state, per-layer INT4
+fragility (KL) — and `scripts/reduce_live.py` folds the artifacts plus the
+FFN neuron statistics into `public/models/<slug>/live.json`. No `live.json`,
+no living-model region; the rest of the canvas works as before.
+
 Expected fields per line: `name, shape, dtype, numel, mean, std, absmax, absmean,
 p50…p9999, kurtosis, skew, sparsity, outlier_3s/4s/6s, dyn_range, hist_log2[],
 component, layer, shard`; for 2-D tensors additionally `row_amax_ratio,
@@ -90,10 +98,12 @@ src/
   panel.ts       # inspector for a tensor, a layer or a group
   i18n.ts        # every UI string, EN + RU
   ui.ts          # header, search, tours, zoom, minimap
-  sections/      # regions: intro, arch, wall, scatter, treemap, records, depth
+  sections/      # regions: intro, arch, wall, scatter, treemap, records, depth;
+                 # dossier and live are optional, gated on dossier.json / live.json
+scripts/
+  atlas_live.py  # live-internals capture: hooks on the bf16 model + attention registry
+  reduce_live.py # folds capture artifacts into public/models/<slug>/live.json
 ```
-
-Vite + TypeScript, zero runtime dependencies.
 
 Русское описание — [README.ru.md](README.ru.md).
 

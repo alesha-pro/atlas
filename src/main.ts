@@ -1,5 +1,6 @@
 import './style.css';
-import { loadDossier, loadManifest, loadModel, type Tensor } from './data';
+import { loadDossier, loadLive, loadManifest, loadModel, type Tensor } from './data';
+import { buildLive, type LiveSection } from './sections/live';
 import { Store } from './store';
 import { World, el } from './world';
 import { buildIntro } from './sections/intro';
@@ -29,7 +30,7 @@ async function boot(slug?: string, keep?: Keep) {
 
   const manifest = await loadManifest();
   const entry = manifest.find(e => e.slug === slug) || manifest[0];
-  const [model, dossier] = await Promise.all([loadModel(entry), loadDossier(entry.slug)]);
+  const [model, dossier, live] = await Promise.all([loadModel(entry), loadDossier(entry.slug), loadLive(entry.slug)]);
   app.innerHTML = '';
 
   const store = new Store(model);
@@ -85,6 +86,20 @@ async function boot(slug?: string, keep?: Keep) {
       background:radial-gradient(ellipse at 50% 50%,rgba(219,208,236,0.4),transparent 66%)`));
   }
 
+  // ── живая модель (если есть live.json) ──
+  let liveSec: LiveSection | null = null;
+  if (live) {
+    liveSec = buildLive(store, live, 80, 2760);
+    world.world.appendChild(liveSec.root);
+    world.world.appendChild(el('div', 'wash', `left:600px;top:3100px;width:3400px;height:1500px;
+      background:radial-gradient(ellipse at 50% 50%,rgba(206,228,224,0.42),transparent 66%)`));
+    const needH = liveSec.rect.y + liveSec.rect.h + 240;
+    if (needH > world.size.h) {
+      world.size.h = needH;
+      world.world.style.height = needH + 'px';
+    }
+  }
+
   const keepNow = (): Keep => ({ metric: store.metric, pan: { ...world.pan }, zoom: world.zoom });
   const onLang = (l: Lang) => { setLang(l); boot(entry.slug, keepNow()); };
   app.appendChild(buildPanel(store, flyToTensor));
@@ -102,6 +117,7 @@ async function boot(slug?: string, keep?: Keep) {
     { label: t('tour.records'), rect: records.rect },
   ];
   if (dossierSec) tours.push({ label: t('tour.dossier'), rect: { ...dossierSec.rect, h: 1500 } });
+  if (liveSec) tours.push({ label: t('tour.live'), rect: liveSec.rect });
   app.appendChild(buildBottombar(world, tours, panelPad));
   const minimap = buildMinimap(world, [
     { rect: introRect, color: 'rgba(120,106,84,0.18)' },
@@ -111,6 +127,7 @@ async function boot(slug?: string, keep?: Keep) {
     { rect: wall.rect, color: kindOf('lin').bg },
     { rect: scatter.rect, color: kindOf('vision').bg },
     { rect: depth.rect, color: kindOf('norm').bg },
+    ...(liveSec ? [{ rect: liveSec.rect, color: kindOf('attn').bg }] : []),
     ...(dossierSec ? [{ rect: dossierSec.rect, color: kindOf('in').bg }] : []),
   ]);
   app.appendChild(minimap);

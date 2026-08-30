@@ -177,6 +177,18 @@ export async function loadDossier(slug: string): Promise<any | null> {
   }
 }
 
+// Живые данные (atlas_live.py): реал-тайм внутренности с прямых проходов.
+// Тоже опционально: нет live.json — нет региона «живая модель».
+export async function loadLive(slug: string): Promise<any | null> {
+  try {
+    const r = await fetch(new URL(`models/${slug}/live.json`, document.baseURI));
+    if (!r.ok) return null;
+    return await r.json();
+  } catch {
+    return null;
+  }
+}
+
 export async function loadManifest(): Promise<ManifestEntry[]> {
   const r = await fetch(new URL('models/manifest.json', document.baseURI));
   return r.json();
