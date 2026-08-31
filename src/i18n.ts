@@ -210,6 +210,7 @@ const en: Record<string, Entry> = {
 
   // live: pending + coverage
   'live.pending': 'awaiting a GPU window',
+  'live.hint': 'hover for values · click picks the layer',
   'live.status.title': 'coverage',
   'live.status.sub': 'what is already captured and what waits for the GPU window',
   'live.status.wait': 'awaiting GPU',
@@ -471,6 +472,7 @@ const ru: Record<string, Entry> = {
   'tour.dossier': 'разбор',
 
   'live.pending': 'ждёт GPU-окна',
+  'live.hint': 'наведение — значения · клик выбирает слой',
   'live.status.title': 'покрытие',
   'live.status.sub': 'что уже снято, а что ждёт GPU-окна',
   'live.status.wait': 'ждёт GPU',

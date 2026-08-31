@@ -84,9 +84,12 @@ function linePath(vals: (number | null)[], px: (i: number) => number, py: (v: nu
   return d;
 }
 
-function cardShell(w: number, title: string, sub?: string): { card: HTMLElement; body: HTMLElement } {
+function cardShell(w: number, title: string, sub?: string, hint = false): { card: HTMLElement; body: HTMLElement } {
   const card = el('div', 'card', `width:${w}px;padding:20px 24px;display:flex;flex-direction:column;gap:14px`);
-  card.innerHTML = `<div class="eyebrow mono">${title}</div>` +
+  card.innerHTML = `<div style="display:flex;align-items:baseline;justify-content:space-between;gap:14px">
+      <div class="eyebrow mono">${title}</div>
+      ${hint ? `<div class="mono" style="font-size:10px;color:var(--accent-ink);white-space:nowrap">✛ ${tr('live.hint')}</div>` : ''}
+    </div>` +
     (sub ? `<div class="note" style="max-width:${w - 60}px">${sub}</div>` : '');
   const body = el('div', '', 'display:flex;flex-direction:column;gap:12px');
   card.appendChild(body);
@@ -107,7 +110,7 @@ function flowCard(live: Live, store: Store): HTMLElement | null {
   if (!hasStream && !f?.io_cos?.length) return null;
   const n = (hasStream ? f.h_rms.all.length : (f.io_cos?.length || 1));
   const W = 1460, H = hasStream ? 400 : 240, W2 = W - 70, H2 = 180;
-  const { card, body } = cardShell(W, tr('live.flow.title'), tr('live.flow.sub'));
+  const { card, body } = cardShell(W, tr('live.flow.title'), tr('live.flow.sub'), true);
   let domSel = 'all', keySel: 'h_rms' | 'delta_rms' = 'h_rms';
 
   const ctl = el('div', 'no-pan', 'display:flex;gap:8px;align-items:center;flex-wrap:wrap');
@@ -148,7 +151,7 @@ function flowCard(live: Live, store: Store): HTMLElement | null {
     tr('live.pending')));
   body.appendChild(ctl);
 
-  const chartWrap = el('div', 'no-pan', `position:relative;width:${W}px;height:${H}px`);
+  const chartWrap = el('div', 'no-pan', `position:relative;width:${W}px;height:${H}px;cursor:crosshair`);
   body.appendChild(chartWrap);
   body.appendChild(el('div', 'small-note', `max-width:${W - 60}px`, tr('live.flow.foot')));
 
@@ -205,12 +208,34 @@ function flowCard(live: Live, store: Store): HTMLElement | null {
     }
 
     // клик по графику → выбрать слой на стене
-    svg.addEventListener('click', (e: MouseEvent) => {
+    const layerAt = (e: MouseEvent) => {
       const r = svg.getBoundingClientRect();
       const i = Math.round(((e.clientX - r.left) / r.width * W - 46) / ((W2 - 14) / Math.max(1, n - 1)));
-      const L = store.model.langLayers[Math.max(0, Math.min(n - 1, i))];
+      return Math.max(0, Math.min(n - 1, i));
+    };
+    svg.addEventListener('click', (e: MouseEvent) => {
+      const L = store.model.langLayers[layerAt(e)];
       if (L) store.select({ type: 'layer', layer: L });
     });
+    const guide = svgEl('line', { y1: 6, y2: H - 6, stroke: 'var(--accent)', 'stroke-width': 1, 'stroke-dasharray': '3 4', opacity: 0 });
+    svg.appendChild(guide);
+    svg.addEventListener('mousemove', (e: MouseEvent) => {
+      const i = layerAt(e);
+      const L = store.model.langLayers[i];
+      if (!L) return;
+      guide.setAttribute('x1', String(px(i)));
+      guide.setAttribute('x2', String(px(i)));
+      guide.setAttribute('opacity', '0.7');
+      const parts = [`<b>${tr('live.layer')} ${L.label}</b> · ${L.kind === 'full' ? tr('kind.full') : tr('kind.linear')}`];
+      if (hasStream) {
+        const hv = f[keySel]?.[domSel]?.[i];
+        if (hv != null) parts.push(`${tr(keySel === 'h_rms' ? 'live.flow.h' : 'live.flow.delta')} ${Number(hv).toFixed(2)}`);
+      }
+      const cv = f.io_cos?.[i];
+      if (cv != null) parts.push(`${tr('live.flow.io')} ${Number(cv).toFixed(3)}`);
+      tip(parts.join('<br>'), e.clientX, e.clientY);
+    });
+    svg.addEventListener('mouseleave', () => { hideTip(); guide.setAttribute('opacity', '0'); });
 
     // нижние полосы: io_cos + каналы-выбросы
     let y0 = hasStream ? H2 + 26 : 12;
@@ -290,7 +315,7 @@ function attnCard(live: Live, store: Store): HTMLElement | null {
   const a = live.attn;
   if (!a?.layers?.length) return null;
   const W = 980, H = 360;
-  const { card, body } = cardShell(W, tr('live.attn.title'), tr('live.attn.sub'));
+  const { card, body } = cardShell(W, tr('live.attn.title'), tr('live.attn.sub'), true);
   const wrap = el('div', 'no-pan', `position:relative;width:${W}px;height:${H}px`);
   body.appendChild(wrap);
   const svg = svgEl('svg', { width: W, height: H });
@@ -506,11 +531,11 @@ function linattnCard(live: Live, store: Store): HTMLElement | null {
   const hasBars = !!la.layers?.length && !!(la.beta?.en?.length);
   if (!hasBars && !la.layers_lambda) return null;
   const W = hasBars ? 1180 : 720, H = 400;
-  const { card, body } = cardShell(W, tr('live.la.title'), tr('live.la.sub'));
+  const { card, body } = cardShell(W, tr('live.la.title'), tr('live.la.sub'), true);
   if (!hasBars) body.appendChild(el('div', 'mono no-pan',
     'align-self:flex-start;font-size:10px;padding:3px 9px;border-radius:10px;border:1px dashed var(--line-strong);color:var(--faint)',
     tr('live.pending')));
-  const wrap = el('div', 'no-pan', `position:relative;width:${W}px;height:${H}px`);
+  const wrap = el('div', 'no-pan', `position:relative;width:${W}px;height:${H}px;cursor:crosshair`);
   body.appendChild(wrap);
   const svg = svgEl('svg', { width: W, height: H });
   wrap.appendChild(svg);
@@ -559,7 +584,9 @@ function linattnCard(live: Live, store: Store): HTMLElement | null {
     const hx = hasBars ? x0 + chartW + 56 : x0;
     const keys = Object.keys(lam).map(Number).sort((x, y) => x - y);
     const heads = lam[keys[0]]?.length || 48;
-    const cellW = Math.min(10.5, 330 / heads), cellH = Math.min(6.2, 300 / keys.length);
+    const availW = hasBars ? 330 : W - hx - 60;
+    const availH = hasBars ? 300 : H - 90;
+    const cellW = Math.min(13, availW / heads), cellH = Math.min(7.2, availH / keys.length);
     yLabel(svg, hx, 14, tr('live.la.lambda'));
     keys.forEach((k, ki) => {
       (lam[k] || []).forEach((v, h) => {
@@ -593,6 +620,14 @@ function linattnCard(live: Live, store: Store): HTMLElement | null {
         (v > 0.999 ? tr('live.la.long') : tr('live.la.short')), e.clientX, e.clientY);
     });
     svg.addEventListener('mouseleave', hideTip);
+    svg.addEventListener('click', (e: MouseEvent) => {
+      const r = svg.getBoundingClientRect();
+      const wx = (e.clientX - r.left) / r.width * W, wy = (e.clientY - r.top) / r.height * H;
+      const ki = Math.floor((wy - 22) / (cellH + 0.5));
+      if (wx < hx || ki < 0 || ki >= keys.length) return;
+      const L = store.model.langLayers[keys[ki]];
+      if (L) store.select({ type: 'layer', layer: L });
+    });
   }
 
   if (hasBars) {
@@ -623,12 +658,12 @@ function linattnCard(live: Live, store: Store): HTMLElement | null {
 
 const NEU_Q = ['0', '1', '5', '10', '25', '50', '75', '90', '95', '99', '99.9', '100'];
 
-function neuronsCard(live: Live): HTMLElement | null {
+function neuronsCard(live: Live, store: Store): HTMLElement | null {
   const nb = live.neurons;
   if (!nb?.heat?.length) return null;
   const W = 1130, H = 360;
-  const { card, body } = cardShell(W, tr('live.neu.title'), tr('live.neu.sub'));
-  const wrap = el('div', 'no-pan', `position:relative;width:${W}px;height:${H}px`);
+  const { card, body } = cardShell(W, tr('live.neu.title'), tr('live.neu.sub'), true);
+  const wrap = el('div', 'no-pan', `position:relative;width:${W}px;height:${H}px;cursor:crosshair`);
   body.appendChild(wrap);
   const svg = svgEl('svg', { width: W, height: H });
   wrap.appendChild(svg);
@@ -677,6 +712,14 @@ function neuronsCard(live: Live): HTMLElement | null {
     tip(`<b>${tr('live.layer')} ${li}</b> · p${NEU_Q[qi]}<br>${tr('live.neu.fire')} ${(v * 100).toFixed(3)}%`, e.clientX, e.clientY);
   });
   svg.addEventListener('mouseleave', hideTip);
+  svg.addEventListener('click', (e: MouseEvent) => {
+    const r = svg.getBoundingClientRect();
+    const wx = (e.clientX - r.left) / r.width * W;
+    const li = Math.floor((wx - x0 - 46) / cellW);
+    if (li < 0 || li >= n) return;
+    const L = store.model.langLayers[li];
+    if (L) store.select({ type: 'layer', layer: L });
+  });
 
   // кривые: мёртвые / концентрация / специализация
   const cy = stripY + rows * (cellH + 1) + 32;
@@ -701,13 +744,21 @@ function neuronsCard(live: Live): HTMLElement | null {
     ex.appendChild(el('div', 'mono', 'font-size:10px;color:var(--faint)', tr('live.neu.ex')));
     for (const e of nb.examples.slice(0, 6)) {
       const total = e.en + e.code + 1e-9;
-      ex.appendChild(el('div', 'mono', 'font-size:10px;display:flex;gap:10px;align-items:center', `
+      const row = el('div', 'mono no-pan', 'font-size:10px;display:flex;gap:10px;align-items:center;cursor:pointer;border-radius:5px;padding:1px 4px');
+      row.addEventListener('mouseenter', () => { row.style.background = 'var(--line)'; });
+      row.addEventListener('mouseleave', () => { row.style.background = ''; });
+      row.addEventListener('click', () => {
+        const L = store.model.langLayers[e.layer];
+        if (L) store.select({ type: 'layer', layer: L });
+      });
+      row.innerHTML = `
         <span style="width:130px;color:var(--faint)">${tr('live.layer')} ${e.layer} · №${e.neuron}</span>
         <span style="display:inline-flex;width:150px;height:8px;border-radius:4px;overflow:hidden">
           <span style="width:${(e.en / total * 100).toFixed(0)}%;background:${DOM_COLOR.en}"></span>
           <span style="width:${(e.code / total * 100).toFixed(0)}%;background:${DOM_COLOR.code}"></span>
         </span>
-        <span>en ${(e.en * 100).toFixed(2)}% · code ${(e.code * 100).toFixed(2)}%</span>`));
+        <span>en ${(e.en * 100).toFixed(2)}% · code ${(e.code * 100).toFixed(2)}%</span>`;
+      ex.appendChild(row);
     }
     body.appendChild(ex);
   }
@@ -752,7 +803,7 @@ function fragCard(live: Live, store: Store): HTMLElement | null {
   const fr = live.fragility;
   if (!fr?.kl?.length) return null;
   const W = 1180, H = 400;
-  const { card, body } = cardShell(W, tr('live.frag.title'), tr('live.frag.sub'));
+  const { card, body } = cardShell(W, tr('live.frag.title'), tr('live.frag.sub'), true);
   const wrap = el('div', 'no-pan', `position:relative;width:${W}px;height:${H}px`);
   body.appendChild(wrap);
   const svg = svgEl('svg', { width: W, height: H });
@@ -865,7 +916,7 @@ export function buildLive(store: Store, live: Live, X: number, Y: number): LiveS
   for (const c of [
     statusCard(live),
     flowCard(live, store), mapCard(live), attnCard(live, store), linattnCard(live, store),
-    actqCard(live), fragCard(live, store), neuronsCard(live), visionCard(live, store),
+    actqCard(live), fragCard(live, store), neuronsCard(live, store), visionCard(live, store),
   ].filter((c): c is HTMLElement => c != null))
     flow.appendChild(c);
 
