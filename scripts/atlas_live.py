@@ -194,6 +194,13 @@ class FlowCollector:
 def atlas_attention_forward(module, query, key, value, attention_mask=None, dropout=0.0,
                             scaling=None, **kwargs):
     """Перехват full-attention: probs считаем сами, копим статистику."""
+    # башня зрения: внимание не причинное, статистику по ней не собираем.
+    # Свою причинную маску сюда применять нельзя — она исказит препроцессинг картинки.
+    if not hasattr(module, "layer_idx"):
+        from transformers.integrations.sdpa_attention import sdpa_attention_forward
+        return sdpa_attention_forward(module, query, key, value,
+                                      attention_mask=attention_mask,
+                                      dropout=dropout, scaling=scaling, **kwargs)
     L = query.shape[-2]
     if key.shape[1] != query.shape[1]:                 # GQA: 24 Q ↔ 4 KV
         rep = query.shape[1] // key.shape[1]
@@ -206,7 +213,9 @@ def atlas_attention_forward(module, query, key, value, attention_mask=None, drop
     probs = torch.softmax(scores, dim=-1)
     out = probs.to(value.dtype) @ value
     _attn_stats(module, probs, L)
-    return out, None
+    # штатный eager отдаёт [B,L,H,D]; без transpose оси перемешиваются и все
+    # слои после первого считают статистику по искажённым активациям
+    return out.transpose(1, 2).contiguous(), None
 
 
 def _attn_acc_(layer: int) -> dict:
@@ -464,9 +473,20 @@ def run_pass(model, bins, batch, mode):
 # ───────────────────────────── режимы GPU ─────────────────────────────
 
 def build_model(attn_impl: str):
-    from transformers import AutoModelForImageTextToText
+    from transformers import AutoConfig, AutoModelForImageTextToText
+    kw = {}
+    if attn_impl == "atlas_capture":
+        # реестр внимания живёт в процессе: без register from_pretrained
+        # отвергает имя на валидации (раньше регистрация была только в selftest)
+        from transformers import AttentionInterface
+        AttentionInterface.register("atlas_capture", atlas_attention_forward)
+        cfg = AutoConfig.from_pretrained(MODEL_DIR)
+        cfg._attn_implementation = attn_impl
+        cfg.text_config._attn_implementation = attn_impl
+        kw["config"] = cfg
     model = AutoModelForImageTextToText.from_pretrained(
-        MODEL_DIR, dtype=torch.bfloat16, device_map="balanced", attn_implementation=attn_impl)
+        MODEL_DIR, dtype=torch.bfloat16, device_map="balanced",
+        attn_implementation=attn_impl, **kw)
     model.eval()
     return model
 
@@ -583,17 +603,23 @@ def mode_showcase(args, model, tok):
             proc = AutoProcessor.from_pretrained(MODEL_DIR)
             img = Image.open(img_path).convert("RGB")
             messages = [{"role": "user", "content": [
-                {"type": "image"}, {"type": "text", "text": "Describe what you see."}]}]
-            text = proc.apply_chat_template(messages, tokenize=False, add_generation_prompt=True)
-            enc = proc(text=[text], images=[img], return_tensors="pt")
+                {"type": "image", "image": img},
+                {"type": "text", "text": "Describe what you see."}]}]
+            # в transformers 5.x картинка идёт прямо через шаблон: раздельный
+            # вызов proc(text=..., images=...) возвращает input_ids=None
+            enc = proc.apply_chat_template(
+                messages, tokenize=True, add_generation_prompt=True,
+                return_dict=True, return_tensors="pt")
             tok_id_img = getattr(model.config, "image_token_id", 248056)
-            ids0 = enc.input_ids[0].tolist()
+            ids0 = enc["input_ids"][0].tolist()
             img_pos = [i for i, t in enumerate(ids0) if t == tok_id_img]
             _state["img_pos"] = img_pos
             _attn_acc.clear()
             gh = attach_gate_hooks(model)
             _state["mode"] = "showcase"
-            enc = {k: v.to(dev) for k, v in enc.items() if k in ("input_ids", "pixel_values", "grid_thw")}
+            keep = ("input_ids", "pixel_values", "grid_thw", "image_grid_thw",
+                    "mm_token_type_ids", "attention_mask")
+            enc = {k: v.to(dev) for k, v in enc.items() if k in keep and v is not None}
             with torch.no_grad():
                 model(**enc, use_cache=False)
             _state["mode"] = ""
