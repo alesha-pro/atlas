@@ -404,8 +404,8 @@ function mapCard(live: Live): HTMLElement | null {
   if (!am?.maps) return null;
   const layers = Object.keys(am.maps).map(Number).sort((x, y) => x - y);
   if (!layers.length) return null;
-  const W = 1560, N = am.tokens.length, SIZE = 620;
-  const { card, body } = cardShell(W, tr('live.map.title'), tr('live.map.sub'));
+  const W = 1560, N = am.tokens.length, SIZE = 760;
+  const { card, body } = cardShell(W, tr('live.map.title'), tr('live.map.sub', String(N)));
   const scene = el('div', 'no-pan', 'display:flex;gap:26px;align-items:flex-start');
   body.appendChild(scene);
 
@@ -427,9 +427,15 @@ function mapCard(live: Live): HTMLElement | null {
 
   const plotWrap = el('div', '', `position:relative;width:${SIZE + 150}px;height:${SIZE + 130}px`);
   scene.appendChild(plotWrap);
+  // верхний треугольник не заливаем — просвечивает фон карточки, поэтому
+  // причинная пустота остаётся по теме и в светлой, и в тёмной
   const canvas = el('canvas', 'no-pan', `border-radius:6px;position:absolute;left:120px;top:0;
-    box-shadow:0 0 0 1px var(--line-strong);cursor:crosshair`);
-  canvas.width = N; canvas.height = N;
+    box-shadow:0 0 0 1px var(--line-strong);cursor:crosshair;background:var(--card)`);
+  // буфер держим в физических пикселях: при canvas.width = N браузер растягивал
+  // матрицу 89×89 на 760 css-px билинейной интерполяцией и всё расплывалось
+  const DPR = Math.min(2, window.devicePixelRatio || 1);
+  const PX = Math.round(SIZE * DPR);
+  canvas.width = PX; canvas.height = PX;
   canvas.style.width = SIZE + 'px'; canvas.style.height = SIZE + 'px';
   plotWrap.appendChild(canvas);
   const xLabels = el('div', 'mono', `position:absolute;left:120px;top:${SIZE + 8}px;width:${SIZE}px;height:110px;overflow:hidden`);
@@ -457,21 +463,21 @@ function mapCard(live: Live): HTMLElement | null {
     const mat = map[selView];
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
-    const img = ctx.createImageData(N, N);
     let vmax = 0;
     for (const row of mat) for (const v of row) if (v > vmax) vmax = v;
+    ctx.clearRect(0, 0, PX, PX);
+    // ячейку кладём прямоугольником с округлением границ: соседние клетки
+    // делят пиксель, поэтому нет ни щелей, ни размытия
+    const step = PX / N;
     for (let j = 0; j < N; j++) {
+      const y0 = Math.round(j * step), y1 = Math.round((j + 1) * step);
       for (let i = 0; i <= j; i++) {
+        const x0 = Math.round(i * step), x1 = Math.round((i + 1) * step);
         const [r, g, b] = attnColor((mat[j][i] / (vmax || 1)) * 0.999 + 1e-6);
-        const o = (j * N + i) * 4;
-        img.data[o] = r; img.data[o + 1] = g; img.data[o + 2] = b; img.data[o + 3] = 255;
-      }
-      for (let i = j + 1; i < N; i++) {
-        const o = (j * N + i) * 4;
-        img.data[o] = 244; img.data[o + 1] = 240; img.data[o + 2] = 230; img.data[o + 3] = 255;
+        ctx.fillStyle = `rgb(${r},${g},${b})`;
+        ctx.fillRect(x0, y0, x1 - x0, y1 - y0);
       }
     }
-    ctx.putImageData(img, 0, 0);
     drawLabels();
     info.innerHTML = tr('live.map.info', String(selLayer), String(map.star_head + 1),
       selView === 'star' ? tr('live.map.star') : tr('live.map.mean'));
