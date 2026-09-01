@@ -32,6 +32,7 @@ OUT = Path(_args.artifacts)
 CARVE = Path(_args.carve)
 MODEL_DIR = Path(_args.model_dir)
 DEST = Path(_args.dest)
+MAPS_DEST = DEST.parent / "attn_maps.json"
 DOMAINS = ("en", "code", "agent")
 
 
@@ -182,12 +183,28 @@ def main() -> int:
             "decay_edges": [1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024],
         }
     if maps:
+        # Матрицы дают ~97% веса live.json, а нужны только тому, кто раскрыл
+        # карточку карт. Уносим их в файл рядом; в live.json остаются промпт,
+        # токены и список слоёв, чтобы карточка рисовала скелет сразу.
+        keys = sorted(maps["maps"], key=int)
+
+        # верхний треугольник пуст по причинности: строку j храним длиной j+1
+        def tri(m):
+            return [row[:j + 1] for j, row in enumerate(m)]
+
         live["attn_maps"] = {
             "prompt": maps["prompt"],
             "tokens": maps["tokens"],
-            "maps": {k: {"star_head": v["star_head"], "mean": v["mean"], "star": v["star"]}
-                     for k, v in maps["maps"].items()},
+            "layers": [int(k) for k in keys],
+            "star_heads": {k: maps["maps"][k]["star_head"] for k in keys},
+            "src": MAPS_DEST.name,
         }
+        MAPS_DEST.write_text(json.dumps(
+            {k: {"star_head": maps["maps"][k]["star_head"],
+                 "mean": tri(maps["maps"][k]["mean"]),
+                 "star": tri(maps["maps"][k]["star"])} for k in keys},
+            ensure_ascii=False, separators=(",", ":")))
+        print(f"  карты внимания → {MAPS_DEST} ({MAPS_DEST.stat().st_size / 1e6:.1f} MB)")
 
     # linattn
     lam = lambda_static()

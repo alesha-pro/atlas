@@ -22,7 +22,13 @@ export interface LiveAttn {
   prof: number[][]; decay_edges?: number[];
 }
 export interface LiveMap { mean: number[][]; star: number[][]; star_head: number }
-export interface LiveAttnMaps { prompt: string; tokens: string[]; maps: Record<string, LiveMap> }
+export interface LiveAttnMaps {
+  prompt: string; tokens: string[];
+  maps?: Record<string, LiveMap>;      // старый формат: матрицы внутри live.json
+  layers?: number[];                   // новый: матрицы лежат в отдельном файле
+  star_heads?: Record<string, number>;
+  src?: string;
+}
 export interface LiveLinAttn {
   layers: number[]; beta: Series; g_mean: Series; state_rms: Series;
   half_life?: (number | null)[]; layers_lambda?: Record<string, number[]>;
@@ -399,11 +405,25 @@ function attnCard(live: Live, store: Store): HTMLElement | null {
 
 // ─────────────────────────── attention map viewer ───────────────────────────
 
-function mapCard(live: Live): HTMLElement | null {
+function mapCard(live: Live, store: Store): HTMLElement | null {
   const am = live.attn_maps;
-  if (!am?.maps) return null;
-  const layers = Object.keys(am.maps).map(Number).sort((x, y) => x - y);
+  if (!am) return null;
+  const layers = (am.layers ?? Object.keys(am.maps || {}).map(Number)).sort((x, y) => x - y);
   if (!layers.length) return null;
+
+  // матрицы приходят отдельным файлом: карточку рисуем сразу, веса подтягиваем
+  let maps: Record<string, LiveMap> | null = am.maps ?? null;
+  let pending = false;
+  async function ensureMaps() {
+    if (maps || pending) return;
+    pending = true;
+    try {
+      const r = await fetch(new URL(`models/${store.model.slug}/${am!.src || 'attn_maps.json'}`,
+        document.baseURI));
+      if (r.ok) { maps = await r.json(); render(); }
+    } catch { /* остаётся скелет, карточка не падает */ }
+    pending = false;
+  }
   const W = 1560, N = am.tokens.length, SIZE = 760;
   const { card, body } = cardShell(W, tr('live.map.title'), tr('live.map.sub', String(N)));
   const scene = el('div', 'no-pan', 'display:flex;gap:26px;align-items:flex-start');
@@ -459,10 +479,18 @@ function mapCard(live: Live): HTMLElement | null {
   }
 
   function render() {
-    const map = am.maps[String(selLayer)];
-    const mat = map[selView];
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
+    drawLabels();
+    syncChips();
+    const map = maps?.[String(selLayer)];
+    if (!map) {                                   // веса ещё в пути
+      ctx.clearRect(0, 0, PX, PX);
+      info.innerHTML = tr('live.map.loading');
+      ensureMaps();
+      return;
+    }
+    const mat = map[selView];
     let vmax = 0;
     for (const row of mat) for (const v of row) if (v > vmax) vmax = v;
     ctx.clearRect(0, 0, PX, PX);
@@ -478,9 +506,11 @@ function mapCard(live: Live): HTMLElement | null {
         ctx.fillRect(x0, y0, x1 - x0, y1 - y0);
       }
     }
-    drawLabels();
     info.innerHTML = tr('live.map.info', String(selLayer), String(map.star_head + 1),
       selView === 'star' ? tr('live.map.star') : tr('live.map.mean'));
+  }
+
+  function syncChips() {
     layerRow.querySelectorAll('div').forEach(d => {
       const on = Number((d as HTMLElement).dataset.l) === selLayer;
       (d as HTMLElement).style.background = on ? kindOf('attn').solid : 'transparent';
@@ -512,19 +542,24 @@ function mapCard(live: Live): HTMLElement | null {
     const i = Math.floor((e.clientX - r.left) / r.width * N);
     const j = Math.floor((e.clientY - r.top) / r.height * N);
     if (i < 0 || j < 0 || i >= N || j >= N) return;
-    const v = am.maps[String(selLayer)][selView]?.[j]?.[i];
+    const v = maps?.[String(selLayer)]?.[selView]?.[j]?.[i];
     hoverI.style.display = 'block'; hoverJ.style.display = 'block';
     hoverI.style.left = '120px'; hoverI.style.width = SIZE + 'px';
     hoverI.style.top = (j / N * SIZE) + 'px';
     hoverJ.style.top = '0px'; hoverJ.style.height = SIZE + 'px';
     hoverJ.style.left = (120 + i / N * SIZE) + 'px';
-    if (v != null)
-      tip(`<b>${tokStr(am.tokens[i] || '')}</b> ← <b>${tokStr(am.tokens[j] || '')}</b><br>
-        ${tr('live.layer')} ${selLayer} · ${tr('live.map.w')} ${(v * 100).toFixed(2)}%`, e.clientX, e.clientY);
+    const pair = `<b>${tokStr(am.tokens[i] || '')}</b> ← <b>${tokStr(am.tokens[j] || '')}</b><br>`;
+    // i > j это верхний треугольник: веса там нет, а не ноль
+    tip(pair + (v != null
+      ? `${tr('live.layer')} ${selLayer} · ${tr('live.map.w')} ${(v * 100).toFixed(2)}%`
+      : tr('live.map.future')), e.clientX, e.clientY);
   });
   canvas.addEventListener('mouseleave', () => { hideTip(); hoverI.style.display = 'none'; hoverJ.style.display = 'none'; });
 
   render();
+  // страница уже интерактивна, веса дотягиваем в простое
+  const idle = (window as any).requestIdleCallback || ((f: () => void) => setTimeout(f, 400));
+  idle(() => ensureMaps());
   body.appendChild(el('div', 'small-note', `max-width:${W - 60}px`, tr('live.map.foot')));
   return card;
 }
@@ -922,7 +957,7 @@ export function buildLive(store: Store, live: Live, X: number, Y: number): LiveS
 
   for (const c of [
     statusCard(live),
-    flowCard(live, store), mapCard(live), attnCard(live, store), linattnCard(live, store),
+    flowCard(live, store), mapCard(live, store), attnCard(live, store), linattnCard(live, store),
     actqCard(live), fragCard(live, store), neuronsCard(live, store), visionCard(live, store),
   ].filter((c): c is HTMLElement => c != null))
     flow.appendChild(c);
