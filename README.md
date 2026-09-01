@@ -137,10 +137,13 @@ src/
   ui.ts          # header, search, tours, zoom, minimap
   sections/      # intro, arch, wall, scatter, treemap, records, depth,
                  # plus dossier and live, gated on their data files
-scripts/
-  weight_atlas.py   # the scan: one jsonl line per tensor
-  atlas_live.py     # live capture: hooks on the bf16 model, attention registry
-  reduce_live.py    # folds capture artifacts into live.json + attn_maps.json
+scripts/          # see scripts/README.md for the full pipeline
+  weight_atlas.py       # the scan: one jsonl line per tensor
+  build_calibration.py  # the english / code / agent token mix
+  run_capture.py        # FFN activations, per-neuron firing statistics
+  carve_hooks.py        # the collector run_capture.py imports
+  atlas_live.py         # live capture: hooks on the bf16 model, attention registry
+  reduce_live.py        # folds artifacts into live.json + attn_maps.json
 ```
 
 Expected fields per tensor line: `name, shape, dtype, numel, mean, std, absmax,

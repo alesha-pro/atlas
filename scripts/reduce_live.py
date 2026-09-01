@@ -7,11 +7,12 @@
 
 Выход: live.json рядом с atlas.jsonl (одна строка UTF-8, компактные округления).
 Запуск на риге:
-  cd /mnt/nvme2/projects/qwen38-carve && .venv/bin/python reduce_live.py
+  python3 reduce_live.py --artifacts out/live --carve out --dest live.json
 """
 from __future__ import annotations
 
 import json
+import os
 import math
 import time
 from pathlib import Path
@@ -24,7 +25,8 @@ import argparse
 _ap = argparse.ArgumentParser(description="fold atlas_live/carve artifacts into live.json")
 _ap.add_argument("--artifacts", default="out/live", help="atlas_live.py output dir")
 _ap.add_argument("--carve", default="out", help="dir with neuron_stats.parquet / layer_io_sim.parquet")
-_ap.add_argument("--model-dir", default="/mnt/ssd/models/Qwen3.8-27B", help="checkpoint dir (A_log/dt_bias for lambda)")
+_ap.add_argument("--model-dir", default=os.environ.get("ATLAS_MODEL_DIR", ""),
+                 help="checkpoint dir, for the A_log/dt_bias lambda map")
 _ap.add_argument("--dest", default="live.json", help="output live.json path")
 _args = _ap.parse_args()
 

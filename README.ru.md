@@ -135,10 +135,13 @@ src/
   ui.ts          # шапка, поиск, туры, зум, миникарта
   sections/      # intro, arch, wall, scatter, treemap, records, depth,
                  # плюс dossier и live — по наличию своих файлов данных
-scripts/
-  weight_atlas.py   # съём: одна строка jsonl на тензор
-  atlas_live.py     # живой съём: хуки на bf16-модели, реестр внимания
-  reduce_live.py    # свёртка артефактов в live.json + attn_maps.json
+scripts/          # весь пайплайн описан в scripts/README.md
+  weight_atlas.py       # съём: одна строка jsonl на тензор
+  build_calibration.py  # калибровочный микс: английский, код, трассы агентов
+  run_capture.py        # активации FFN, статистика срабатываний нейронов
+  carve_hooks.py        # коллектор, который импортирует run_capture.py
+  atlas_live.py         # живой съём: хуки на bf16-модели, реестр внимания
+  reduce_live.py        # свёртка артефактов в live.json + attn_maps.json
 ```
 
 Ожидаемые поля строки: `name, shape, dtype, numel, mean, std, absmax, absmean,

@@ -21,7 +21,6 @@
 Дальше reduce_live.py собирает из них + carve-артефактов public/models/<slug>/live.json.
 
 Запуск на риге:
-  cd /mnt/nvme2/projects/qwen38-carve
   .venv/bin/python atlas_live.py --mode selftest
   .venv/bin/python atlas_live.py --mode all
 """
@@ -30,6 +29,7 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import os
 import sys
 import time
 from pathlib import Path
@@ -38,7 +38,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-MODEL_DIR = "/mnt/ssd/models/Qwen3.8-27B"
+MODEL_DIR = os.environ.get("ATLAS_MODEL_DIR", "")   # или --model-dir
 OUT = Path("out/live")
 DOMAINS = ("en", "code", "agent")
 DECAY_EDGES = (1, 2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048)
@@ -739,8 +739,11 @@ def run_selftest(args) -> int:
 
 
 def main() -> int:
+    global MODEL_DIR
     ap = argparse.ArgumentParser()
     ap.add_argument("--mode", default="selftest")
+    ap.add_argument("--model-dir", default=MODEL_DIR,
+                    help="checkpoint dir (or set ATLAS_MODEL_DIR)")
     ap.add_argument("--data", default="data/calibration.jsonl")
     ap.add_argument("--seqlen", type=int, default=2048)
     ap.add_argument("--batch", type=int, default=4)
@@ -748,6 +751,10 @@ def main() -> int:
     ap.add_argument("--attn-bins", type=int, default=75)
     ap.add_argument("--la-bins", type=int, default=225)
     args = ap.parse_args()
+    MODEL_DIR = args.model_dir
+    if not MODEL_DIR:
+        log("нужен --model-dir или ATLAS_MODEL_DIR")
+        return 2
     if args.mode == "selftest":
         return run_selftest(args)
     from transformers import AutoTokenizer
