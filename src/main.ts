@@ -131,13 +131,13 @@ async function boot(slug?: string, keep?: Keep) {
   app.appendChild(buildBottombar(world, tours, panelPad));
   const minimap = buildMinimap(world, [
     { rect: introRect, color: 'var(--line-strong)' },
-    { rect: arch.rect, color: kindOf('attn').bg },
-    { rect: treemap.rect, color: kindOf('mlp').bg },
-    { rect: records.rect, color: kindOf('out').bg },
-    { rect: wall.rect, color: kindOf('lin').bg },
-    { rect: scatter.rect, color: kindOf('vision').bg },
-    { rect: depth.rect, color: kindOf('norm').bg },
-    ...(liveSec ? [{ rect: liveSec.rect, color: kindOf('attn').bg }] : []),
+    { rect: arch.rect, color: kindOf('attn').solid },
+    { rect: treemap.rect, color: kindOf('mlp').solid },
+    { rect: records.rect, color: kindOf('out').solid },
+    { rect: wall.rect, color: kindOf('lin').solid },
+    { rect: scatter.rect, color: kindOf('vision').solid },
+    { rect: depth.rect, color: kindOf('norm').solid },
+    ...(liveSec ? [{ rect: liveSec.rect, color: kindOf('attn').solid }] : []),
     ...(dossierSec ? [{ rect: dossierSec.rect, color: kindOf('in').bg }] : []),
   ]);
   app.appendChild(minimap);

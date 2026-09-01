@@ -204,7 +204,8 @@ body { font-family: var(--serif); color: var(--ink); }
 
 /* ── миникарта ── */
 .minimap { position: absolute; right: 22px; bottom: 22px; cursor: pointer; overflow: hidden; }
-.minimap .mm-sec { position: absolute; border-radius: 2px; }
+/* насыщенные тона секций, приглушённые прозрачностью: читаются и на бумаге, и в темноте */
+.minimap .mm-sec { position: absolute; border-radius: 2px; opacity: 0.5; }
 .minimap .mm-view { position: absolute; border: 1.6px solid var(--accent); border-radius: 3px; background: rgba(255, 138, 61, 0.08); }
 
 select.plain {
