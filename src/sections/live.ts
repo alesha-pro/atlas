@@ -902,7 +902,8 @@ function visionCard(live: Live, store: Store): HTMLElement | null {
     svg.appendChild(svgEl('rect', { x: 34, y, width: Math.max(2, w), height: 11, fill: kindOf('vision').solid, rx: 2 }));
     yLabel(svg, 38 + Math.max(2, w), y + 10, (val * 100).toFixed(1) + '%');
   });
-  body.appendChild(el('div', 'small-note', `max-width:${W - 60}px`, tr('live.vis.foot')));
+  body.appendChild(el('div', 'small-note', `max-width:${W - 60}px`,
+    tr('live.vis.foot', String(v.n_img_tokens ?? '?'))));
   return card;
 }
 
