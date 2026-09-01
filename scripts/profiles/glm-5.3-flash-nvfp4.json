@@ -1,0 +1,21 @@
+{
+  "schema": 1,
+  "slug": "glm-5.3-flash-nvfp4",
+  "name": "GLM-5.3-Flash NVFP4",
+  "status": "capture-planned",
+  "checkpoint": "provider-mounted exact NVFP4 checkpoint; record repo and revision at preflight",
+  "weight_scan": {
+    "script": "weight_atlas.py",
+    "device": "cuda",
+    "required": true
+  },
+  "live_capture": {
+    "moe_artifact": "moe.json",
+    "producer_repo": "/Users/kts/dev/projects/agents/glm53-reap-atlas-capture",
+    "dataset": "glm53-reap-multidomain-12.8m-v1",
+    "vision_required": true,
+    "signals": ["routing_count", "routing_mass", "input_proxy", "sampled_exact_reap"]
+  },
+  "publish_gate": "Do not add to public/models/manifest.json until atlas.jsonl and measured moe.json both exist and validate."
+}
+

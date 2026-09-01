@@ -41,6 +41,18 @@ export interface LiveNeurons {
 }
 export interface LiveFragility { kl: number[]; logit_cos: number[] }
 export interface LiveVision { n_img_tokens: number; img_share: Record<string, number> }
+export interface LiveMoELayer {
+  layer: number; experts: number; routed_picks: number; dead_fraction: number;
+  load_cv: number; mass_gini: number; proxy_gini: number; reap_gini: number;
+  count_q: number[]; mass_q: number[]; proxy_q: number[]; reap_q: number[];
+  top_count: number[]; top_mass: number[]; top_reap: number[];
+}
+export interface LiveMoE {
+  schema: number; checkpoint: string; dataset: string; captured_at: string;
+  mode: string; exact_sample_rate?: number; rank_policy?: string;
+  domains: string[]; tokens_layer: Record<string, number>;
+  crosscheck?: Record<string, unknown>; layers: LiveMoELayer[];
+}
 export interface Live {
   schema: number;
   meta: Record<string, unknown>;
@@ -51,6 +63,7 @@ export interface Live {
   neurons?: LiveNeurons;
   fragility?: LiveFragility;
   vision?: LiveVision;
+  moe?: LiveMoE;
 }
 
 const DOMAINS = ['en', 'code', 'agent'];
@@ -824,6 +837,7 @@ function statusCard(live: Live): HTMLElement {
     [tr('live.neu.title'), live.neurons?.heat?.length ? 'ok' : 'wait', tr('live.status.src.carve')],
     [tr('live.frag.title'), live.fragility?.kl?.length ? 'ok' : 'wait', tr('live.status.src.pass')],
     [tr('live.vis.title'), live.vision?.img_share ? 'ok' : 'wait', tr('live.status.src.pass')],
+    [tr('live.moe.title'), live.moe?.layers?.length ? 'ok' : 'wait', tr('live.status.src.reap')],
   ];
   for (const [name, st, src] of rows) {
     const color = st === 'ok' ? 'var(--good)' : st === 'part' ? 'var(--warn)' : 'var(--ghost)';
@@ -835,6 +849,70 @@ function statusCard(live: Live): HTMLElement {
   }
   const when = (live.meta as any)?.when;
   if (when) body.appendChild(el('div', 'small-note', '', `${tr('live.status.when')} ${when}`));
+  return card;
+}
+
+// ─────────────────────────── MoE experts ───────────────────────────
+
+const MOE_Q = ['min', 'p1', 'p5', 'p25', 'p50', 'p75', 'p95', 'p99', 'max'];
+
+function moeCard(live: Live, store: Store): HTMLElement | null {
+  const moe = live.moe;
+  if (!moe?.layers?.length) return null;
+  const W = 1460;
+  const rowH = Math.max(7, Math.min(15, 560 / moe.layers.length));
+  const H = 72 + rowH * moe.layers.length;
+  const { card, body } = cardShell(W, tr('live.moe.title'), tr('live.moe.sub'), true);
+  const meta = el('div', 'mono', 'font-size:10px;color:var(--faint);display:flex;gap:18px;flex-wrap:wrap');
+  meta.innerHTML = `<span>${moe.mode}</span><span>${((moe.exact_sample_rate || 0) * 100).toFixed(1)}% exact</span>` +
+    `<span>${moe.domains.length} ${tr('live.moe.domains')}</span><span>${moe.rank_policy || '—'}</span>`;
+  body.appendChild(meta);
+  const wrap = el('div', 'no-pan', `position:relative;width:${W - 52}px;height:${H}px`);
+  body.appendChild(wrap);
+  const svg = svgEl('svg', { width: W - 52, height: H });
+  wrap.appendChild(svg);
+  const x0 = 72, heatW = 780, cellW = heatW / MOE_Q.length, y0 = 28;
+  MOE_Q.forEach((q, i) => yLabel(svg, x0 + i * cellW + 4, 14, q));
+  yLabel(svg, x0 + heatW + 40, 14, tr('live.moe.load'));
+  yLabel(svg, x0 + heatW + 270, 14, tr('live.moe.gini'));
+  const all = moe.layers.flatMap(x => x.reap_q || []);
+  const lo = Math.min(...all.filter(isFinite)), hi = Math.max(...all.filter(isFinite));
+  const logLo = Math.log10(Math.max(lo, 1e-9)), logHi = Math.log10(Math.max(hi, 1e-9));
+  const norm = (v: number) => (Math.log10(Math.max(v, 1e-9)) - logLo) / (logHi - logLo || 1);
+  moe.layers.forEach((layer, ri) => {
+    const y = y0 + ri * rowH;
+    yLabel(svg, 4, y + rowH - 1, String(layer.layer));
+    (layer.reap_q || layer.proxy_q || layer.mass_q).forEach((v, qi) => {
+      svg.appendChild(svgEl('rect', {
+        x: x0 + qi * cellW, y, width: cellW - 2, height: Math.max(3, rowH - 2),
+        fill: heatColor(norm(v)), rx: 1,
+      }));
+    });
+    const loadW = Math.min(190, layer.load_cv * 110);
+    svg.appendChild(svgEl('rect', { x: x0 + heatW + 40, y, width: Math.max(2, loadW), height: Math.max(3, rowH - 2), fill: kindOf('mlp').solid, rx: 1 }));
+    const giniW = Math.min(150, layer.reap_gini * 150);
+    svg.appendChild(svgEl('rect', { x: x0 + heatW + 270, y, width: Math.max(2, giniW), height: Math.max(3, rowH - 2), fill: kindOf('attn').solid, rx: 1 }));
+  });
+  svg.addEventListener('mousemove', (e: MouseEvent) => {
+    const rect = svg.getBoundingClientRect();
+    const y = (e.clientY - rect.top) / rect.height * H;
+    const i = Math.floor((y - y0) / rowH);
+    const row = moe.layers[i];
+    if (!row) return hideTip();
+    tip(`<b>${tr('live.layer')} ${row.layer}</b><br>${row.experts} ${tr('live.moe.experts')} · ` +
+      `${tr('live.moe.load')} ${row.load_cv.toFixed(2)}<br>REAP Gini ${row.reap_gini.toFixed(3)} · ` +
+      `${tr('live.moe.dead')} ${(row.dead_fraction * 100).toFixed(2)}%<br>` +
+      `${tr('live.moe.top')} ${row.top_reap.join(', ')}`, e.clientX, e.clientY);
+  });
+  svg.addEventListener('mouseleave', hideTip);
+  svg.addEventListener('click', (e: MouseEvent) => {
+    const rect = svg.getBoundingClientRect();
+    const i = Math.floor((((e.clientY - rect.top) / rect.height * H) - y0) / rowH);
+    const row = moe.layers[i];
+    const layer = row && store.model.langLayers.find(x => x.label === String(row.layer));
+    if (layer) store.select({ type: 'layer', layer });
+  });
+  body.appendChild(el('div', 'small-note', `max-width:${W - 60}px`, tr('live.moe.foot')));
   return card;
 }
 
@@ -958,7 +1036,7 @@ export function buildLive(store: Store, live: Live, X: number, Y: number): LiveS
   for (const c of [
     statusCard(live),
     flowCard(live, store), mapCard(live, store), attnCard(live, store), linattnCard(live, store),
-    actqCard(live), fragCard(live, store), neuronsCard(live, store), visionCard(live, store),
+    actqCard(live), fragCard(live, store), neuronsCard(live, store), moeCard(live, store), visionCard(live, store),
   ].filter((c): c is HTMLElement => c != null))
     flow.appendChild(c);
 

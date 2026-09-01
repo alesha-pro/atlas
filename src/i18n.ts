@@ -218,6 +218,7 @@ const en: Record<string, Entry> = {
   'live.status.src.pass': 'forward pass',
   'live.status.src.carve': 'carve run, 3.9M tokens',
   'live.status.src.weights': 'computed from the weights',
+  'live.status.src.reap': 'REAP capture',
   'live.status.when': 'captured:',
 
   // scale toggle
@@ -275,6 +276,11 @@ const en: Record<string, Entry> = {
   'live.frag.foot': 'The scatter is the honesty check: weight-side SQNR predicts live damage only partly — some layers are quiet in weights yet loud in logits.',
   'live.vis.title': 'The model looks at its own atlas',
   'live.vis.sub': 'The canvas screenshot was fed through the vision tower; these are the shares of attention the text layers pay to the image tokens.',
+  'live.moe.title': 'Which experts carry the model',
+  'live.moe.sub': 'Real MoE routes across a multidomain corpus. The heatmap is the percentile ladder of sampled router-weighted expert-output norms; load imbalance and Gini show where work and importance concentrate.',
+  'live.moe.domains': 'domains', 'live.moe.load': 'load CV', 'live.moe.gini': 'REAP Gini',
+  'live.moe.experts': 'experts', 'live.moe.dead': 'unseen', 'live.moe.top': 'top REAP experts',
+  'live.moe.foot': 'Frequency, routing mass, input proxy and exact REAP stay separate. Exact scores come from unit-top-1 replay through the deployed quantized expert kernel; no raw activations are stored.',
   'live.head': 'head',
   'live.la.axes': (h: string, l: string) => `heads 0…${h} · layers 0…${l}`,
   'live.la.long': 'long memory: keeps nearly everything',
@@ -482,6 +488,7 @@ const ru: Record<string, Entry> = {
   'live.status.src.pass': 'прямой проход',
   'live.status.src.carve': 'carve-прогон, 3.9M токенов',
   'live.status.src.weights': 'посчитано из весов',
+  'live.status.src.reap': 'REAP-захват',
   'live.status.when': 'снято:',
 
   'scale.rel': 'по модели', 'scale.rel.tip': 'цвет = позиция внутри диапазона метрики по модели',
@@ -543,6 +550,11 @@ const ru: Record<string, Entry> = {
   'live.frag.foot': 'Диаграмма — проверка честности: SQNR по весам предсказывает живой урон лишь отчасти — есть слои, тихие в весах, но громкие в логитах.',
   'live.vis.title': 'Модель смотрит на собственный атлас',
   'live.vis.sub': 'Скриншот этого полотна прошёл через визуальную башню; столбцы — доля внимания текстовых слоёв к токенам картинки.',
+  'live.moe.title': 'На каких экспертах держится модель',
+  'live.moe.sub': 'Настоящие маршруты MoE на многодоменном корпусе. Теплокарта — лесенка перцентилей router-weighted норм выходов экспертов; дисбаланс нагрузки и Gini показывают, где концентрируются работа и важность.',
+  'live.moe.domains': 'доменов', 'live.moe.load': 'CV нагрузки', 'live.moe.gini': 'REAP Gini',
+  'live.moe.experts': 'экспертов', 'live.moe.dead': 'не встречались', 'live.moe.top': 'топ REAP-эксперты',
+  'live.moe.foot': 'Частота, routing mass, входной proxy и точный REAP не смешиваются. Exact-сигнал получен unit-top-1 replay через реальный квантованный kernel эксперта; сырые активации не сохраняются.',
   'live.vis.foot': (n: string) => `${n} токенов картинки вошло в контекст; смотрите, каким глубоким слоям вообще интересно на них смотреть.`,
 };
 

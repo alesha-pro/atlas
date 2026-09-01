@@ -180,13 +180,21 @@ export async function loadDossier(slug: string): Promise<any | null> {
 // Живые данные (atlas_live.py): реал-тайм внутренности с прямых проходов.
 // Тоже опционально: нет live.json — нет региона «живая модель».
 export async function loadLive(slug: string): Promise<any | null> {
+  let live: any | null = null;
   try {
     const r = await fetch(new URL(`models/${slug}/live.json`, document.baseURI));
-    if (!r.ok) return null;
-    return await r.json();
-  } catch {
-    return null;
-  }
+    if (r.ok) live = await r.json();
+  } catch { /* optional */ }
+  // MoE capture is intentionally a separate, small artifact. A model may have
+  // expert-routing data before the rest of the expensive live-pass cards exist.
+  try {
+    const r = await fetch(new URL(`models/${slug}/moe.json`, document.baseURI));
+    if (r.ok) {
+      live = live || { schema: 1, meta: {} };
+      live.moe = await r.json();
+    }
+  } catch { /* optional */ }
+  return live;
 }
 
 export async function loadManifest(): Promise<ManifestEntry[]> {
