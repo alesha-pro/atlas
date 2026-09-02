@@ -19,8 +19,18 @@ Weight Atlas lays all of it out on a single pan and zoom canvas and answers one
 question: **what in this model can be compressed losslessly, what falls apart,
 and why.**
 
-First model on the canvas is **Qwen3.8-27B**: 27.78B parameters across 1199
-tensors, read straight off the original bf16 shards.
+The picker now contains two very different autopsies:
+
+- **Qwen3.8-27B** — 27.78B parameters across 1199 tensors, read from the
+  original bf16 shards.
+- **GLM-5.3-Flash NVFP4** — a 320B-total / 18B-active multimodal MoE captured
+  while the released NVFP4 checkpoint was live, with 42 × 288 exact REAP
+  scores, routing and contribution maps, KDA memory, sparse-indexer reach,
+  causal Vision arms, deployed quantization statistics and pruning controls.
+
+For GLM, `FC2 QDQ` is the activation quantize/dequantize measurement captured
+with the checkpoint's own deployed scale. Every other GLM panel likewise shows
+the evidence we actually captured, without projecting it onto another format.
 
 ## Every number is measured
 
@@ -83,11 +93,28 @@ of english, code and agent traces.
 Everything in that region is a measurement with its limits written next to it.
 Where a number is a guess, the card says so.
 
+### GLM-5.3-Flash NVFP4
+
+GLM has its own evidence-led living region rather than forcing MoE data into the
+Qwen charts:
+
+- 12,096 expert cells switchable between exact REAP, route share and sampled
+  output contribution; REAP has 14 domain slices
+- router decisiveness and load inequality through all 42 routed layers
+- split-half ranking stability and controls against frequency-only importance
+- 34 × 64 KDA head half-lives and long-position sparse-indexer reach
+- shared-versus-routed contribution, NVFP4 block-scale structure and FC2 QDQ
+- four causal Vision arms and a five-arm causal REAP stress test
+
+The architecture dossier is grounded in the released config and primary
+sources. The public data bundle contains aggregates and checksums, not prompts,
+generations, images, activations or raw routes.
+
 ## Bring your own checkpoint
 
-Nothing about Qwen is hardcoded. Layers, components, wall rows, metric ranges
-and colour domains are all derived from the data, so a new model drops in
-without touching the code.
+The core weight view derives layers, components, wall rows, metric ranges and
+colour domains from the data. Models with distinct runtime evidence can add a
+dedicated gated section, as GLM does in `src/sections/glm.ts`.
 
 1. Scan it and drop the result at `public/models/<slug>/atlas.jsonl`
 2. Add one line to `public/models/manifest.json`:
@@ -136,7 +163,7 @@ src/
   i18n.ts        # every UI string, EN and RU
   ui.ts          # header, search, tours, zoom, minimap
   sections/      # intro, arch, wall, scatter, treemap, records, depth,
-                 # plus dossier and live, gated on their data files
+                 # plus dossier, Qwen live and GLM evidence views
 scripts/          # see scripts/README.md for the full pipeline
   weight_atlas.py       # the scan: one jsonl line per tensor
   build_calibration.py  # the english / code / agent token mix
@@ -144,6 +171,7 @@ scripts/          # see scripts/README.md for the full pipeline
   carve_hooks.py        # the collector run_capture.py imports
   atlas_live.py         # live capture: hooks on the bf16 model, attention registry
   reduce_live.py        # folds artifacts into live.json + attn_maps.json
+  build_glm_atlas.py    # reduces preserved GLM captures into public aggregates
 ```
 
 Expected fields per tensor line: `name, shape, dtype, numel, mean, std, absmax,

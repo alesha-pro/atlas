@@ -1,5 +1,5 @@
 import './style.css';
-import { loadDossier, loadLive, loadManifest, loadModel, type Tensor } from './data';
+import { loadDossier, loadInsights, loadLive, loadManifest, loadModel, type Tensor } from './data';
 import { buildLive, type LiveSection } from './sections/live';
 import { Store } from './store';
 import { World, el } from './world';
@@ -11,6 +11,7 @@ import { buildTreemap } from './sections/treemap';
 import { buildRecords } from './sections/records';
 import { buildDepth } from './sections/depth';
 import { buildDossier } from './sections/dossier';
+import { buildGlmInsights, type GlmSection } from './sections/glm';
 import { buildPanel } from './panel';
 import { buildTopbar, buildBottombar, buildMinimap, type Tour } from './ui';
 import { kindOf } from './color';
@@ -30,14 +31,17 @@ async function boot(slug?: string, keep?: Keep) {
 
   const manifest = await loadManifest();
   const entry = manifest.find(e => e.slug === slug) || manifest[0];
-  const [model, dossier, live] = await Promise.all([loadModel(entry), loadDossier(entry.slug), loadLive(entry.slug)]);
+  const [model, dossier, live, insights] = await Promise.all([
+    loadModel(entry), loadDossier(entry.slug), loadLive(entry.slug), loadInsights(entry.slug),
+  ]);
   app.innerHTML = '';
+  const isGlm = entry.kind === 'glm-live';
 
   const store = new Store(model);
   if (keep) store.metric = keep.metric;
   // scrollIntoView/focus умеют скроллить даже overflow:hidden — гасим
   app.addEventListener('scroll', () => { app.scrollTop = 0; app.scrollLeft = 0; });
-  const world = new World(app, dossier ? { w: 9260, h: 4950 } : { w: 6400, h: 3300 });
+  const world = new World(app, isGlm ? { w: 6000, h: 8200 } : dossier ? { w: 9260, h: 4950 } : { w: 6400, h: 3300 });
 
   // цветовые пятна фона
   const washes: [number, number, number, number, string][] = [
@@ -56,16 +60,24 @@ async function boot(slug?: string, keep?: Keep) {
   world.world.appendChild(buildIntro(store, 80, 170));
   const arch = buildArch(store, 790, 150);
   world.world.appendChild(arch.root);
-  const treemap = buildTreemap(store, 3280, 150);
-  world.world.appendChild(treemap.root);
-  const records = buildRecords(store, 4990, 150);
-  world.world.appendChild(records.root);
+  let treemap: ReturnType<typeof buildTreemap> | null = null;
+  let records: ReturnType<typeof buildRecords> | null = null;
+  if (!isGlm) {
+    treemap = buildTreemap(store, 3280, 150);
+    world.world.appendChild(treemap.root);
+    records = buildRecords(store, 4990, 150);
+    world.world.appendChild(records.root);
+  }
   const wall = buildWall(store, 80, 1890);
   world.world.appendChild(wall.root);
-  const scatter = buildScatter(store, wall.rect.x + wall.rect.w + 90, 1890);
-  world.world.appendChild(scatter.root);
-  const depth = buildDepth(store, scatter.rect.x + scatter.rect.w + 90, 1890);
-  world.world.appendChild(depth.root);
+  let scatter: ReturnType<typeof buildScatter> | null = null;
+  let depth: ReturnType<typeof buildDepth> | null = null;
+  if (!isGlm) {
+    scatter = buildScatter(store, wall.rect.x + wall.rect.w + 90, 1890);
+    world.world.appendChild(scatter.root);
+    depth = buildDepth(store, scatter.rect.x + scatter.rect.w + 90, 1890);
+    world.world.appendChild(depth.root);
+  }
 
   // ── панель и оверлеи ──
   const mobile = () => window.innerWidth < 760;
@@ -80,20 +92,32 @@ async function boot(slug?: string, keep?: Keep) {
   // ── разбор модели (если у модели есть dossier.json) ──
   let dossierSec: ReturnType<typeof buildDossier> | null = null;
   if (dossier) {
-    dossierSec = buildDossier(store, dossier, 6560, 150, (x) => flyToTensor(x));
+    dossierSec = buildDossier(store, dossier, isGlm ? 3280 : 6560, 150, (x) => flyToTensor(x));
     world.world.appendChild(dossierSec.root);
-    world.world.appendChild(el('div', 'wash', `left:6700px;top:600px;width:2200px;height:1600px;
+    dossierSec.rect.h = dossierSec.root.offsetHeight + 40;
+    world.world.appendChild(el('div', 'wash', `left:${isGlm ? 3420 : 6700}px;top:600px;width:2200px;height:1600px;
       background:radial-gradient(ellipse at 50% 50%,rgba(219,208,236,0.4),transparent 66%)`));
+  }
+
+  let glmSec: GlmSection | null = null;
+  if (isGlm && insights) {
+    const startY = Math.max(wall.rect.y + wall.rect.h, dossierSec ? dossierSec.rect.y + dossierSec.rect.h : 0) + 150;
+    glmSec = buildGlmInsights(store, insights, 80, startY);
+    world.world.appendChild(glmSec.root);
+    glmSec.rect.h = glmSec.root.offsetHeight + 40;
+    const needH = glmSec.rect.y + glmSec.rect.h + 260;
+    world.size.h = Math.max(world.size.h, needH);
+    world.world.style.height = world.size.h + 'px';
   }
 
   // ── живая модель (если есть live.json) ──
   let liveSec: LiveSection | null = null;
-  if (live) {
+  if (live && !isGlm) {
     // строго ниже второго ряда, чтобы не лечь на стену и скаттер
     const row2Bottom = Math.max(
       wall.rect.y + wall.rect.h,
-      scatter.rect.y + scatter.rect.h,
-      depth.rect.y + depth.rect.h);
+      scatter!.rect.y + scatter!.rect.h,
+      depth!.rect.y + depth!.rect.h);
     liveSec = buildLive(store, live, 80, row2Bottom + 140);
     world.world.appendChild(liveSec.root);
     // регион уже в DOM: настоящие размеры известны до туров и миникарты
@@ -121,23 +145,25 @@ async function boot(slug?: string, keep?: Keep) {
     { label: t('tour.intro'), rect: introRect },
     { label: t('tour.arch'), rect: arch.rect },
     { label: t('tour.wall'), rect: wall.rect },
-    { label: t('tour.scatter'), rect: scatter.rect },
-    { label: t('tour.depth'), rect: depth.rect },
-    { label: t('tour.treemap'), rect: treemap.rect },
-    { label: t('tour.records'), rect: records.rect },
   ];
+  if (scatter) tours.push({ label: t('tour.scatter'), rect: scatter.rect });
+  if (depth) tours.push({ label: t('tour.depth'), rect: depth.rect });
+  if (treemap) tours.push({ label: t('tour.treemap'), rect: treemap.rect });
+  if (records) tours.push({ label: t('tour.records'), rect: records.rect });
   if (dossierSec) tours.push({ label: t('tour.dossier'), rect: { ...dossierSec.rect, h: 1500 } });
   if (liveSec) tours.push({ label: t('tour.live'), rect: liveSec.rect });
+  if (glmSec) tours.push({ label: t('tour.live'), rect: glmSec.rect });
   app.appendChild(buildBottombar(world, tours, panelPad));
   const minimap = buildMinimap(world, [
     { rect: introRect, color: 'var(--line-strong)' },
     { rect: arch.rect, color: kindOf('attn').solid },
-    { rect: treemap.rect, color: kindOf('mlp').solid },
-    { rect: records.rect, color: kindOf('out').solid },
     { rect: wall.rect, color: kindOf('lin').solid },
-    { rect: scatter.rect, color: kindOf('vision').solid },
-    { rect: depth.rect, color: kindOf('norm').solid },
+    ...(treemap ? [{ rect: treemap.rect, color: kindOf('mlp').solid }] : []),
+    ...(records ? [{ rect: records.rect, color: kindOf('out').solid }] : []),
+    ...(scatter ? [{ rect: scatter.rect, color: kindOf('vision').solid }] : []),
+    ...(depth ? [{ rect: depth.rect, color: kindOf('norm').solid }] : []),
     ...(liveSec ? [{ rect: liveSec.rect, color: kindOf('attn').solid }] : []),
+    ...(glmSec ? [{ rect: glmSec.rect, color: kindOf('attn').solid }] : []),
     ...(dossierSec ? [{ rect: dossierSec.rect, color: kindOf('in').bg }] : []),
   ]);
   app.appendChild(minimap);

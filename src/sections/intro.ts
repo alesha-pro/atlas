@@ -11,21 +11,22 @@ export function buildIntro(store: Store, x: number, y: number): HTMLElement {
   const lin = m.langLayers.filter(l => l.kind === 'linear').length;
   const n2d = m.tensors.filter(x => x.is2d).length;
 
+  const isGlm = m.entry.kind === 'glm-live';
   root.innerHTML = `
     <div style="display:flex;flex-direction:column;gap:13px">
-      <div class="eyebrow accent mono">${t('intro.eyebrow')}</div>
+      <div class="eyebrow accent mono">${t(isGlm ? 'glm.intro.eyebrow' : 'intro.eyebrow')}</div>
       <div style="font-size:52px;font-weight:400;letter-spacing:-0.015em;line-height:1.03">
-        ${m.name}<br><span style="font-size:26px;color:var(--muted)">${t('intro.sub')}</span>
+        ${m.name}<br><span style="font-size:26px;color:var(--muted)">${t(isGlm ? 'glm.intro.sub' : 'intro.sub')}</span>
       </div>
       <div class="note" style="font-size:16.5px;max-width:600px">
-        ${t('intro.note', fmtN(m.totalParams), m.tensors.length)}
+        ${isGlm ? t('glm.intro.note') : t('intro.note', fmtN(m.totalParams), m.tensors.length)}
       </div>
       <div style="display:flex;gap:10px;margin-top:4px">
         ${[
-          [fmtN(m.langParams), t('intro.stat.lang')],
-          [t('intro.stat.layers', m.langLayers.length), t('intro.stat.layers.sub', full, lin)],
-          [fmtN(m.visParams), t('intro.stat.vision')],
-          [`${n2d}`, t('intro.stat.sqnr')],
+          [isGlm ? fmtN(m.entry.active_params ?? 0) : fmtN(m.langParams), isGlm ? t('glm.intro.stat.active') : t('intro.stat.lang')],
+          [t('intro.stat.layers', m.langLayers.length), isGlm ? t('glm.intro.stat.layers.sub', full, lin) : t('intro.stat.layers.sub', full, lin)],
+          [isGlm ? '24 blocks' : fmtN(m.visParams), isGlm ? t('glm.intro.stat.vision') : t('intro.stat.vision')],
+          [isGlm ? '288 → 8' : `${n2d}`, isGlm ? t('glm.intro.stat.experts') : t('intro.stat.sqnr')],
         ].map(([v, l]) => `
           <div style="flex:1;border:1px solid var(--line);background:var(--glass-soft);border-radius:4px;padding:12px 13px;display:flex;flex-direction:column;gap:4px">
             <div class="mono" style="font-size:19px;color:var(--ink)">${v}</div>
@@ -36,7 +37,7 @@ export function buildIntro(store: Store, x: number, y: number): HTMLElement {
         <div style="width:6px;height:6px;border-radius:3px;background:var(--accent)"></div>
         <div style="font-size:11.5px;color:var(--accent-ink)">${t('intro.hint')}</div>
       </div>
-      <div class="small-note" style="max-width:580px">${t('intro.rhythm')}</div>
+      <div class="small-note" style="max-width:580px">${isGlm ? t('glm.intro.rhythm') : t('intro.rhythm')}</div>
     </div>`;
   return root;
 }

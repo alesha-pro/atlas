@@ -31,11 +31,33 @@ export function buildDossier(
     if (b.type === 'intro') col.appendChild(introBlock(b));
     else if (b.type === 'facts') col.appendChild(factsBlock(b));
     else if (b.type === 'pattern') col.appendChild(patternBlock(store, b));
+    else if (b.type === 'stack') col.appendChild(stackBlock(b));
     else if (b.type === 'diagram') col.appendChild(diagramBlock(store, b, flyToTensor));
     else if (b.type === 'papers') col.appendChild(papersBlock(b));
   }
 
   return { root, rect: { x: X, y: Y, w: W, h: 4650 } };
+}
+
+function stackBlock(b: any): HTMLElement {
+  const card = el('div', 'card', `width:${CARD_W}px;padding:24px 32px`);
+  const segments = (b.segments || []) as any[];
+  const cells = segments.map((s, i) => {
+    const k = kindOf(s.kind || 'norm');
+    const tall = s.kind === 'attn' ? 58 : s.kind === 'vision' ? 48 : 40;
+    return `<div class="no-pan" title="${pick(s.tip)}" style="flex:${s.count || 1};min-width:22px;height:${tall}px;
+      border-radius:4px;background:${k.solid};opacity:${s.opacity ?? .84};display:flex;align-items:center;justify-content:center;
+      color:#fff;font-family:var(--mono);font-size:10px;letter-spacing:.03em">${s.label || i}</div>`;
+  }).join('');
+  const legend = segments.map(s => {
+    const k = kindOf(s.kind || 'norm');
+    return `<div style="display:flex;align-items:center;gap:7px"><span style="width:9px;height:14px;border-radius:2px;background:${k.solid}"></span>${pick(s.name)}</div>`;
+  }).join('');
+  card.innerHTML = blockHead(pick(b.title)) +
+    `<div style="display:flex;align-items:flex-end;gap:5px;margin:16px 0 10px">${cells}</div>` +
+    `<div class="mono" style="display:flex;gap:22px;flex-wrap:wrap;font-size:11.5px;color:var(--faint);margin-bottom:14px">${legend}</div>` +
+    `<div class="note" style="max-width:2100px">${pick(b.note)}</div>`;
+  return card;
 }
 
 function blockHead(title: string, extra = ''): string {

@@ -15,6 +15,7 @@ export function buildWall(store: Store, X: number, Y: number): {
   root: HTMLElement; rect: { x: number; y: number; w: number; h: number };
 } {
   const m = store.model;
+  const isGlm = m.entry.kind === 'glm-live';
 
   // ряды языковой части — объединение слотов всех слоёв
   const slotSet = new Map<string, number>();
@@ -43,15 +44,15 @@ export function buildWall(store: Store, X: number, Y: number): {
   const root = el('div', 'section', `left:${X}px;top:${Y}px;width:${cardW}px`);
   root.appendChild(el('div', 'section-head', '', `
     <div class="section-tag mono">${tr('sec.wall.tag')}</div>
-    <div class="section-title">${tr('sec.wall.title', m.tensors.length)}</div>
-    <div class="section-sub">${tr('sec.wall.sub')}</div>`));
+    <div class="section-title">${tr(isGlm ? 'glm.sec.wall.title' : 'sec.wall.title', m.tensors.length)}</div>
+    <div class="section-sub">${tr(isGlm ? 'glm.sec.wall.sub' : 'sec.wall.sub')}</div>`));
 
   const card = el('div', 'card', `position:relative;width:${cardW}px;height:${cardH}px`);
   root.appendChild(card);
 
   card.appendChild(el('div', '', `position:absolute;left:${PAD}px;top:22px;display:flex;flex-direction:column;gap:5px`, `
     <div class="eyebrow mono">${tr('wall.head', nLang, nVis)}</div>
-    <div class="note" style="max-width:900px">${tr('wall.note').replace('◆', `<span class="mono" style="color:${kindOf('attn').fg}">◆</span>`)}</div>`));
+    <div class="note" style="max-width:1080px">${tr(isGlm ? 'glm.wall.note' : 'wall.note').replace('◆', `<span class="mono" style="color:${kindOf('attn').fg}">◆</span>`)}</div>`));
 
   const gx = PAD + LBL_W, gy = HEAD_H + TICK_H;
 

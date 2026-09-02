@@ -2,6 +2,15 @@
   {
     "slug": "qwen3.8-27b",
     "name": "Qwen3.8-27B",
+    "kind": "weight",
     "note": "bf16 shards, scanned by weight_atlas.py on an RTX PRO 6000 in 116 s; live pass by atlas_live.py over 460K calibration tokens plus 3.9M carve tokens for the neuron statistics"
+  },
+  {
+    "slug": "glm-5.3-flash-nvfp4",
+    "name": "GLM-5.3-Flash NVFP4",
+    "kind": "glm-live",
+    "total_params": 320000000000,
+    "active_params": 18000000000,
+    "note": "exact 197.84 GB deployed NVFP4 checkpoint; 12.59M REAP tokens per routed layer, 724 behavioural rows, 100 real Vision rows, plus causal controls and deployed-scale activation QDQ"
   }
 ]

@@ -138,3 +138,24 @@ Needs about 60 GB of VRAM for a 27B model in bf16, or several cards with
 
 Numbers on the canvas come from these runs and nowhere else. If a card cannot
 compute something it says so instead of showing a plausible value.
+
+## 6. GLM-5.3-Flash NVFP4: reduce the preserved capture
+
+GLM uses a separate reducer because its evidence is a deployed NVFP4 MoE
+capture with a different structure. From the repository root:
+
+```bash
+python3 scripts/build_glm_atlas.py
+```
+
+The reducer reads `evidence/glm-5.3-flash-nvfp4/`, verifies the source shapes
+while loading them, and writes two public artifacts:
+
+- `atlas.jsonl` — 592 config-derived logical weight groups for the shared
+  architecture wall
+- `insights.json` — aggregated routing, exact REAP, contribution, memory,
+  quantization, Vision and pruning views, plus SHA-256 source checksums
+
+It publishes no prompts, generations, images, activations or raw routes. The
+`FC2 QDQ` values are activation error captured with the deployed checkpoint's
+own scale.

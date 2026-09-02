@@ -1,0 +1,111 @@
+{
+  "blocks": [
+    {
+      "type": "intro",
+      "title": {"en": "What this model is", "ru": "Что это за модель"},
+      "text": {
+        "en": "GLM-5.3-Flash is Z.ai's first natively multimodal GLM-5 model: a 320B-total, 18B-active MoE with a 1M-token configured context. This Atlas describes the exact 197.84 GB NVFP4 checkpoint we ran on four RTX PRO 6000 Blackwell GPUs. Architecture facts come from its config and the cited primary sources; every chart in the Living Model region comes from our captured runs or directly from the deployed weights.",
+        "ru": "GLM-5.3-Flash — первая нативно мультимодальная модель серии GLM-5 от Z.ai: MoE на 320 млрд параметров, из которых 18 млрд активны на токен, с контекстом до 1 млн токенов. Этот Atlas описывает точный NVFP4-чекпоинт размером 197,84 ГБ, который мы запускали на четырёх RTX PRO 6000 Blackwell. Архитектура взята из его config и первичных источников ниже; каждый график в Living Model построен по нашим прогонам или данным, прочитанным прямо из весов."
+      }
+    },
+    {
+      "type": "facts",
+      "title": {"en": "Passport: released config + deployed checkpoint", "ru": "Паспорт: config релиза + развёрнутый чекпоинт"},
+      "rows": [
+        [{"en":"parameters","ru":"параметры"}, "320B total · 18B active · 197.84 GB NVFP4 checkpoint"],
+        [{"en":"language stack","ru":"языковой стек"}, {"en":"45 layers = 34 KDA + 11 sparse MLA/DSA", "ru":"45 слоёв = 34 KDA + 11 sparse MLA/DSA"}],
+        [{"en":"residual stream","ru":"остаточный поток"}, "4096 · mHC width 4"],
+        [{"en":"feed-forward","ru":"feed-forward"}, {"en":"layers 0–2 dense; layers 3–44: 288 routed experts, top-8 + 1 shared", "ru":"слои 0–2 dense; слои 3–44: 288 routed experts, top-8 + 1 shared"}],
+        [{"en":"expert width","ru":"ширина эксперта"}, "4096 → 2048 → 4096 · SiLU"],
+        [{"en":"sparse attention","ru":"sparse attention"}, {"en":"NoPE MLA · KV latent 512 · 32 indexer heads × 128 · learned top-2048", "ru":"NoPE MLA · KV latent 512 · 32 головы индексатора × 128 · learned top-2048"}],
+        [{"en":"linear attention","ru":"линейное внимание"}, {"en":"Kimi Delta Attention · 64 heads · recurrent finite state", "ru":"Kimi Delta Attention · 64 головы · конечное рекуррентное состояние"}],
+        [{"en":"context","ru":"контекст"}, "1,048,576 tokens"],
+        [{"en":"vocabulary","ru":"словарь"}, "154,880 · hidden 4096"],
+        [{"en":"vision tower","ru":"визуальная башня"}, "24 blocks · hidden 1024 · 16 heads · patch 14 · merge 2×2"],
+        [{"en":"draft head","ru":"draft-голова"}, {"en":"1 native MTP layer in the checkpoint; omitted by the current Transformers implementation", "ru":"1 нативный MTP-слой в чекпоинте; текущая реализация Transformers его не включает"}],
+        [{"en":"evidence","ru":"измерения"}, "12.59M REAP tokens/layer · 724 behavioural rows · 100 real Vision rows"]
+      ]
+    },
+    {
+      "type": "stack",
+      "title": {"en": "The 45-layer rhythm", "ru": "Ритм 45 слоёв"},
+      "segments": [
+        {"count":3,"kind":"lin","label":"0–2","name":{"en":"3 × KDA + dense FFN","ru":"3 × KDA + dense FFN"},"tip":{"en":"The only dense feed-forward layers","ru":"Единственные dense feed-forward слои"}},
+        {"count":1,"kind":"attn","label":"3","name":{"en":"sparse MLA + MoE","ru":"sparse MLA + MoE"},"tip":{"en":"learned top-2048 indexer","ru":"learned top-2048 indexer"}},
+        {"count":3,"kind":"lin","label":"4–6","name":{"en":"KDA + MoE","ru":"KDA + MoE"},"tip":"KDA"},
+        {"count":1,"kind":"attn","label":"7","name":{"en":"sparse every fourth layer","ru":"sparse каждый четвёртый слой"},"tip":"DSA"},
+        {"count":3,"kind":"lin","label":"8–10","name":{"en":"KDA","ru":"KDA"},"tip":"KDA"},
+        {"count":1,"kind":"attn","label":"11","name":{"en":"sparse MLA","ru":"sparse MLA"},"tip":"DSA"},
+        {"count":31,"kind":"lin","label":"12 … 42","name":{"en":"the pattern repeats to layer 42","ru":"паттерн повторяется до слоя 42"},"tip":{"en":"KDA blocks with sparse layers at 15, 19, 23, 27, 31, 35 and 39","ru":"KDA-блоки со sparse-слоями 15, 19, 23, 27, 31, 35 и 39"}},
+        {"count":1,"kind":"attn","label":"43","name":{"en":"last sparse layer","ru":"последний sparse-слой"},"tip":"DSA"},
+        {"count":1,"kind":"lin","label":"44","name":{"en":"final KDA layer","ru":"финальный KDA-слой"},"tip":"KDA"}
+      ],
+      "note": {
+        "en": "Sparse attention appears at layers 3, 7, 11, …, 43. The other 34 layers carry a fixed-size KDA memory. Feed-forward compute becomes sparse after the first three layers: the router chooses 8 of 288 experts while one shared expert always runs. This is two independent kinds of sparsity in one backbone: sparse memory lookup and sparse expert compute.",
+        "ru": "Sparse attention стоит на слоях 3, 7, 11, …, 43. Остальные 34 слоя несут KDA-память фиксированного размера. Feed-forward часть становится разреженной после первых трёх слоёв: роутер выбирает 8 из 288 экспертов, а один shared expert работает всегда. В одном backbone совмещены два разных вида разреженности: выбор памяти и выбор вычислений."
+      }
+    },
+    {
+      "type": "diagram",
+      "title": {"en":"KDA layer: finite memory that can forget","ru":"KDA-слой: конечная память, которая умеет забывать"},
+      "h": 410,
+      "nodes": [
+        {"id":"x","x":10,"y":155,"w":160,"kind":"norm","label":"x · 4096"},
+        {"id":"mix","x":220,"y":145,"w":190,"kind":"norm","label":"mHC read · 4 streams","detail":{"text":{"en":"mHC expands the residual connection into four streams and learns a constrained mixing map. The manifold constraint preserves a stable identity path while allowing richer cross-layer routing.","ru":"mHC расширяет residual connection до четырёх потоков и обучает ограниченное смешивание. Manifold constraint сохраняет устойчивый identity path, но добавляет более богатую межслойную маршрутизацию."}}},
+        {"id":"qkv","x":470,"y":55,"w":210,"kind":"lin","label":"q · k · v · gates","sub":{"en":"64 recurrent heads","ru":"64 рекуррентные головы"}},
+        {"id":"state","x":760,"y":45,"w":260,"kind":"lin","label":"Sₜ = forget(Sₜ₋₁) + write","sub":{"en":"fixed-size DPLR state","ru":"DPLR-состояние фиксированного размера"},"detail":{"text":{"en":"Kimi Delta Attention extends the delta rule with fine-grained gating. Each head decides how much old state to retain and how strongly to write the current key-value association.","ru":"Kimi Delta Attention расширяет delta rule детальным гейтингом. Каждая голова решает, сколько старого состояния оставить и насколько сильно записать текущую связь key-value."}}},
+        {"id":"read","x":1090,"y":55,"w":190,"kind":"lin","label":"q × state","sub":{"en":"memory read","ru":"чтение памяти"}},
+        {"id":"router","x":1370,"y":145,"w":190,"kind":"mlp","label":"router · top-8/288"},
+        {"id":"experts","x":1640,"y":55,"w":250,"kind":"mlp","label":"8 routed + 1 shared","sub":"4096 → 2048 → 4096","detail":{"text":{"en":"The eight routed outputs are weighted and summed. A separate shared expert always contributes, which our live capture measures independently from the routed branch.","ru":"Восемь routed-выходов взвешиваются и суммируются. Отдельный shared expert работает всегда; в live capture его вклад измерен отдельно от routed-ветки."}}},
+        {"id":"out","x":1990,"y":145,"w":210,"kind":"out","label":"mHC write → x′"}
+      ],
+      "edges":[["x","mix"],["mix","qkv"],["qkv","state"],["state","read"],["read","router"],["router","experts"],["experts","out"]],
+      "note":{"en":"Our capture follows this mechanism directly: half-life and gate openness for 64 heads in every KDA layer, plus position-bucket behaviour at long sequence positions.","ru":"Наш capture следует этому механизму напрямую: half-life и открытость гейта для 64 голов каждого KDA-слоя, плюс поведение по позиционным бакетам на длинных последовательностях."}
+    },
+    {
+      "type": "diagram",
+      "title": {"en":"Sparse MLA layer: learn where to look","ru":"Sparse MLA-слой: сначала решить, куда смотреть"},
+      "h": 430,
+      "nodes": [
+        {"id":"x","x":10,"y":165,"w":150,"kind":"norm","label":"x · 4096"},
+        {"id":"q","x":230,"y":40,"w":210,"kind":"attn","label":"query latent → 64 Q","sub":"NoPE · 256 dims"},
+        {"id":"kv","x":230,"y":270,"w":210,"kind":"attn","label":"KV latent · 512","sub":{"en":"compressed cache","ru":"сжатый cache"}},
+        {"id":"idx","x":520,"y":110,"w":260,"kind":"attn","label":"32-head indexer","sub":{"en":"score history · k-pool 4","ru":"оценить историю · k-pool 4"},"detail":{"text":{"en":"The lightweight indexer scores the prefix and selects 2,048 candidate token positions. Main MLA computes attention only over those learned positions, not the whole history.","ru":"Лёгкий indexer оценивает prefix и выбирает 2048 позиций-кандидатов. Основной MLA считает attention только по этим выученно выбранным позициям, а не по всей истории."}}},
+        {"id":"topk","x":880,"y":110,"w":210,"kind":"attn","label":"top-2048 positions"},
+        {"id":"mla","x":1180,"y":95,"w":250,"kind":"attn","label":"sparse MLA","sub":{"en":"exact attention on selected KV","ru":"точный attention по выбранным KV"}},
+        {"id":"moe","x":1520,"y":105,"w":240,"kind":"mlp","label":"MoE · top-8 + shared"},
+        {"id":"out","x":1850,"y":145,"w":210,"kind":"out","label":"mHC write → x′"}
+      ],
+      "edges":[["x","q"],["x","kv"],["q","idx"],["kv","idx"],["idx","topk"],["topk","mla"],["kv","mla"],["mla","moe"],["moe","out"]],
+      "note":{"en":"The released config is NoPE MLA (qk_rope_head_dim = 0) with a 512-wide KV latent. Our measured indexer chart shows how the selected distance grows with sequence position instead of assuming a fixed local window.","ru":"В release config используется NoPE MLA (qk_rope_head_dim = 0) с KV latent шириной 512. Наш график indexer показывает, как дистанция выбранных токенов растёт вместе с позицией, вместо предположения о фиксированном локальном окне."}
+    },
+    {
+      "type": "diagram",
+      "title": {"en":"Vision and NVFP4: what is quantized, what is not","ru":"Vision и NVFP4: что квантовано, а что нет"},
+      "h": 390,
+      "nodes": [
+        {"id":"img","x":10,"y":135,"w":160,"kind":"vision","label":"image / video"},
+        {"id":"patch","x":240,"y":120,"w":210,"kind":"vision","label":"patch 14 × 14","sub":"hidden 1024"},
+        {"id":"vit","x":540,"y":100,"w":240,"kind":"vision","label":"24 ViT blocks","sub":"16 heads · BF16"},
+        {"id":"merge","x":870,"y":115,"w":220,"kind":"vision","label":"spatial merge 2 × 2"},
+        {"id":"tokens","x":1180,"y":125,"w":190,"kind":"in","label":"visual tokens · 4096"},
+        {"id":"router","x":1460,"y":115,"w":220,"kind":"mlp","label":"routed experts only","sub":"layers 3–44"},
+        {"id":"nv","x":1770,"y":85,"w":300,"kind":"mlp","label":"NVFP4 W4A4 · group 16","sub":{"en":"FP8 block scales + F32 globals","ru":"FP8 block scales + F32 globals"},"detail":{"text":{"en":"Only routed-expert gate/up/down projections are packed to NVFP4. Attention, KDA, router, shared experts, embeddings and the vision tower remain BF16 in this checkpoint.","ru":"В NVFP4 упакованы только gate/up/down проекции routed experts. Attention, KDA, router, shared experts, embeddings и vision tower в этом чекпоинте остаются BF16."}}}
+      ],
+      "edges":[["img","patch"],["patch","vit"],["vit","merge"],["merge","tokens"],["tokens","router"],["router","nv"]],
+      "note":{"en":"36,288 routed-expert matrices are packed as U8 storage with 36,288 FP8 block-scale tensors and 72,576 scalar calibration values. All scanned block scales were finite and positive. The Living Model region reports the captured deployed-scale FC2-input QDQ.","ru":"36 288 матриц routed experts хранятся в packed U8 вместе с 36 288 FP8-тензорами block scale и 72 576 скалярными calibration values. Все просканированные block scales конечны и положительны. В Living Model показан снятый deployed-scale FC2-input QDQ."}
+    },
+    {
+      "type":"papers",
+      "title":{"en":"Documentation and papers behind the map","ru":"Документация и papers за этой картой"},
+      "items":[
+        {"id":"OFFICIAL MODEL CARD","title":"GLM-5.3-Flash","url":"https://huggingface.co/zai-org/GLM-5.3-Flash","why":{"en":"Release scope, 320B/18B, native multimodality, hybrid sparse/linear attention and 30T-token pre-training statement.","ru":"Границы релиза, 320B/18B, нативная мультимодальность, гибрид sparse/linear attention и заявление о 30T токенов pre-training."}},
+        {"id":"ARXIV 2602.15763","title":"GLM-5: from Vibe Coding to Agentic Engineering","url":"https://arxiv.org/abs/2602.15763","why":{"en":"The official GLM-5 technical report cited by the model card; describes DSA adoption and the GLM-5 training/post-training line.","ru":"Официальный технический отчёт GLM-5, на который ссылается model card; описывает DSA и линию training/post-training GLM-5."}},
+        {"id":"ARXIV 2510.26692","title":"Kimi Linear: An Expressive, Efficient Attention Architecture","url":"https://arxiv.org/abs/2510.26692","why":{"en":"Primary paper for Kimi Delta Attention, its gated delta-rule memory and DPLR transition.","ru":"Первичный paper о Kimi Delta Attention, gated delta-rule памяти и DPLR transition."}},
+        {"id":"ARXIV 2512.02556","title":"DeepSeek-V3.2: Pushing the Frontier of Open Large Language Models","url":"https://arxiv.org/abs/2512.02556","why":{"en":"Primary description of DeepSeek Sparse Attention and its learned token indexer.","ru":"Первичное описание DeepSeek Sparse Attention и обучаемого token indexer."}},
+        {"id":"ARXIV 2512.24880","title":"mHC: Manifold-Constrained Hyper-Connections","url":"https://arxiv.org/abs/2512.24880","why":{"en":"Primary paper for the constrained four-stream residual mixing used by the checkpoint.","ru":"Первичный paper про constrained residual mixing, использованный в четырёхпоточном mHC чекпоинта."}},
+        {"id":"TRANSFORMERS DOCS","title":"GLM-5.3-Flash / Glm5Next","url":"https://huggingface.co/docs/transformers/main/en/model_doc/glm5_next","why":{"en":"Reference implementation and config API; explicitly notes that Transformers does not include the native MTP layer.","ru":"Reference implementation и config API; отдельно указано, что Transformers не включает нативный MTP-слой."}}
+      ]
+    }
+  ]
+}

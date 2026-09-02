@@ -38,7 +38,9 @@ export function buildTopbar(
   // метрики
   const tabs = el('div', '', 'display:flex;gap:6px;flex-wrap:wrap');
   const chipEls = new Map<string, HTMLElement>();
-  const shown = ['int4', 'int8', 'fp8', 'kurt', 'hot', 'srank', 'size'];
+  const shown = store.model.entry.kind === 'glm-live'
+    ? ['int4', 'size']
+    : ['int4', 'int8', 'fp8', 'kurt', 'hot', 'srank', 'size'];
   for (const key of shown) {
     const d = store.model.metrics[key];
     if (!d) continue;
@@ -64,7 +66,7 @@ export function buildTopbar(
     scaleWrap.appendChild(c);
     scaleChips.set(mode, c);
   }
-  bar.appendChild(scaleWrap);
+  if (store.model.entry.kind !== 'glm-live') bar.appendChild(scaleWrap);
   const syncScale = () => {
     for (const [m, c] of scaleChips) c.classList.toggle('on', store.scale === m);
     const has = !!store.model.metrics[store.metric].abs;

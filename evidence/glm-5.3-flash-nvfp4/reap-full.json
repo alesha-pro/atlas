@@ -1,0 +1,1699 @@
+{
+  "schema": 1,
+  "capture": {
+    "schema": 1,
+    "rank_policy": "rank0",
+    "tokens_layer": {
+      "3": 12588576,
+      "4": 12588576,
+      "5": 12588576,
+      "6": 12588576,
+      "7": 12588576,
+      "8": 12588576,
+      "9": 12588576,
+      "10": 12588576,
+      "11": 12588576,
+      "12": 12588576,
+      "13": 12588576,
+      "14": 12588576,
+      "15": 12588576,
+      "16": 12588576,
+      "17": 12588576,
+      "18": 12588576,
+      "19": 12588576,
+      "20": 12588576,
+      "21": 12588576,
+      "22": 12588576,
+      "23": 12588576,
+      "24": 12588576,
+      "25": 12588576,
+      "26": 12588576,
+      "27": 12588576,
+      "28": 12588576,
+      "29": 12588576,
+      "30": 12588576,
+      "31": 12588576,
+      "32": 12588576,
+      "33": 12588576,
+      "34": 12588576,
+      "35": 12588576,
+      "36": 12588576,
+      "37": 12588576,
+      "38": 12588576,
+      "39": 12588576,
+      "40": 12588576,
+      "41": 12588576,
+      "42": 12588576,
+      "43": 12588576,
+      "44": 12588576
+    },
+    "crosscheck": {
+      "3": {
+        "rows": 11,
+        "min_cosine": 0.9999819993972778,
+        "mean_cosine": 0.9999868273735046,
+        "mean_relative_l2": 0.00510749826207757,
+        "p95_relative_l2": 0.005689078010618687,
+        "p99_relative_l2": 0.0059497118927538395,
+        "p999_relative_l2": 0.006008354481309652,
+        "max_relative_l2": 0.0060148704797029495,
+        "finite": true
+      },
+      "4": {
+        "rows": 12,
+        "min_cosine": 0.9999817609786987,
+        "mean_cosine": 0.999984860420227,
+        "mean_relative_l2": 0.005506486631929874,
+        "p95_relative_l2": 0.0059121171943843365,
+        "p99_relative_l2": 0.00601175706833601,
+        "p999_relative_l2": 0.006034175865352154,
+        "max_relative_l2": 0.006036666687577963,
+        "finite": true
+      },
+      "5": {
+        "rows": 9,
+        "min_cosine": 0.9999831318855286,
+        "mean_cosine": 0.999984860420227,
+        "mean_relative_l2": 0.005510385613888502,
+        "p95_relative_l2": 0.0057577104307711124,
+        "p99_relative_l2": 0.00579780712723732,
+        "p999_relative_l2": 0.00580682884901762,
+        "max_relative_l2": 0.005807831417769194,
+        "finite": true
+      },
+      "6": {
+        "rows": 10,
+        "min_cosine": 0.9999818205833435,
+        "mean_cosine": 0.9999851584434509,
+        "mean_relative_l2": 0.00545267341658473,
+        "p95_relative_l2": 0.005968520883470774,
+        "p99_relative_l2": 0.006021697074174881,
+        "p999_relative_l2": 0.006033661775290966,
+        "max_relative_l2": 0.00603499123826623,
+        "finite": true
+      },
+      "7": {
+        "rows": 10,
+        "min_cosine": 0.9999812841415405,
+        "mean_cosine": 0.999984085559845,
+        "mean_relative_l2": 0.00564706651493907,
+        "p95_relative_l2": 0.0059844087809324265,
+        "p99_relative_l2": 0.006079352460801601,
+        "p999_relative_l2": 0.006100714672356844,
+        "max_relative_l2": 0.0061030881479382515,
+        "finite": true
+      },
+      "8": {
+        "rows": 8,
+        "min_cosine": 0.999983549118042,
+        "mean_cosine": 0.9999855756759644,
+        "mean_relative_l2": 0.005377604626119137,
+        "p95_relative_l2": 0.005694208666682243,
+        "p99_relative_l2": 0.005747832823544741,
+        "p999_relative_l2": 0.005759898107498884,
+        "max_relative_l2": 0.005761238746345043,
+        "finite": true
+      },
+      "9": {
+        "rows": 10,
+        "min_cosine": 0.9999804496765137,
+        "mean_cosine": 0.9999842047691345,
+        "mean_relative_l2": 0.005615368019789457,
+        "p95_relative_l2": 0.0061041065491735935,
+        "p99_relative_l2": 0.0062101720832288265,
+        "p999_relative_l2": 0.006234037224203348,
+        "max_relative_l2": 0.006236688699573278,
+        "finite": true
+      },
+      "10": {
+        "rows": 12,
+        "min_cosine": 0.9999830722808838,
+        "mean_cosine": 0.9999853372573853,
+        "mean_relative_l2": 0.005413120146840811,
+        "p95_relative_l2": 0.005793777294456959,
+        "p99_relative_l2": 0.005825158208608627,
+        "p999_relative_l2": 0.005832218565046787,
+        "max_relative_l2": 0.005833003204315901,
+        "finite": true
+      },
+      "11": {
+        "rows": 10,
+        "min_cosine": 0.9999824166297913,
+        "mean_cosine": 0.9999850392341614,
+        "mean_relative_l2": 0.0054758470505476,
+        "p95_relative_l2": 0.005824135150760412,
+        "p99_relative_l2": 0.0059099686332046986,
+        "p999_relative_l2": 0.0059292814694345,
+        "max_relative_l2": 0.005931427236646414,
+        "finite": true
+      },
+      "12": {
+        "rows": 10,
+        "min_cosine": 0.9999825954437256,
+        "mean_cosine": 0.9999852180480957,
+        "mean_relative_l2": 0.005427473224699497,
+        "p95_relative_l2": 0.0057979850098490715,
+        "p99_relative_l2": 0.005876155570149422,
+        "p999_relative_l2": 0.005893743596971035,
+        "max_relative_l2": 0.005895697977393866,
+        "finite": true
+      },
+      "13": {
+        "rows": 10,
+        "min_cosine": 0.9999815225601196,
+        "mean_cosine": 0.9999849200248718,
+        "mean_relative_l2": 0.005472428165376186,
+        "p95_relative_l2": 0.006083014886826277,
+        "p99_relative_l2": 0.0060907695442438126,
+        "p999_relative_l2": 0.006092514377087355,
+        "max_relative_l2": 0.006092708092182875,
+        "finite": true
+      },
+      "14": {
+        "rows": 9,
+        "min_cosine": 0.999982476234436,
+        "mean_cosine": 0.9999850392341614,
+        "mean_relative_l2": 0.005465528462082148,
+        "p95_relative_l2": 0.005819397978484631,
+        "p99_relative_l2": 0.005904216319322586,
+        "p999_relative_l2": 0.005923300050199032,
+        "max_relative_l2": 0.005925420671701431,
+        "finite": true
+      },
+      "15": {
+        "rows": 9,
+        "min_cosine": 0.9999815821647644,
+        "mean_cosine": 0.999984085559845,
+        "mean_relative_l2": 0.00562600651755929,
+        "p95_relative_l2": 0.006015799008309841,
+        "p99_relative_l2": 0.006049877032637596,
+        "p999_relative_l2": 0.006057544611394405,
+        "max_relative_l2": 0.0060583967715501785,
+        "finite": true
+      },
+      "16": {
+        "rows": 11,
+        "min_cosine": 0.9999836683273315,
+        "mean_cosine": 0.9999849200248718,
+        "mean_relative_l2": 0.005488591268658638,
+        "p95_relative_l2": 0.005706108175218105,
+        "p99_relative_l2": 0.005708134733140469,
+        "p999_relative_l2": 0.005708590615540743,
+        "max_relative_l2": 0.005708641372621059,
+        "finite": true
+      },
+      "17": {
+        "rows": 11,
+        "min_cosine": 0.999983549118042,
+        "mean_cosine": 0.9999861717224121,
+        "mean_relative_l2": 0.0052705081179738045,
+        "p95_relative_l2": 0.005681002512574196,
+        "p99_relative_l2": 0.005723961163312197,
+        "p999_relative_l2": 0.0057336268946528435,
+        "max_relative_l2": 0.005734700709581375,
+        "finite": true
+      },
+      "18": {
+        "rows": 9,
+        "min_cosine": 0.999984622001648,
+        "mean_cosine": 0.9999862313270569,
+        "mean_relative_l2": 0.0052372757345438,
+        "p95_relative_l2": 0.005506635643541813,
+        "p99_relative_l2": 0.0055352733470499516,
+        "p999_relative_l2": 0.005541717167943716,
+        "max_relative_l2": 0.005542432889342308,
+        "finite": true
+      },
+      "19": {
+        "rows": 10,
+        "min_cosine": 0.9999836683273315,
+        "mean_cosine": 0.9999850392341614,
+        "mean_relative_l2": 0.005464185960590839,
+        "p95_relative_l2": 0.005633833352476358,
+        "p99_relative_l2": 0.005691102240234613,
+        "p999_relative_l2": 0.005703987553715706,
+        "max_relative_l2": 0.005705419462174177,
+        "finite": true
+      },
+      "20": {
+        "rows": 9,
+        "min_cosine": 0.9999828934669495,
+        "mean_cosine": 0.9999850392341614,
+        "mean_relative_l2": 0.005462610628455877,
+        "p95_relative_l2": 0.0058077299036085606,
+        "p99_relative_l2": 0.005840864963829517,
+        "p999_relative_l2": 0.005848320201039314,
+        "max_relative_l2": 0.005849148612469435,
+        "finite": true
+      },
+      "21": {
+        "rows": 8,
+        "min_cosine": 0.9999829530715942,
+        "mean_cosine": 0.9999849796295166,
+        "mean_relative_l2": 0.005473093129694462,
+        "p95_relative_l2": 0.005838884972035885,
+        "p99_relative_l2": 0.005846995860338211,
+        "p999_relative_l2": 0.005848821252584457,
+        "max_relative_l2": 0.005849023815244436,
+        "finite": true
+      },
+      "22": {
+        "rows": 10,
+        "min_cosine": 0.9999829530715942,
+        "mean_cosine": 0.9999843835830688,
+        "mean_relative_l2": 0.0055885910987854,
+        "p95_relative_l2": 0.005827922374010086,
+        "p99_relative_l2": 0.005848689936101437,
+        "p999_relative_l2": 0.00585336284711957,
+        "max_relative_l2": 0.005853882059454918,
+        "finite": true
+      },
+      "23": {
+        "rows": 11,
+        "min_cosine": 0.9999845027923584,
+        "mean_cosine": 0.9999858140945435,
+        "mean_relative_l2": 0.005322405137121677,
+        "p95_relative_l2": 0.005556606221944094,
+        "p99_relative_l2": 0.005559718701988459,
+        "p999_relative_l2": 0.0055604190565645695,
+        "max_relative_l2": 0.00556049682199955,
+        "finite": true
+      },
+      "24": {
+        "rows": 10,
+        "min_cosine": 0.9999830722808838,
+        "mean_cosine": 0.9999847412109375,
+        "mean_relative_l2": 0.005514698103070259,
+        "p95_relative_l2": 0.00578191177919507,
+        "p99_relative_l2": 0.005809160880744457,
+        "p999_relative_l2": 0.005815291777253151,
+        "max_relative_l2": 0.005815973039716482,
+        "finite": true
+      },
+      "25": {
+        "rows": 10,
+        "min_cosine": 0.999981701374054,
+        "mean_cosine": 0.9999845623970032,
+        "mean_relative_l2": 0.005558941047638655,
+        "p95_relative_l2": 0.005987175274640322,
+        "p99_relative_l2": 0.006032363977283239,
+        "p999_relative_l2": 0.006042531691491604,
+        "max_relative_l2": 0.006043661385774612,
+        "finite": true
+      },
+      "26": {
+        "rows": 10,
+        "min_cosine": 0.9999828338623047,
+        "mean_cosine": 0.9999839663505554,
+        "mean_relative_l2": 0.005666329991072416,
+        "p95_relative_l2": 0.005852789152413607,
+        "p99_relative_l2": 0.005858341231942177,
+        "p999_relative_l2": 0.0058595906011760235,
+        "max_relative_l2": 0.005859729368239641,
+        "finite": true
+      },
+      "27": {
+        "rows": 8,
+        "min_cosine": 0.9999812841415405,
+        "mean_cosine": 0.9999839663505554,
+        "mean_relative_l2": 0.005652140825986862,
+        "p95_relative_l2": 0.0060097030363976955,
+        "p99_relative_l2": 0.006101023405790329,
+        "p999_relative_l2": 0.006121570244431496,
+        "max_relative_l2": 0.0061238533817231655,
+        "finite": true
+      },
+      "28": {
+        "rows": 10,
+        "min_cosine": 0.999982476234436,
+        "mean_cosine": 0.9999847412109375,
+        "mean_relative_l2": 0.005532142240554094,
+        "p95_relative_l2": 0.00581098860129714,
+        "p99_relative_l2": 0.005903668701648712,
+        "p999_relative_l2": 0.005924521945416927,
+        "max_relative_l2": 0.005926839075982571,
+        "finite": true
+      },
+      "29": {
+        "rows": 11,
+        "min_cosine": 0.9999825358390808,
+        "mean_cosine": 0.9999844431877136,
+        "mean_relative_l2": 0.005585242062807083,
+        "p95_relative_l2": 0.005849981680512428,
+        "p99_relative_l2": 0.005900070536881685,
+        "p999_relative_l2": 0.005911340471357107,
+        "max_relative_l2": 0.005912592634558678,
+        "finite": true
+      },
+      "30": {
+        "rows": 10,
+        "min_cosine": 0.9999801516532898,
+        "mean_cosine": 0.9999845623970032,
+        "mean_relative_l2": 0.005544740241020918,
+        "p95_relative_l2": 0.006086209788918495,
+        "p99_relative_l2": 0.006256274413317442,
+        "p999_relative_l2": 0.006294539198279381,
+        "max_relative_l2": 0.0062987906858325005,
+        "finite": true
+      },
+      "31": {
+        "rows": 10,
+        "min_cosine": 0.9999819397926331,
+        "mean_cosine": 0.9999836087226868,
+        "mean_relative_l2": 0.005730098579078913,
+        "p95_relative_l2": 0.006006824783980846,
+        "p99_relative_l2": 0.006009056698530912,
+        "p999_relative_l2": 0.00600955868139863,
+        "max_relative_l2": 0.006009614560753107,
+        "finite": true
+      },
+      "32": {
+        "rows": 10,
+        "min_cosine": 0.9999811053276062,
+        "mean_cosine": 0.9999832510948181,
+        "mean_relative_l2": 0.005794431548565626,
+        "p95_relative_l2": 0.006093999370932579,
+        "p99_relative_l2": 0.006143117789179087,
+        "p999_relative_l2": 0.006154169328510761,
+        "max_relative_l2": 0.006155397277325392,
+        "finite": true
+      },
+      "33": {
+        "rows": 8,
+        "min_cosine": 0.9999825954437256,
+        "mean_cosine": 0.9999839067459106,
+        "mean_relative_l2": 0.005670712795108557,
+        "p95_relative_l2": 0.0058749024756252766,
+        "p99_relative_l2": 0.0059067122638225555,
+        "p999_relative_l2": 0.0059138694778084755,
+        "max_relative_l2": 0.005914664827287197,
+        "finite": true
+      },
+      "34": {
+        "rows": 10,
+        "min_cosine": 0.9999815225601196,
+        "mean_cosine": 0.9999837875366211,
+        "mean_relative_l2": 0.005685901734977961,
+        "p95_relative_l2": 0.006061619147658348,
+        "p99_relative_l2": 0.006063196342438459,
+        "p999_relative_l2": 0.006063551176339388,
+        "max_relative_l2": 0.006063590757548809,
+        "finite": true
+      },
+      "35": {
+        "rows": 10,
+        "min_cosine": 0.9999812841415405,
+        "mean_cosine": 0.9999837875366211,
+        "mean_relative_l2": 0.0056806267239153385,
+        "p95_relative_l2": 0.006011775229126215,
+        "p99_relative_l2": 0.006100744009017944,
+        "p999_relative_l2": 0.006120762322098017,
+        "max_relative_l2": 0.0061229863204061985,
+        "finite": true
+      },
+      "36": {
+        "rows": 10,
+        "min_cosine": 0.9999831914901733,
+        "mean_cosine": 0.9999846816062927,
+        "mean_relative_l2": 0.005541601683944464,
+        "p95_relative_l2": 0.005784966051578522,
+        "p99_relative_l2": 0.005790156777948141,
+        "p999_relative_l2": 0.005791324656456709,
+        "max_relative_l2": 0.005791454575955868,
+        "finite": true
+      },
+      "37": {
+        "rows": 11,
+        "min_cosine": 0.9999822974205017,
+        "mean_cosine": 0.9999842643737793,
+        "mean_relative_l2": 0.005611540284007788,
+        "p95_relative_l2": 0.005923162214457989,
+        "p99_relative_l2": 0.005944770760834217,
+        "p999_relative_l2": 0.005949632730334997,
+        "max_relative_l2": 0.005950172897428274,
+        "finite": true
+      },
+      "38": {
+        "rows": 10,
+        "min_cosine": 0.9999816417694092,
+        "mean_cosine": 0.9999847412109375,
+        "mean_relative_l2": 0.005514890421181917,
+        "p95_relative_l2": 0.005981093272566795,
+        "p99_relative_l2": 0.006042933091521263,
+        "p999_relative_l2": 0.006056847050786018,
+        "max_relative_l2": 0.00605839304625988,
+        "finite": true
+      },
+      "39": {
+        "rows": 8,
+        "min_cosine": 0.9999818801879883,
+        "mean_cosine": 0.9999839663505554,
+        "mean_relative_l2": 0.0056599220260977745,
+        "p95_relative_l2": 0.006000440567731857,
+        "p99_relative_l2": 0.006026922725141048,
+        "p999_relative_l2": 0.006032880861312151,
+        "max_relative_l2": 0.0060335430316627026,
+        "finite": true
+      },
+      "40": {
+        "rows": 10,
+        "min_cosine": 0.9999812245368958,
+        "mean_cosine": 0.999984085559845,
+        "mean_relative_l2": 0.005638002417981625,
+        "p95_relative_l2": 0.00611597066745162,
+        "p99_relative_l2": 0.006118383724242449,
+        "p999_relative_l2": 0.00611892668530345,
+        "max_relative_l2": 0.0061189872212708,
+        "finite": true
+      },
+      "41": {
+        "rows": 10,
+        "min_cosine": 0.9999816417694092,
+        "mean_cosine": 0.9999846816062927,
+        "mean_relative_l2": 0.005541074555367231,
+        "p95_relative_l2": 0.006037027109414339,
+        "p99_relative_l2": 0.006068847607821226,
+        "p999_relative_l2": 0.006076007150113583,
+        "max_relative_l2": 0.006076802499592304,
+        "finite": true
+      },
+      "42": {
+        "rows": 10,
+        "min_cosine": 0.9999816417694092,
+        "mean_cosine": 0.9999845623970032,
+        "mean_relative_l2": 0.005556246265769005,
+        "p95_relative_l2": 0.00596230523660779,
+        "p99_relative_l2": 0.006051388569176197,
+        "p999_relative_l2": 0.006071432027965784,
+        "max_relative_l2": 0.006073659285902977,
+        "finite": true
+      },
+      "43": {
+        "rows": 12,
+        "min_cosine": 0.9999762177467346,
+        "mean_cosine": 0.999983012676239,
+        "mean_relative_l2": 0.005816345568746328,
+        "p95_relative_l2": 0.006712308153510094,
+        "p99_relative_l2": 0.0068565355613827705,
+        "p999_relative_l2": 0.006888986565172672,
+        "max_relative_l2": 0.006892592180520296,
+        "finite": true
+      },
+      "44": {
+        "rows": 11,
+        "min_cosine": 0.9999806880950928,
+        "mean_cosine": 0.9999855756759644,
+        "mean_relative_l2": 0.005396628752350807,
+        "p95_relative_l2": 0.00593188963830471,
+        "p99_relative_l2": 0.006176930386573076,
+        "p999_relative_l2": 0.006232064682990313,
+        "max_relative_l2": 0.006238190922886133,
+        "finite": true
+      }
+    },
+    "mode": "reap",
+    "exact_sample_rate": 0.02,
+    "installed": true,
+    "adapters": [
+      "glm5_next_checkpoint_loader",
+      "transformers_moe_forward",
+      "fused_router_select_experts"
+    ],
+    "checkpoint_adapter": {},
+    "skipped_decode_rows": 0
+  },
+  "layers": {
+    "3": {
+      "E": 288,
+      "domains": [
+        "agent",
+        "code",
+        "general",
+        "knowledge/multitopic",
+        "long-context",
+        "multilingual/es",
+        "multilingual/ru",
+        "multilingual/zh",
+        "reasoning",
+        "systems",
+        "vision/chart",
+        "vision/document",
+        "vision/general",
+        "vision/ocr"
+      ]
+    },
+    "4": {
+      "E": 288,
+      "domains": [
+        "agent",
+        "code",
+        "general",
+        "knowledge/multitopic",
+        "long-context",
+        "multilingual/es",
+        "multilingual/ru",
+        "multilingual/zh",
+        "reasoning",
+        "systems",
+        "vision/chart",
+        "vision/document",
+        "vision/general",
+        "vision/ocr"
+      ]
+    },
+    "5": {
+      "E": 288,
+      "domains": [
+        "agent",
+        "code",
+        "general",
+        "knowledge/multitopic",
+        "long-context",
+        "multilingual/es",
+        "multilingual/ru",
+        "multilingual/zh",
+        "reasoning",
+        "systems",
+        "vision/chart",
+        "vision/document",
+        "vision/general",
+        "vision/ocr"
+      ]
+    },
+    "6": {
+      "E": 288,
+      "domains": [
+        "agent",
+        "code",
+        "general",
+        "knowledge/multitopic",
+        "long-context",
+        "multilingual/es",
+        "multilingual/ru",
+        "multilingual/zh",
+        "reasoning",
+        "systems",
+        "vision/chart",
+        "vision/document",
+        "vision/general",
+        "vision/ocr"
+      ]
+    },
+    "7": {
+      "E": 288,
+      "domains": [
+        "agent",
+        "code",
+        "general",
+        "knowledge/multitopic",
+        "long-context",
+        "multilingual/es",
+        "multilingual/ru",
+        "multilingual/zh",
+        "reasoning",
+        "systems",
+        "vision/chart",
+        "vision/document",
+        "vision/general",
+        "vision/ocr"
+      ]
+    },
+    "8": {
+      "E": 288,
+      "domains": [
+        "agent",
+        "code",
+        "general",
+        "knowledge/multitopic",
+        "long-context",
+        "multilingual/es",
+        "multilingual/ru",
+        "multilingual/zh",
+        "reasoning",
+        "systems",
+        "vision/chart",
+        "vision/document",
+        "vision/general",
+        "vision/ocr"
+      ]
+    },
+    "9": {
+      "E": 288,
+      "domains": [
+        "agent",
+        "code",
+        "general",
+        "knowledge/multitopic",
+        "long-context",
+        "multilingual/es",
+        "multilingual/ru",
+        "multilingual/zh",
+        "reasoning",
+        "systems",
+        "vision/chart",
+        "vision/document",
+        "vision/general",
+        "vision/ocr"
+      ]
+    },
+    "10": {
+      "E": 288,
+      "domains": [
+        "agent",
+        "code",
+        "general",
+        "knowledge/multitopic",
+        "long-context",
+        "multilingual/es",
+        "multilingual/ru",
+        "multilingual/zh",
+        "reasoning",
+        "systems",
+        "vision/chart",
+        "vision/document",
+        "vision/general",
+        "vision/ocr"
+      ]
+    },
+    "11": {
+      "E": 288,
+      "domains": [
+        "agent",
+        "code",
+        "general",
+        "knowledge/multitopic",
+        "long-context",
+        "multilingual/es",
+        "multilingual/ru",
+        "multilingual/zh",
+        "reasoning",
+        "systems",
+        "vision/chart",
+        "vision/document",
+        "vision/general",
+        "vision/ocr"
+      ]
+    },
+    "12": {
+      "E": 288,
+      "domains": [
+        "agent",
+        "code",
+        "general",
+        "knowledge/multitopic",
+        "long-context",
+        "multilingual/es",
+        "multilingual/ru",
+        "multilingual/zh",
+        "reasoning",
+        "systems",
+        "vision/chart",
+        "vision/document",
+        "vision/general",
+        "vision/ocr"
+      ]
+    },
+    "13": {
+      "E": 288,
+      "domains": [
+        "agent",
+        "code",
+        "general",
+        "knowledge/multitopic",
+        "long-context",
+        "multilingual/es",
+        "multilingual/ru",
+        "multilingual/zh",
+        "reasoning",
+        "systems",
+        "vision/chart",
+        "vision/document",
+        "vision/general",
+        "vision/ocr"
+      ]
+    },
+    "14": {
+      "E": 288,
+      "domains": [
+        "agent",
+        "code",
+        "general",
+        "knowledge/multitopic",
+        "long-context",
+        "multilingual/es",
+        "multilingual/ru",
+        "multilingual/zh",
+        "reasoning",
+        "systems",
+        "vision/chart",
+        "vision/document",
+        "vision/general",
+        "vision/ocr"
+      ]
+    },
+    "15": {
+      "E": 288,
+      "domains": [
+        "agent",
+        "code",
+        "general",
+        "knowledge/multitopic",
+        "long-context",
+        "multilingual/es",
+        "multilingual/ru",
+        "multilingual/zh",
+        "reasoning",
+        "systems",
+        "vision/chart",
+        "vision/document",
+        "vision/general",
+        "vision/ocr"
+      ]
+    },
+    "16": {
+      "E": 288,
+      "domains": [
+        "agent",
+        "code",
+        "general",
+        "knowledge/multitopic",
+        "long-context",
+        "multilingual/es",
+        "multilingual/ru",
+        "multilingual/zh",
+        "reasoning",
+        "systems",
+        "vision/chart",
+        "vision/document",
+        "vision/general",
+        "vision/ocr"
+      ]
+    },
+    "17": {
+      "E": 288,
+      "domains": [
+        "agent",
+        "code",
+        "general",
+        "knowledge/multitopic",
+        "long-context",
+        "multilingual/es",
+        "multilingual/ru",
+        "multilingual/zh",
+        "reasoning",
+        "systems",
+        "vision/chart",
+        "vision/document",
+        "vision/general",
+        "vision/ocr"
+      ]
+    },
+    "18": {
+      "E": 288,
+      "domains": [
+        "agent",
+        "code",
+        "general",
+        "knowledge/multitopic",
+        "long-context",
+        "multilingual/es",
+        "multilingual/ru",
+        "multilingual/zh",
+        "reasoning",
+        "systems",
+        "vision/chart",
+        "vision/document",
+        "vision/general",
+        "vision/ocr"
+      ]
+    },
+    "19": {
+      "E": 288,
+      "domains": [
+        "agent",
+        "code",
+        "general",
+        "knowledge/multitopic",
+        "long-context",
+        "multilingual/es",
+        "multilingual/ru",
+        "multilingual/zh",
+        "reasoning",
+        "systems",
+        "vision/chart",
+        "vision/document",
+        "vision/general",
+        "vision/ocr"
+      ]
+    },
+    "20": {
+      "E": 288,
+      "domains": [
+        "agent",
+        "code",
+        "general",
+        "knowledge/multitopic",
+        "long-context",
+        "multilingual/es",
+        "multilingual/ru",
+        "multilingual/zh",
+        "reasoning",
+        "systems",
+        "vision/chart",
+        "vision/document",
+        "vision/general",
+        "vision/ocr"
+      ]
+    },
+    "21": {
+      "E": 288,
+      "domains": [
+        "agent",
+        "code",
+        "general",
+        "knowledge/multitopic",
+        "long-context",
+        "multilingual/es",
+        "multilingual/ru",
+        "multilingual/zh",
+        "reasoning",
+        "systems",
+        "vision/chart",
+        "vision/document",
+        "vision/general",
+        "vision/ocr"
+      ]
+    },
+    "22": {
+      "E": 288,
+      "domains": [
+        "agent",
+        "code",
+        "general",
+        "knowledge/multitopic",
+        "long-context",
+        "multilingual/es",
+        "multilingual/ru",
+        "multilingual/zh",
+        "reasoning",
+        "systems",
+        "vision/chart",
+        "vision/document",
+        "vision/general",
+        "vision/ocr"
+      ]
+    },
+    "23": {
+      "E": 288,
+      "domains": [
+        "agent",
+        "code",
+        "general",
+        "knowledge/multitopic",
+        "long-context",
+        "multilingual/es",
+        "multilingual/ru",
+        "multilingual/zh",
+        "reasoning",
+        "systems",
+        "vision/chart",
+        "vision/document",
+        "vision/general",
+        "vision/ocr"
+      ]
+    },
+    "24": {
+      "E": 288,
+      "domains": [
+        "agent",
+        "code",
+        "general",
+        "knowledge/multitopic",
+        "long-context",
+        "multilingual/es",
+        "multilingual/ru",
+        "multilingual/zh",
+        "reasoning",
+        "systems",
+        "vision/chart",
+        "vision/document",
+        "vision/general",
+        "vision/ocr"
+      ]
+    },
+    "25": {
+      "E": 288,
+      "domains": [
+        "agent",
+        "code",
+        "general",
+        "knowledge/multitopic",
+        "long-context",
+        "multilingual/es",
+        "multilingual/ru",
+        "multilingual/zh",
+        "reasoning",
+        "systems",
+        "vision/chart",
+        "vision/document",
+        "vision/general",
+        "vision/ocr"
+      ]
+    },
+    "26": {
+      "E": 288,
+      "domains": [
+        "agent",
+        "code",
+        "general",
+        "knowledge/multitopic",
+        "long-context",
+        "multilingual/es",
+        "multilingual/ru",
+        "multilingual/zh",
+        "reasoning",
+        "systems",
+        "vision/chart",
+        "vision/document",
+        "vision/general",
+        "vision/ocr"
+      ]
+    },
+    "27": {
+      "E": 288,
+      "domains": [
+        "agent",
+        "code",
+        "general",
+        "knowledge/multitopic",
+        "long-context",
+        "multilingual/es",
+        "multilingual/ru",
+        "multilingual/zh",
+        "reasoning",
+        "systems",
+        "vision/chart",
+        "vision/document",
+        "vision/general",
+        "vision/ocr"
+      ]
+    },
+    "28": {
+      "E": 288,
+      "domains": [
+        "agent",
+        "code",
+        "general",
+        "knowledge/multitopic",
+        "long-context",
+        "multilingual/es",
+        "multilingual/ru",
+        "multilingual/zh",
+        "reasoning",
+        "systems",
+        "vision/chart",
+        "vision/document",
+        "vision/general",
+        "vision/ocr"
+      ]
+    },
+    "29": {
+      "E": 288,
+      "domains": [
+        "agent",
+        "code",
+        "general",
+        "knowledge/multitopic",
+        "long-context",
+        "multilingual/es",
+        "multilingual/ru",
+        "multilingual/zh",
+        "reasoning",
+        "systems",
+        "vision/chart",
+        "vision/document",
+        "vision/general",
+        "vision/ocr"
+      ]
+    },
+    "30": {
+      "E": 288,
+      "domains": [
+        "agent",
+        "code",
+        "general",
+        "knowledge/multitopic",
+        "long-context",
+        "multilingual/es",
+        "multilingual/ru",
+        "multilingual/zh",
+        "reasoning",
+        "systems",
+        "vision/chart",
+        "vision/document",
+        "vision/general",
+        "vision/ocr"
+      ]
+    },
+    "31": {
+      "E": 288,
+      "domains": [
+        "agent",
+        "code",
+        "general",
+        "knowledge/multitopic",
+        "long-context",
+        "multilingual/es",
+        "multilingual/ru",
+        "multilingual/zh",
+        "reasoning",
+        "systems",
+        "vision/chart",
+        "vision/document",
+        "vision/general",
+        "vision/ocr"
+      ]
+    },
+    "32": {
+      "E": 288,
+      "domains": [
+        "agent",
+        "code",
+        "general",
+        "knowledge/multitopic",
+        "long-context",
+        "multilingual/es",
+        "multilingual/ru",
+        "multilingual/zh",
+        "reasoning",
+        "systems",
+        "vision/chart",
+        "vision/document",
+        "vision/general",
+        "vision/ocr"
+      ]
+    },
+    "33": {
+      "E": 288,
+      "domains": [
+        "agent",
+        "code",
+        "general",
+        "knowledge/multitopic",
+        "long-context",
+        "multilingual/es",
+        "multilingual/ru",
+        "multilingual/zh",
+        "reasoning",
+        "systems",
+        "vision/chart",
+        "vision/document",
+        "vision/general",
+        "vision/ocr"
+      ]
+    },
+    "34": {
+      "E": 288,
+      "domains": [
+        "agent",
+        "code",
+        "general",
+        "knowledge/multitopic",
+        "long-context",
+        "multilingual/es",
+        "multilingual/ru",
+        "multilingual/zh",
+        "reasoning",
+        "systems",
+        "vision/chart",
+        "vision/document",
+        "vision/general",
+        "vision/ocr"
+      ]
+    },
+    "35": {
+      "E": 288,
+      "domains": [
+        "agent",
+        "code",
+        "general",
+        "knowledge/multitopic",
+        "long-context",
+        "multilingual/es",
+        "multilingual/ru",
+        "multilingual/zh",
+        "reasoning",
+        "systems",
+        "vision/chart",
+        "vision/document",
+        "vision/general",
+        "vision/ocr"
+      ]
+    },
+    "36": {
+      "E": 288,
+      "domains": [
+        "agent",
+        "code",
+        "general",
+        "knowledge/multitopic",
+        "long-context",
+        "multilingual/es",
+        "multilingual/ru",
+        "multilingual/zh",
+        "reasoning",
+        "systems",
+        "vision/chart",
+        "vision/document",
+        "vision/general",
+        "vision/ocr"
+      ]
+    },
+    "37": {
+      "E": 288,
+      "domains": [
+        "agent",
+        "code",
+        "general",
+        "knowledge/multitopic",
+        "long-context",
+        "multilingual/es",
+        "multilingual/ru",
+        "multilingual/zh",
+        "reasoning",
+        "systems",
+        "vision/chart",
+        "vision/document",
+        "vision/general",
+        "vision/ocr"
+      ]
+    },
+    "38": {
+      "E": 288,
+      "domains": [
+        "agent",
+        "code",
+        "general",
+        "knowledge/multitopic",
+        "long-context",
+        "multilingual/es",
+        "multilingual/ru",
+        "multilingual/zh",
+        "reasoning",
+        "systems",
+        "vision/chart",
+        "vision/document",
+        "vision/general",
+        "vision/ocr"
+      ]
+    },
+    "39": {
+      "E": 288,
+      "domains": [
+        "agent",
+        "code",
+        "general",
+        "knowledge/multitopic",
+        "long-context",
+        "multilingual/es",
+        "multilingual/ru",
+        "multilingual/zh",
+        "reasoning",
+        "systems",
+        "vision/chart",
+        "vision/document",
+        "vision/general",
+        "vision/ocr"
+      ]
+    },
+    "40": {
+      "E": 288,
+      "domains": [
+        "agent",
+        "code",
+        "general",
+        "knowledge/multitopic",
+        "long-context",
+        "multilingual/es",
+        "multilingual/ru",
+        "multilingual/zh",
+        "reasoning",
+        "systems",
+        "vision/chart",
+        "vision/document",
+        "vision/general",
+        "vision/ocr"
+      ]
+    },
+    "41": {
+      "E": 288,
+      "domains": [
+        "agent",
+        "code",
+        "general",
+        "knowledge/multitopic",
+        "long-context",
+        "multilingual/es",
+        "multilingual/ru",
+        "multilingual/zh",
+        "reasoning",
+        "systems",
+        "vision/chart",
+        "vision/document",
+        "vision/general",
+        "vision/ocr"
+      ]
+    },
+    "42": {
+      "E": 288,
+      "domains": [
+        "agent",
+        "code",
+        "general",
+        "knowledge/multitopic",
+        "long-context",
+        "multilingual/es",
+        "multilingual/ru",
+        "multilingual/zh",
+        "reasoning",
+        "systems",
+        "vision/chart",
+        "vision/document",
+        "vision/general",
+        "vision/ocr"
+      ]
+    },
+    "43": {
+      "E": 288,
+      "domains": [
+        "agent",
+        "code",
+        "general",
+        "knowledge/multitopic",
+        "long-context",
+        "multilingual/es",
+        "multilingual/ru",
+        "multilingual/zh",
+        "reasoning",
+        "systems",
+        "vision/chart",
+        "vision/document",
+        "vision/general",
+        "vision/ocr"
+      ]
+    },
+    "44": {
+      "E": 288,
+      "domains": [
+        "agent",
+        "code",
+        "general",
+        "knowledge/multitopic",
+        "long-context",
+        "multilingual/es",
+        "multilingual/ru",
+        "multilingual/zh",
+        "reasoning",
+        "systems",
+        "vision/chart",
+        "vision/document",
+        "vision/general",
+        "vision/ocr"
+      ]
+    }
+  },
+  "run": {
+    "merged_from": [
+      "out/native-full-shard0",
+      "out/native-full-shard1",
+      "out/native-full-shard2",
+      "out/native-full-shard3",
+      "out/native-full-shard4",
+      "out/native-full-shard5",
+      "out/native-full-shard6",
+      "out/native-full-shard7"
+    ],
+    "runs": [
+      {
+        "model": "/workspace/models/GLM-5.3-Flash-NVFP4-RedHatAI",
+        "data": "/workspace/glm53-reap-atlas-capture/data/calibration.jsonl",
+        "data_sha256": "e2e62cd590838ae817a503e356e2f8ba7f9c1dcfcebf0759e751a3c0302ecc17",
+        "checkpoint": {
+          "config_sha256": "29c9f4171196910e99b9c069d6b76c56e3cdcd0f436dc1bacbc9513c9a7529ac",
+          "weight_shards": 11,
+          "weight_bytes": 197843812476,
+          "index_sha256": "015faae91e8189c7553f1d48ec3d0694b8c02b282d7f58af2d7b4064a81ce4c0"
+        },
+        "runtime": {
+          "vllm": "0.1.dev20051+g487ecf187",
+          "torch": "2.13.0+cu130",
+          "transformers": "5.15.1"
+        },
+        "shard_index": 0,
+        "num_shards": 8,
+        "records": 2135,
+        "wall_s": 1937.01,
+        "config": {
+          "schema": 1,
+          "mode": "reap",
+          "exact_sample_rate": 0.02,
+          "sample_seed": 530017,
+          "pair_chunk": 8192,
+          "rank_policy": "rank0",
+          "tensor_parallel_size": 4,
+          "max_model_len": 32768,
+          "max_num_seqs": 16,
+          "max_num_batched_tokens": 32768,
+          "gpu_memory_utilization": 0.9,
+          "prompt_batch": 64,
+          "kv_cache_dtype": "fp8",
+          "enforce_eager": true,
+          "enable_prefix_caching": false,
+          "enable_chunked_prefill": false,
+          "limit_mm_per_prompt": {
+            "image": 1
+          },
+          "skip_mm_profiling": true,
+          "crosscheck_min_cosine": 0.999,
+          "crosscheck_p99_relative_l2": 0.01,
+          "crosscheck_max_relative_l2": 0.02
+        }
+      },
+      {
+        "model": "/workspace/models/GLM-5.3-Flash-NVFP4-RedHatAI",
+        "data": "/workspace/glm53-reap-atlas-capture/data/calibration.jsonl",
+        "data_sha256": "e2e62cd590838ae817a503e356e2f8ba7f9c1dcfcebf0759e751a3c0302ecc17",
+        "checkpoint": {
+          "config_sha256": "29c9f4171196910e99b9c069d6b76c56e3cdcd0f436dc1bacbc9513c9a7529ac",
+          "weight_shards": 11,
+          "weight_bytes": 197843812476,
+          "index_sha256": "015faae91e8189c7553f1d48ec3d0694b8c02b282d7f58af2d7b4064a81ce4c0"
+        },
+        "runtime": {
+          "vllm": "0.1.dev20051+g487ecf187",
+          "torch": "2.13.0+cu130",
+          "transformers": "5.15.1"
+        },
+        "shard_index": 1,
+        "num_shards": 8,
+        "records": 2135,
+        "wall_s": 1791.95,
+        "config": {
+          "schema": 1,
+          "mode": "reap",
+          "exact_sample_rate": 0.02,
+          "sample_seed": 530017,
+          "pair_chunk": 8192,
+          "rank_policy": "rank0",
+          "tensor_parallel_size": 4,
+          "max_model_len": 32768,
+          "max_num_seqs": 16,
+          "max_num_batched_tokens": 32768,
+          "gpu_memory_utilization": 0.9,
+          "prompt_batch": 64,
+          "kv_cache_dtype": "fp8",
+          "enforce_eager": true,
+          "enable_prefix_caching": false,
+          "enable_chunked_prefill": false,
+          "limit_mm_per_prompt": {
+            "image": 1
+          },
+          "skip_mm_profiling": true,
+          "crosscheck_min_cosine": 0.999,
+          "crosscheck_p99_relative_l2": 0.01,
+          "crosscheck_max_relative_l2": 0.02
+        }
+      },
+      {
+        "model": "/workspace/models/GLM-5.3-Flash-NVFP4-RedHatAI",
+        "data": "/workspace/glm53-reap-atlas-capture/data/calibration.jsonl",
+        "data_sha256": "e2e62cd590838ae817a503e356e2f8ba7f9c1dcfcebf0759e751a3c0302ecc17",
+        "checkpoint": {
+          "config_sha256": "29c9f4171196910e99b9c069d6b76c56e3cdcd0f436dc1bacbc9513c9a7529ac",
+          "weight_shards": 11,
+          "weight_bytes": 197843812476,
+          "index_sha256": "015faae91e8189c7553f1d48ec3d0694b8c02b282d7f58af2d7b4064a81ce4c0"
+        },
+        "runtime": {
+          "vllm": "0.1.dev20051+g487ecf187",
+          "torch": "2.13.0+cu130",
+          "transformers": "5.15.1"
+        },
+        "shard_index": 2,
+        "num_shards": 8,
+        "records": 2135,
+        "wall_s": 1669.45,
+        "config": {
+          "schema": 1,
+          "mode": "reap",
+          "exact_sample_rate": 0.02,
+          "sample_seed": 530017,
+          "pair_chunk": 8192,
+          "rank_policy": "rank0",
+          "tensor_parallel_size": 4,
+          "max_model_len": 32768,
+          "max_num_seqs": 16,
+          "max_num_batched_tokens": 32768,
+          "gpu_memory_utilization": 0.9,
+          "prompt_batch": 64,
+          "kv_cache_dtype": "fp8",
+          "enforce_eager": true,
+          "enable_prefix_caching": false,
+          "enable_chunked_prefill": false,
+          "limit_mm_per_prompt": {
+            "image": 1
+          },
+          "skip_mm_profiling": true,
+          "crosscheck_min_cosine": 0.999,
+          "crosscheck_p99_relative_l2": 0.01,
+          "crosscheck_max_relative_l2": 0.02
+        }
+      },
+      {
+        "model": "/workspace/models/GLM-5.3-Flash-NVFP4-RedHatAI",
+        "data": "/workspace/glm53-reap-atlas-capture/data/calibration.jsonl",
+        "data_sha256": "e2e62cd590838ae817a503e356e2f8ba7f9c1dcfcebf0759e751a3c0302ecc17",
+        "checkpoint": {
+          "config_sha256": "29c9f4171196910e99b9c069d6b76c56e3cdcd0f436dc1bacbc9513c9a7529ac",
+          "weight_shards": 11,
+          "weight_bytes": 197843812476,
+          "index_sha256": "015faae91e8189c7553f1d48ec3d0694b8c02b282d7f58af2d7b4064a81ce4c0"
+        },
+        "runtime": {
+          "vllm": "0.1.dev20051+g487ecf187",
+          "torch": "2.13.0+cu130",
+          "transformers": "5.15.1"
+        },
+        "shard_index": 3,
+        "num_shards": 8,
+        "records": 2135,
+        "wall_s": 585.89,
+        "config": {
+          "schema": 1,
+          "mode": "reap",
+          "exact_sample_rate": 0.02,
+          "sample_seed": 530017,
+          "pair_chunk": 8192,
+          "rank_policy": "rank0",
+          "tensor_parallel_size": 4,
+          "max_model_len": 32768,
+          "max_num_seqs": 16,
+          "max_num_batched_tokens": 32768,
+          "gpu_memory_utilization": 0.9,
+          "prompt_batch": 16,
+          "kv_cache_dtype": "fp8",
+          "enforce_eager": true,
+          "enable_prefix_caching": false,
+          "enable_chunked_prefill": false,
+          "limit_mm_per_prompt": {
+            "image": 1
+          },
+          "skip_mm_profiling": true,
+          "crosscheck_min_cosine": 0.999,
+          "crosscheck_p99_relative_l2": 0.01,
+          "crosscheck_max_relative_l2": 0.02
+        }
+      },
+      {
+        "model": "/workspace/models/GLM-5.3-Flash-NVFP4-RedHatAI",
+        "data": "/workspace/glm53-reap-atlas-capture/data/calibration.jsonl",
+        "data_sha256": "e2e62cd590838ae817a503e356e2f8ba7f9c1dcfcebf0759e751a3c0302ecc17",
+        "checkpoint": {
+          "config_sha256": "29c9f4171196910e99b9c069d6b76c56e3cdcd0f436dc1bacbc9513c9a7529ac",
+          "weight_shards": 11,
+          "weight_bytes": 197843812476,
+          "index_sha256": "015faae91e8189c7553f1d48ec3d0694b8c02b282d7f58af2d7b4064a81ce4c0"
+        },
+        "runtime": {
+          "vllm": "0.1.dev20051+g487ecf187",
+          "torch": "2.13.0+cu130",
+          "transformers": "5.15.1"
+        },
+        "shard_index": 4,
+        "num_shards": 8,
+        "records": 2135,
+        "wall_s": 605.14,
+        "config": {
+          "schema": 1,
+          "mode": "reap",
+          "exact_sample_rate": 0.02,
+          "sample_seed": 530017,
+          "pair_chunk": 8192,
+          "rank_policy": "rank0",
+          "tensor_parallel_size": 4,
+          "max_model_len": 32768,
+          "max_num_seqs": 16,
+          "max_num_batched_tokens": 32768,
+          "gpu_memory_utilization": 0.9,
+          "prompt_batch": 16,
+          "kv_cache_dtype": "fp8",
+          "enforce_eager": true,
+          "enable_prefix_caching": false,
+          "enable_chunked_prefill": false,
+          "limit_mm_per_prompt": {
+            "image": 1
+          },
+          "skip_mm_profiling": true,
+          "crosscheck_min_cosine": 0.999,
+          "crosscheck_p99_relative_l2": 0.01,
+          "crosscheck_max_relative_l2": 0.02
+        }
+      },
+      {
+        "model": "/workspace/models/GLM-5.3-Flash-NVFP4-RedHatAI",
+        "data": "/workspace/glm53-reap-atlas-capture/data/calibration.jsonl",
+        "data_sha256": "e2e62cd590838ae817a503e356e2f8ba7f9c1dcfcebf0759e751a3c0302ecc17",
+        "checkpoint": {
+          "config_sha256": "29c9f4171196910e99b9c069d6b76c56e3cdcd0f436dc1bacbc9513c9a7529ac",
+          "weight_shards": 11,
+          "weight_bytes": 197843812476,
+          "index_sha256": "015faae91e8189c7553f1d48ec3d0694b8c02b282d7f58af2d7b4064a81ce4c0"
+        },
+        "runtime": {
+          "vllm": "0.1.dev20051+g487ecf187",
+          "torch": "2.13.0+cu130",
+          "transformers": "5.15.1"
+        },
+        "shard_index": 5,
+        "num_shards": 8,
+        "records": 2135,
+        "wall_s": 584.58,
+        "config": {
+          "schema": 1,
+          "mode": "reap",
+          "exact_sample_rate": 0.02,
+          "sample_seed": 530017,
+          "pair_chunk": 8192,
+          "rank_policy": "rank0",
+          "tensor_parallel_size": 4,
+          "max_model_len": 32768,
+          "max_num_seqs": 16,
+          "max_num_batched_tokens": 32768,
+          "gpu_memory_utilization": 0.9,
+          "prompt_batch": 16,
+          "kv_cache_dtype": "fp8",
+          "enforce_eager": true,
+          "enable_prefix_caching": false,
+          "enable_chunked_prefill": false,
+          "limit_mm_per_prompt": {
+            "image": 1
+          },
+          "skip_mm_profiling": true,
+          "crosscheck_min_cosine": 0.999,
+          "crosscheck_p99_relative_l2": 0.01,
+          "crosscheck_max_relative_l2": 0.02
+        }
+      },
+      {
+        "model": "/workspace/models/GLM-5.3-Flash-NVFP4-RedHatAI",
+        "data": "/workspace/glm53-reap-atlas-capture/data/calibration.jsonl",
+        "data_sha256": "e2e62cd590838ae817a503e356e2f8ba7f9c1dcfcebf0759e751a3c0302ecc17",
+        "checkpoint": {
+          "config_sha256": "29c9f4171196910e99b9c069d6b76c56e3cdcd0f436dc1bacbc9513c9a7529ac",
+          "weight_shards": 11,
+          "weight_bytes": 197843812476,
+          "index_sha256": "015faae91e8189c7553f1d48ec3d0694b8c02b282d7f58af2d7b4064a81ce4c0"
+        },
+        "runtime": {
+          "vllm": "0.1.dev20051+g487ecf187",
+          "torch": "2.13.0+cu130",
+          "transformers": "5.15.1"
+        },
+        "shard_index": 6,
+        "num_shards": 8,
+        "records": 2134,
+        "wall_s": 569.81,
+        "config": {
+          "schema": 1,
+          "mode": "reap",
+          "exact_sample_rate": 0.02,
+          "sample_seed": 530017,
+          "pair_chunk": 8192,
+          "rank_policy": "rank0",
+          "tensor_parallel_size": 4,
+          "max_model_len": 32768,
+          "max_num_seqs": 16,
+          "max_num_batched_tokens": 32768,
+          "gpu_memory_utilization": 0.9,
+          "prompt_batch": 16,
+          "kv_cache_dtype": "fp8",
+          "enforce_eager": true,
+          "enable_prefix_caching": false,
+          "enable_chunked_prefill": false,
+          "limit_mm_per_prompt": {
+            "image": 1
+          },
+          "skip_mm_profiling": true,
+          "crosscheck_min_cosine": 0.999,
+          "crosscheck_p99_relative_l2": 0.01,
+          "crosscheck_max_relative_l2": 0.02
+        }
+      },
+      {
+        "model": "/workspace/models/GLM-5.3-Flash-NVFP4-RedHatAI",
+        "data": "/workspace/glm53-reap-atlas-capture/data/calibration.jsonl",
+        "data_sha256": "e2e62cd590838ae817a503e356e2f8ba7f9c1dcfcebf0759e751a3c0302ecc17",
+        "checkpoint": {
+          "config_sha256": "29c9f4171196910e99b9c069d6b76c56e3cdcd0f436dc1bacbc9513c9a7529ac",
+          "weight_shards": 11,
+          "weight_bytes": 197843812476,
+          "index_sha256": "015faae91e8189c7553f1d48ec3d0694b8c02b282d7f58af2d7b4064a81ce4c0"
+        },
+        "runtime": {
+          "vllm": "0.1.dev20051+g487ecf187",
+          "torch": "2.13.0+cu130",
+          "transformers": "5.15.1"
+        },
+        "shard_index": 7,
+        "num_shards": 8,
+        "records": 2134,
+        "wall_s": 570.57,
+        "config": {
+          "schema": 1,
+          "mode": "reap",
+          "exact_sample_rate": 0.02,
+          "sample_seed": 530017,
+          "pair_chunk": 8192,
+          "rank_policy": "rank0",
+          "tensor_parallel_size": 4,
+          "max_model_len": 32768,
+          "max_num_seqs": 16,
+          "max_num_batched_tokens": 32768,
+          "gpu_memory_utilization": 0.9,
+          "prompt_batch": 16,
+          "kv_cache_dtype": "fp8",
+          "enforce_eager": true,
+          "enable_prefix_caching": false,
+          "enable_chunked_prefill": false,
+          "limit_mm_per_prompt": {
+            "image": 1
+          },
+          "skip_mm_profiling": true,
+          "crosscheck_min_cosine": 0.999,
+          "crosscheck_p99_relative_l2": 0.01,
+          "crosscheck_max_relative_l2": 0.02
+        }
+      }
+    ]
+  }
+}

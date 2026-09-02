@@ -77,6 +77,7 @@ function groupNode(store: Store, g: GroupInfo, geom: NodeGeom): HTMLElement {
   const avg = int4s.length ? int4s.reduce((a, b) => a + b, 0) / int4s.length : null;
   const worst = d2.length ? d2.reduce((a, b) => a.sqnr_int4_g128! < b.sqnr_int4_g128! ? a : b) : null;
   const md = m.metrics.int4;
+  const metricLabel = m.entry.kind === 'glm-live' ? t('glm.node.avg') : t('node.avg');
 
   node.innerHTML = `
     <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px">
@@ -85,7 +86,7 @@ function groupNode(store: Store, g: GroupInfo, geom: NodeGeom): HTMLElement {
     </div>
     <div class="mono" style="font-size:34px;font-weight:500;color:${k.fg};letter-spacing:-0.02em;margin-bottom:8px">${fmtN(g.params)}</div>
     <div style="font-size:24px;line-height:1.15;margin-bottom:9px">${g.label}</div>
-    <div style="font-size:15px;line-height:1.5;color:var(--muted);text-wrap:pretty">${t('node.text.' + g.key)}</div>
+    <div style="font-size:15px;line-height:1.5;color:var(--muted);text-wrap:pretty">${t((m.entry.kind === 'glm-live' ? 'glm.' : '') + 'node.text.' + g.key)}</div>
     <div style="margin-top:13px;display:flex;flex-direction:column;gap:7px">
       <div style="display:flex;align-items:center;gap:8px">
         <div class="bar-track" style="flex:1"><div class="bar-fill" style="width:${g.share.toFixed(1)}%;background:${k.solid}"></div></div>
@@ -93,10 +94,10 @@ function groupNode(store: Store, g: GroupInfo, geom: NodeGeom): HTMLElement {
       </div>
       ${avg != null ? `
       <div style="display:flex;align-items:center;gap:8px;justify-content:space-between">
-        <div class="mono" style="font-size:12.5px;color:var(--faint)">${t('node.avg')} <span style="color:${ink(avg, md)}">${avg.toFixed(2)} ${t('unit.db')}</span></div>
+        <div class="mono" style="font-size:12.5px;color:var(--faint)">${metricLabel} <span style="color:${ink(avg, md)}">${avg.toFixed(2)} ${t('unit.db')}</span></div>
         <div class="mono" style="font-size:12px;color:var(--faint)">${t('node.worst')} <span style="color:${ink(worst!.sqnr_int4_g128!, md)}">${worst!.sqnr_int4_g128!.toFixed(1)}</span></div>
       </div>` : `
-      <div class="mono" style="font-size:12.5px;color:var(--ghost)">${t('node.1d')}</div>`}
+      <div class="mono" style="font-size:12.5px;color:var(--ghost)">${t(m.entry.kind === 'glm-live' ? 'glm.node.inventory' : 'node.1d')}</div>`}
     </div>`;
 
   node.addEventListener('click', () => store.select({ type: 'group', group: g }));
@@ -127,9 +128,9 @@ function railNode(store: Store, geom: NodeGeom): HTMLElement {
     <div class="rail-rows" style="display:flex;flex-direction:column;gap:1px"></div>
     <div style="display:flex;align-items:center;gap:14px;margin-top:10px" class="mono">
       <div style="display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--faint)">
-        <div style="width:6px;height:11px;border-radius:2px;background:${kindOf('attn').solid}"></div>${t('kind.full')}</div>
+        <div style="width:6px;height:11px;border-radius:2px;background:${kindOf('attn').solid}"></div>${t(m.entry.kind === 'glm-live' ? 'glm.kind.sparse' : 'kind.full')}</div>
       <div style="display:flex;align-items:center;gap:6px;font-size:11.5px;color:var(--faint)">
-        <div style="width:6px;height:11px;border-radius:2px;background:${kindOf('lin').solid}"></div>${t('kind.linear')}</div>
+        <div style="width:6px;height:11px;border-radius:2px;background:${kindOf('lin').solid}"></div>${t(m.entry.kind === 'glm-live' ? 'glm.kind.kda' : 'kind.linear')}</div>
     </div>`;
 
   const rows = node.querySelector('.rail-rows')!;
@@ -149,7 +150,7 @@ function railNode(store: Store, geom: NodeGeom): HTMLElement {
     row.appendChild(strip);
     row.addEventListener('click', () => store.select({ type: 'layer', layer: L }));
     row.addEventListener('mouseenter', (e) => tip(
-      `<span class="mono">${t('depth.layer', L.label)}</span> · ${L.kind === 'full' ? t('kind.full') : t('kind.linear')} · ${fmtN(L.params)}`,
+      `<span class="mono">${t('depth.layer', L.label)}</span> · ${L.kind === 'full' ? t(m.entry.kind === 'glm-live' ? 'glm.kind.sparse' : 'kind.full') : t(m.entry.kind === 'glm-live' ? 'glm.kind.kda' : 'kind.linear')} · ${fmtN(L.params)}`,
       (e as MouseEvent).clientX, (e as MouseEvent).clientY));
     row.addEventListener('mouseleave', hideTip);
     rows.appendChild(row);

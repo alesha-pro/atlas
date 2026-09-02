@@ -65,6 +65,7 @@ export interface MetricDef {
 export interface Model {
   slug: string;
   name: string;
+  entry: ManifestEntry;
   tensors: Tensor[];
   langLayers: Layer[];
   visBlocks: Layer[];
@@ -79,7 +80,11 @@ export interface Model {
   int4Sorted: number[];   // для перцентилей вердикта
 }
 
-export interface ManifestEntry { slug: string; name: string; note?: string; }
+export interface ManifestEntry {
+  slug: string; name: string; note?: string;
+  kind?: 'weight' | 'glm-live';
+  total_params?: number; active_params?: number;
+}
 
 const SLOT_ORDER = [
   'attn.q', 'attn.k', 'attn.v', 'attn.o', 'attn.q_norm', 'attn.k_norm',
@@ -197,6 +202,15 @@ export async function loadLive(slug: string): Promise<any | null> {
   return live;
 }
 
+export async function loadInsights(slug: string): Promise<any | null> {
+  try {
+    const r = await fetch(new URL(`models/${slug}/insights.json`, document.baseURI));
+    return r.ok ? await r.json() : null;
+  } catch {
+    return null;
+  }
+}
+
 export async function loadManifest(): Promise<ManifestEntry[]> {
   const r = await fetch(new URL('models/manifest.json', document.baseURI));
   return r.json();
@@ -256,12 +270,12 @@ export async function loadModel(entry: ManifestEntry): Promise<Model> {
     .sort((a, b) => b.numel - a.numel);
   const topLayer: Layer = { key: 'top', label: 'вход/выход', kind: 'top', idx: 0, tensors: topTs, params: sum(topTs) };
 
-  const totalParams = sum(tensors);
+  const totalParams = entry.total_params ?? sum(tensors);
   const langParams = sum(tensors.filter(t => t.stack === 'lang')) + sum(topTs.filter(t => !t.name.startsWith('mtp')));
   const visParams = sum(tensors.filter(t => t.stack === 'vision'));
 
   // группы для архитектурной карты
-  const groups = buildGroups(tensors, totalParams);
+  const groups = buildGroups(tensors, totalParams, entry.kind === 'glm-live');
 
   // четверти стека по INT4
   const L = langLayers.length;
@@ -293,11 +307,17 @@ export async function loadModel(entry: ManifestEntry): Promise<Model> {
     M('out3s', '%', x => x.outlier_3s * 100, { invert: true, digits: 2 }),
   ];
   for (const d of defs) metrics[d.key] = d;
+  if (entry.kind === 'glm-live') {
+    metrics.int4.label = t('glm.metric.qdq');
+    metrics.int4.loT = t('glm.sc.qdq.lo');
+    metrics.int4.hiT = t('glm.sc.qdq.hi');
+    metrics.int4.abs = undefined;
+  }
 
   const int4Sorted = tensors.map(t => t.sqnr_int4_g128).filter((v): v is number => v != null).sort((a, b) => a - b);
 
   return {
-    slug: entry.slug, name: entry.name, tensors, langLayers, visBlocks, topLayer, visExtra,
+    slug: entry.slug, name: entry.name, entry, tensors, langLayers, visBlocks, topLayer, visExtra,
     groups, metrics, totalParams, langParams, visParams, quarters, int4Sorted,
   };
 }
@@ -329,7 +349,7 @@ function groupOf(t: Tensor): string {
   return 'norm';
 }
 
-function buildGroups(tensors: Tensor[], total: number): GroupInfo[] {
+function buildGroups(tensors: Tensor[], total: number, isGlm = false): GroupInfo[] {
   const defs: [string, string][] = [
     ['embed', 'in'], ['attn', 'attn'], ['linattn', 'lin'], ['mlp', 'mlp'],
     ['norm', 'norm'], ['vision', 'vision'], ['head', 'out'], ['mtp', 'out'],
@@ -337,7 +357,9 @@ function buildGroups(tensors: Tensor[], total: number): GroupInfo[] {
   return defs.map(([key, kind]) => {
     const ts = tensors.filter(x => x.group === key);
     return {
-      key, kind, label: t(`group.${key}.label`), plain: t(`group.${key}.plain`),
+      key, kind,
+      label: t(`${isGlm ? 'glm.' : ''}group.${key}.label`),
+      plain: t(`${isGlm ? 'glm.' : ''}group.${key}.plain`),
       tensors: ts, params: sum(ts), share: sum(ts) / total * 100,
     };
   }).filter(g => g.tensors.length > 0);

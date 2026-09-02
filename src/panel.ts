@@ -178,6 +178,21 @@ function renderTensor(store: Store, head: HTMLElement, body: HTMLElement, x: Ten
     `[${x.shape.join('×')}] · ${x.dtype} · ${fmtN(x.numel)} · ${x.shard.replace('model-', '').replace('.safetensors', '')}`);
   wireClose(store, head);
 
+  if (m.entry.kind === 'glm-live') {
+    const qdq = x.sqnr_int4_g128;
+    body.innerHTML = `
+      <div style="font-size:16px;line-height:1.55;color:var(--ink-soft);text-wrap:pretty">${tr('glm.panel.tensor.note')}</div>
+      <div class="stat-card">
+        <div class="mono" style="font-size:10px;letter-spacing:0.08em;color:var(--faint)">${qdq == null ? tr('glm.panel.provenance') : tr('glm.metric.qdq')}</div>
+        <div class="mono" style="font-size:${qdq == null ? 15 : 24}px;line-height:1.15;color:var(--ink)">${qdq == null ? tr('glm.panel.config') : `${qdq.toFixed(2)} ${tr('unit.db')}`}</div>
+        <div class="small-note">${qdq == null ? tr('glm.panel.config.note') : tr('glm.panel.qdq.note')}</div>
+      </div>
+      <div class="chip mini" style="align-self:flex-start" data-fly>${tr('panel.fly')}</div>`;
+    body.querySelector('[data-fly]')?.addEventListener('click', () => onFly(x));
+    body.scrollTop = 0;
+    return;
+  }
+
   body.innerHTML = `
     <div style="font-size:16px;line-height:1.55;color:var(--ink-soft);text-wrap:pretty">${verdict(m, x)}</div>
     ${x.is2d || x.sqnr_int8_ch != null ? sqnrCards(x, m) : ''}
@@ -194,7 +209,7 @@ function renderLayer(store: Store, head: HTMLElement, body: HTMLElement, L: Laye
   const m = store.model;
   const d = store.md;
   const kind = L.kind === 'full' ? 'attn' : L.kind === 'linear' ? 'lin' : L.kind === 'vision' ? 'vision' : 'out';
-  const label = L.kind === 'full' ? tr('kind.full') : L.kind === 'linear' ? tr('kind.linear.long')
+  const label = L.kind === 'full' ? tr(m.entry.kind === 'glm-live' ? 'glm.kind.sparse' : 'kind.full') : L.kind === 'linear' ? tr(m.entry.kind === 'glm-live' ? 'glm.kind.kda' : 'kind.linear.long')
     : L.kind === 'vision' ? tr('kind.visblock') : tr('kind.top');
   const title = L.kind === 'vision' ? tr('layer.title.vis', L.label.replace('v', ''))
     : L.kind === 'top' ? tr('layer.title.top') : tr('layer.title', L.label);
@@ -203,12 +218,15 @@ function renderLayer(store: Store, head: HTMLElement, body: HTMLElement, L: Laye
 
   const int4s = L.tensors.map(x => x.sqnr_int4_g128).filter((v): v is number => v != null);
   const avg = int4s.length ? int4s.reduce((a, b) => a + b, 0) / int4s.length : null;
-  const textKey = L.kind === 'full' ? 'layer.text.full' : L.kind === 'linear' ? 'layer.text.linear'
+  const textKey = m.entry.kind === 'glm-live'
+    ? (L.kind === 'full' ? 'glm.layer.text.sparse' : L.kind === 'linear' ? 'glm.layer.text.kda'
+      : L.kind === 'vision' ? 'glm.layer.text.vision' : 'glm.layer.text.top')
+    : L.kind === 'full' ? 'layer.text.full' : L.kind === 'linear' ? 'layer.text.linear'
     : L.kind === 'vision' ? 'layer.text.vision' : 'layer.text.top';
 
   body.innerHTML = `
     <div style="font-size:15.5px;line-height:1.55;color:var(--ink-soft);text-wrap:pretty">${tr(textKey)}${
-      avg != null ? tr('layer.avg', avg.toFixed(2)) : ''}</div>
+      avg != null ? (m.entry.kind === 'glm-live' ? tr('glm.layer.avg', avg.toFixed(2)) : tr('layer.avg', avg.toFixed(2))) : ''}</div>
     <div style="display:flex;flex-direction:column;gap:6px">
       <div class="eyebrow mono">${tr('layer.list')}</div>
       <div class="layer-list" style="display:flex;flex-direction:column;gap:5px"></div>
@@ -238,6 +256,23 @@ function renderGroup(store: Store, head: HTMLElement, body: HTMLElement, key: st
   head.innerHTML = headHTML(g.plain, g.kind, g.label,
     `${tr('layer.sub', g.tensors.length, fmtN(g.params))} · ${g.share.toFixed(1)}%`);
   wireClose(store, head);
+
+  if (m.entry.kind === 'glm-live') {
+    const measured = g.tensors.filter(x => x.sqnr_int4_g128 != null);
+    body.innerHTML = `
+      <div style="font-size:15.5px;line-height:1.55;color:var(--ink-soft);text-wrap:pretty">${tr('glm.panel.group.note', g.tensors.length, measured.length)}</div>
+      <div style="display:flex;flex-direction:column;gap:6px">
+        <div class="eyebrow mono">${tr('layer.list')}</div>
+        ${g.tensors.slice(0, 18).map(x => `<div class="t-row" data-idx="${x.idx}">
+          <div style="width:9px;height:24px;border-radius:2px;background:${colorForTensor(x, d)}"></div>
+          <div style="flex:1;min-width:0"><div class="mono" style="font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${x.short}</div><div style="font-size:12px;color:var(--faint)">${fmtN(x.numel)} · ${x.dtype}</div></div>
+          <div class="mono" style="font-size:13px;color:var(--ink-soft)">${x.sqnr_int4_g128 == null ? tr('na') : `${x.sqnr_int4_g128.toFixed(2)} ${tr('unit.db')}`}</div>
+        </div>`).join('')}
+      </div>`;
+    body.querySelectorAll<HTMLElement>('[data-idx]').forEach(row => row.addEventListener('click', () => store.select({ type: 'tensor', tensor: m.tensors[+row.dataset.idx!] })));
+    body.scrollTop = 0;
+    return;
+  }
 
   const d2 = g.tensors.filter(x => x.is2d);
   const worst = [...d2].sort((a, b) => a.sqnr_int4_g128! - b.sqnr_int4_g128!).slice(0, 7);
