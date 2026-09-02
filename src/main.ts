@@ -21,7 +21,17 @@ const app = document.getElementById('app')!;
 
 interface Keep { metric: string; pan: { x: number; y: number }; zoom: number; }
 
+// модель в адресе: ?model=<slug>, чтобы ссылку можно было кидать напрямую
+const urlSlug = () => new URLSearchParams(location.search).get('model') || undefined;
+function writeUrl(slug: string, push = false) {
+  const u = new URL(location.href);
+  if (u.searchParams.get('model') === slug) return;
+  u.searchParams.set('model', slug);
+  push ? history.pushState(null, '', u) : history.replaceState(null, '', u);
+}
+
 async function boot(slug?: string, keep?: Keep) {
+  slug = slug || urlSlug();
   app.innerHTML = '';
   document.title = t('title');
   document.documentElement.lang = localStorage.getItem('atlas.lang') === 'ru' ? 'ru' : 'en';
@@ -31,6 +41,7 @@ async function boot(slug?: string, keep?: Keep) {
 
   const manifest = await loadManifest();
   const entry = manifest.find(e => e.slug === slug) || manifest[0];
+  writeUrl(entry.slug);
   const [model, dossier, live, insights] = await Promise.all([
     loadModel(entry), loadDossier(entry.slug), loadLive(entry.slug), loadInsights(entry.slug),
   ]);
@@ -140,7 +151,7 @@ async function boot(slug?: string, keep?: Keep) {
   const keepNow = (): Keep => ({ metric: store.metric, pan: { ...world.pan }, zoom: world.zoom });
   const onLang = (l: Lang) => { setLang(l); boot(entry.slug, keepNow()); };
   app.appendChild(buildPanel(store, flyToTensor));
-  app.appendChild(buildTopbar(store, world, manifest, entry.slug, s => boot(s, keepNow()), flyToTensor, onLang));
+  app.appendChild(buildTopbar(store, world, manifest, entry.slug, s => { writeUrl(s, true); boot(s, keepNow()); }, flyToTensor, onLang));
 
   const introRect = { x: 60, y: 120, w: 700, h: 900 };
   const tours: Tour[] = [
@@ -201,4 +212,5 @@ async function boot(slug?: string, keep?: Keep) {
   });
 }
 
+window.addEventListener('popstate', () => boot(urlSlug()));
 boot();

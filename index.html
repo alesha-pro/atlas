@@ -7,9 +7,9 @@
 <script>
 try {
   var t = localStorage.getItem('atlas.theme');
-  if (!t) t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  if (t !== 'light' && t !== 'dark') t = 'dark'; // тёмная по умолчанию для всех; выбор в шапке сохраняется
   document.documentElement.dataset.theme = t;
-} catch (e) { document.documentElement.dataset.theme = 'light'; }
+} catch (e) { document.documentElement.dataset.theme = 'dark'; }
 </script>
 <meta name="description" content="An interactive canvas for taking a model apart, tensor by tensor: measured INT8/INT4/FP8 error, distributions, spectra and outlier channels for every weight tensor.">
 <meta property="og:title" content="Weight Atlas">
