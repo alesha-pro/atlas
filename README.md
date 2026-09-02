@@ -129,6 +129,10 @@ The architecture dossier is grounded in the released config and primary
 sources. The public data bundle contains aggregates and checksums, not prompts,
 generations, images, activations or raw routes.
 
+Every model has a direct link, `?model=<slug>`, so a page can be shared
+already open on that checkpoint. The interface starts dark; the toggle in the
+top bar is remembered per browser.
+
 ## Bring your own checkpoint
 
 The core weight view derives layers, components, wall rows, metric ranges and
