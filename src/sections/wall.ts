@@ -11,7 +11,10 @@ const COL_W = 34, COL_G = 3, ROW_H = 21, ROW_G = 3, TICK_H = 18, NUM_H = 20;
 const VCOL_W = 24, VCOL_G = 2;
 const VLBL_W = 150;               // отдельная полоса под подписи рядов башни
 
-export function buildWall(store: Store, X: number, Y: number): {
+// подкраска клеток, у которых нет значения текущей метрики: цвет роли, яркость по живому замеру слоя
+export type WallTint = (t: Tensor) => { color: string; note: string } | null;
+
+export function buildWall(store: Store, X: number, Y: number, tint?: WallTint): {
   root: HTMLElement; rect: { x: number; y: number; w: number; h: number };
 } {
   const m = store.model;
@@ -67,11 +70,15 @@ export function buildWall(store: Store, X: number, Y: number): {
   }
 
   const cellRefs: { div: HTMLElement; t: Tensor }[] = [];
+  const paint = (x0: Tensor) => {
+    if (tint && store.md.get(x0) == null) { const tn = tint(x0); if (tn) return tn.color; }
+    return colorForTensor(x0, store.md);
+  };
   const addCell = (x0: Tensor, x: number, y: number, w: number, h: number) => {
-    const c = el('div', 'wall-cell no-pan', `position:absolute;left:${x}px;top:${y}px;width:${w}px;height:${h}px;border-radius:2px;background:${colorForTensor(x0, store.md)}`);
+    const c = el('div', 'wall-cell no-pan', `position:absolute;left:${x}px;top:${y}px;width:${w}px;height:${h}px;border-radius:2px;background:${paint(x0)}`);
     c.addEventListener('click', () => store.select({ type: 'tensor', tensor: x0 }));
-    c.addEventListener('mouseenter', e => showTensorTip(store, x0, e as MouseEvent));
-    c.addEventListener('mousemove', e => showTensorTip(store, x0, e as MouseEvent));
+    c.addEventListener('mouseenter', e => showTensorTip(store, x0, e as MouseEvent, tint));
+    c.addEventListener('mousemove', e => showTensorTip(store, x0, e as MouseEvent, tint));
     c.addEventListener('mouseleave', hideTip);
     card.appendChild(c);
     cellRefs.push({ div: c, t: x0 });
@@ -157,7 +164,7 @@ export function buildWall(store: Store, X: number, Y: number): {
 
   // ── реакции ──
   store.addEventListener('metric', () => {
-    for (const { div, t } of cellRefs) div.style.background = colorForTensor(t, store.md);
+    for (const { div, t } of cellRefs) div.style.background = paint(t);
   });
   let lastSel: HTMLElement | null = null;
   store.addEventListener('sel', () => {
@@ -176,13 +183,14 @@ export function buildWall(store: Store, X: number, Y: number): {
   return { root, rect: { x: X, y: Y, w: cardW, h: cardH + 40 } };
 }
 
-export function showTensorTip(store: Store, x0: Tensor, e: MouseEvent) {
+export function showTensorTip(store: Store, x0: Tensor, e: MouseEvent, tint?: WallTint) {
   const d = store.md;
   const v = d.get(x0);
+  const tn = v == null && tint ? tint(x0) : null;
   tip(`<div class="mono" style="font-size:12px;margin-bottom:3px">${x0.short}</div>
     <div style="display:flex;gap:10px;align-items:baseline">
       <span class="mono">${v == null ? tr('na') : d.fmt(v) + (d.unit ? ' ' + d.unit : '')}</span>
       <span style="opacity:0.75">${d.label}</span>
       <span style="opacity:0.6">· ${fmtN(x0.numel)}</span>
-    </div>`, e.clientX, e.clientY);
+    </div>${tn ? `<div style="margin-top:4px;opacity:0.75;font-size:12px">${tn.note}</div>` : ''}`, e.clientX, e.clientY);
 }

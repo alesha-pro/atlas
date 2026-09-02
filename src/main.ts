@@ -11,7 +11,7 @@ import { buildTreemap } from './sections/treemap';
 import { buildRecords } from './sections/records';
 import { buildDepth } from './sections/depth';
 import { buildDossier } from './sections/dossier';
-import { buildGlmInsights, type GlmSection } from './sections/glm';
+import { buildGlmInsights, buildGlmWallTint, type GlmSection } from './sections/glm';
 import { buildPanel } from './panel';
 import { buildTopbar, buildBottombar, buildMinimap, type Tour } from './ui';
 import { kindOf } from './color';
@@ -80,7 +80,7 @@ async function boot(slug?: string, keep?: Keep) {
     records = buildRecords(store, 4990, 150);
     world.world.appendChild(records.root);
   }
-  const wall = buildWall(store, 80, 1890);
+  const wall = buildWall(store, 80, 1890, isGlm && insights ? buildGlmWallTint(insights) : undefined);
   world.world.appendChild(wall.root);
   let scatter: ReturnType<typeof buildScatter> | null = null;
   let depth: ReturnType<typeof buildDepth> | null = null;

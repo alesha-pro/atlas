@@ -127,7 +127,7 @@ const en: Record<string, Entry> = {
   'wall.note': 'Every fourth layer is built differently from its neighbours — the ◆ ticks on top mark full attention. Rows are aligned: one horizontal line is one role across all layers, and you can watch properties drift with depth.',
   'glm.sec.wall.title': (n: number) => `${n} logical weight groups`,
   'glm.sec.wall.sub': 'column = layer, row = role; expert cells aggregate all 288 routed experts',
-  'glm.wall.note': 'The ◆ ticks mark learned sparse-attention layers; the other columns are KDA. Shapes and dtypes come from the checkpoint inventory. Colour on routed-expert projections is the captured FC2-input QDQ.',
+  'glm.wall.note': 'The ◆ ticks mark learned sparse-attention layers; the other columns are KDA. Shapes and dtypes come from the checkpoint inventory. Colour on routed-expert projections is the captured FC2-input QDQ; every other cell wears its role colour, brightened by a live measurement of that layer (hover to see which one).',
   'wall.outside': 'outside the layers',
   'wall.vision': 'vision tower',
 
@@ -446,7 +446,7 @@ const ru: Record<string, Entry> = {
   'wall.note': 'Каждый четвёртый слой устроен иначе соседей — засечки ◆ сверху отмечают полное внимание. Ряды выровнены: одна горизонталь — одна роль во всех слоях, и видно, как свойства меняются с глубиной.',
   'glm.sec.wall.title': (n: number) => `${n} логических групп весов`,
   'glm.sec.wall.sub': 'колонка — слой, ряд — роль; expert-клетки агрегируют все 288 routed experts',
-  'glm.wall.note': 'Засечки ◆ отмечают learned sparse-attention слои; остальные колонки — KDA. Shapes и dtypes взяты из inventory чекпоинта. Цвет routed-expert проекций — снятый FC2-input QDQ.',
+  'glm.wall.note': 'Засечки ◆ отмечают learned sparse-attention слои; остальные столбцы KDA. Формы и dtype из инвентаря чекпоинта. Цвет на routed-expert проекциях это снятый FC2-input QDQ; остальные клетки носят цвет роли, а яркость берут из живого замера своего слоя (наведите, чтобы увидеть какого).',
   'wall.outside': 'вне слоёв',
   'wall.vision': 'визуальная башня',
 

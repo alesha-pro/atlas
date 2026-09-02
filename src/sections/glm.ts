@@ -6,6 +6,7 @@ import { hideTip, tip } from '../store';
 import { lang } from '../i18n';
 import { kindOf, ramp } from '../color';
 import { el, svgEl } from '../world';
+import type { Tensor } from '../data';
 
 type Rect = { x: number; y: number; w: number; h: number };
 export interface GlmSection { root: HTMLElement; rect: Rect }
@@ -269,7 +270,8 @@ function atlasCard(d: any, store: Store): HTMLElement {
   const legend = el('div', '', 'display:flex;gap:26px;align-items:center;flex-wrap:wrap');
   left.appendChild(legend);
   row.appendChild(left);
-  const insp = el('div', 'glm-insp no-pan', `width:${5800 - 52 - padL - E * cw - marginW - 24 - 20 - 42}px;min-height:${padT + N * ch}px`);
+  // фиксированная высота: досье в самом полном состоянии не должно двигать низ карточки
+  const insp = el('div', 'glm-insp no-pan', `width:${5800 - 52 - padL - E * cw - marginW - 24 - 20 - 42}px;height:${padT + N * ch + 70}px;overflow-y:auto`);
   row.appendChild(insp);
   body.appendChild(row);
 
@@ -1202,4 +1204,44 @@ export function buildGlmInsights(store: Store, data: any, X: number, Y: number, 
   root.appendChild(grid);
   new MutationObserver(() => redraws.forEach(f => f())).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
   return { root, rect: { x: X, y: Y, w: W, h: 7200 } };
+}
+
+// ───────────────────────── подкраска стены ─────────────────────────
+// У GLM стена почти вся без FC2 QDQ: клетки красим цветом роли, а яркость берём
+// из живого замера этого слоя, подходящего роли. Что именно, пишем в tooltip.
+export function buildGlmWallTint(d: any): (t: Tensor) => { color: string; note: string } | null {
+  const rankMap = (pairs: [number, number][]) => {
+    const sorted = [...pairs].map(p => p[1]).sort((a, b) => a - b);
+    const m = new Map<number, number>();
+    for (const [k, v] of pairs) m.set(k, sorted.length > 1 ? sorted.indexOf(v) / (sorted.length - 1) : .5);
+    return m;
+  };
+  const M = d.memory, R = d.routing, F = d.flow, V = d.vision_tower;
+  const kdaHalf = new Map<number, number>(M.kda.map((r: any) => [r.layer, r.half_life]));
+  const kdaT = rankMap(M.kda.map((r: any) => [r.layer, Math.log10(Math.max(r.half_life, .1))]));
+  const idxDist = new Map<number, number>(M.indexer.map((r: any) => [r.layer, r.selected_distance]));
+  const idxT = rankMap(M.indexer.map((r: any) => [r.layer, r.selected_distance]));
+  const gini = new Map<number, number>(R.dynamics.all.map((r: any) => [r.layer, r.selected_gini]));
+  const giniT = rankMap(R.dynamics.all.map((r: any) => [r.layer, r.selected_gini]));
+  const shared = new Map<number, number>(d.contributions.layers.map((r: any) => [r.layer, r.shared_energy]));
+  const sharedT = rankMap(d.contributions.layers.map((r: any) => [r.layer, r.shared_energy]));
+  const delta = new Map<number, number>(F.layers.map((L: number, i: number) => [L, F.delta_rms[i]]));
+  const deltaT = rankMap(F.layers.map((L: number, i: number) => [L, F.delta_rms[i]]));
+  const vdelta = new Map<number, number>(V.blocks.map((b: number, i: number) => [b, V.delta_rms[i]]));
+  const vdeltaT = rankMap(V.blocks.map((b: number, i: number) => [b, V.delta_rms[i]]));
+  const mix = (kind: string, t: number) => `color-mix(in oklab, ${kindOf(kind).solid} ${Math.round(28 + 62 * t)}%, var(--card))`;
+  return (x: Tensor) => {
+    const s = x.slot, name = x.name;
+    const lm = /\.layers\.(\d+)\./.exec(name);
+    const L = x.layer ?? (lm ? +lm[1] : null);
+    const vb = /^model\.visual\.blocks\.(\d+)\./.exec(name);
+    if (vb) { const b = +vb[1]; return vdelta.has(b) ? { color: mix('vision', vdeltaT.get(b)!), note: `${l('tint: vision block Δ RMS', 'подкраска: Δ RMS vision-блока')} ${fix(vdelta.get(b)!, 3)}` } : { color: mix('vision', .5), note: '' }; }
+    if (L == null) return { color: mix(s.startsWith('vis') ? 'vision' : 'out', .5), note: '' };
+    if (s.startsWith('attn.') && idxDist.has(L)) return { color: mix('attn', idxT.get(L)!), note: `${l('tint: indexer mean selected distance', 'подкраска: средняя дистанция indexer')} ${fmt(idxDist.get(L)!, 0)} ${l('tokens', 'токенов')}` };
+    if (s.startsWith('linattn.') && kdaHalf.has(L)) return { color: mix('lin', kdaT.get(L)!), note: `${l('tint: KDA mean half-life', 'подкраска: средняя half-life KDA')} ${big(kdaHalf.get(L)!)} ${l('tokens', 'токенов')}` };
+    if (/\.mlp\.gate\.weight$/.test(name) && gini.has(L)) return { color: mix('mlp', giniT.get(L)!), note: `${l('tint: router load Gini', 'подкраска: Gini нагрузки роутера')} ${fix(gini.get(L)!, 3)}` };
+    if (s.startsWith('mlp.') && shared.has(L)) return { color: mix('mlp', sharedT.get(L)!), note: `${l('tint: shared-expert energy share', 'подкраска: доля энергии shared expert')} ${pct(shared.get(L)!, 1)}` };
+    if (delta.has(L)) return { color: mix(s.startsWith('norm') ? 'norm' : s.startsWith('mlp') ? 'mlp' : 'attn', deltaT.get(L)!), note: `${l('tint: layer Δ RMS', 'подкраска: Δ RMS слоя')} ${fix(delta.get(L)!, 3)}` };
+    return { color: mix('norm', .5), note: '' };
+  };
 }
