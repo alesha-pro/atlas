@@ -220,6 +220,169 @@ def main() -> int:
             "pruning": "reversible route ablation, not a physically pruned checkpoint",
         },
     }
+
+    # ── EXTRA VIEWS: everything the cards need beyond the first cut ──
+    full = set(indexer_layers)
+    def mval(key):
+        v = metrics.get(key)
+        if not isinstance(v, dict):
+            return None
+        x = v.get("mean", v.get("value"))
+        try:
+            x = float(x)
+            return x if math.isfinite(x) else None
+        except (TypeError, ValueError):
+            return None
+
+    # top-1 share and co-routing per layer
+    top1_matrix, coroute, pos_gini = [], [], []
+    for l in layers:
+        L = router["layers"][str(l)]
+        tok = max(1, L["all"]["tokens"])
+        top1_matrix.append((qz[f"L{l}__top1_count"].astype(float) / tok).tolist())
+        pairs = L["pairs"]
+        coroute.append({
+            "count": [[p["expert_a"], p["expert_b"], p["count"], round(p["token_fraction"], 5)] for p in pairs["top_by_count"][:16]],
+            "lift": [[p["expert_a"], p["expert_b"], p["count"], round(p["independence_lift"], 2)] for p in pairs["top_by_independence_lift"][:16]],
+            "min_count": pairs["minimum_count_for_lift"],
+        })
+        pos_gini.append([finite(x) for x in L["position_selected_gini"]])
+    payload["routing"]["top1_share"] = top1_matrix
+    payload["routing"]["coroute"] = coroute
+    payload["routing"]["position"] = {
+        "token_count": router["layers"][str(layers[0])]["position_token_count"],
+        "gini": pos_gini,
+    }
+    payload["routing"]["prune_sets"] = {
+        name: [sorted(arm["prune_sets"][str(l)]) for l in layers] for name, arm in pruning["arms"].items()
+    }
+
+    # per-head β and position buckets for KDA; rank buckets + locality for the indexer
+    payload["memory"]["kda_heads_beta"] = [[finite(x.get("mean")) for x in rich["head_metrics"][f"{l}::beta_open"]] for l in kda_layers]
+    payload["memory"]["kda_position"] = {
+        "half_life": [[mval(f"all::language.layer.{l}.kda.position_bucket.{b}.half_life") for b in range(6)] for l in kda_layers],
+        "beta_open": [[mval(f"all::language.layer.{l}.kda.position_bucket.{b}.beta_open") for b in range(6)] for l in kda_layers],
+    }
+    rank_names = ["0_32", "32_128", "128_512", "512_2048"]
+    for row in payload["memory"]["indexer"]:
+        l = row["layer"]
+        row["rank_distance"] = [mval(f"all::language.layer.{l}.indexer.rank_bucket.{r}.selected_distance") for r in rank_names]
+        row["within"] = [mval(f"all::language.layer.{l}.indexer.fraction_within_{w}") for w in (128, 1024, 8192)]
+        row["position_within_1024"] = [mval(f"all::language.layer.{l}.indexer.position_bucket.{b}.fraction_within_1024") for b in range(6)]
+    payload["memory"]["rank_buckets"] = ["0–31", "32–127", "128–511", "512–2047"]
+
+    # expert-pair extremes per layer (already thresholded at 5 samples upstream)
+    payload["contributions"]["pairs_extreme"] = [{
+        "layer": l,
+        "aligned": [[p["expert_a"], p["expert_b"], p["sample_count"], round(p["mean_output_cosine"], 4)] for p in contrib["layers"][str(l)]["pair_extremes"]["most_aligned"][:4]],
+        "opposed": [[p["expert_a"], p["expert_b"], p["sample_count"], round(p["mean_output_cosine"], 4)] for p in contrib["layers"][str(l)]["pair_extremes"]["most_opposed"][:4]],
+    } for l in layers]
+
+    # block-scale code histograms and the scalar global scales
+    hist = scales["group_code_histograms"]
+    payload["quantization"]["scale_hist"] = {
+        "codebook": scales["codebook"],
+        "all": hist["all"], "gate_proj": hist["gate_proj"], "up_proj": hist["up_proj"], "down_proj": hist["down_proj"],
+        "value_count": scales["value_count"],
+    }
+    ss = inv["scale_summaries"]
+    def summ(x):
+        return {k: finite(x[k]) for k in ("min", "p05", "p25", "p50", "p75", "p95", "max", "mean")}
+    payload["quantization"]["global_scales"] = {
+        "input": summ(ss["input_global_scale:all"]), "weight": summ(ss["weight_global_scale:all"]),
+        "input_by_proj": {p: summ(ss[f"input_global_scale:{p}"]) for p in ("gate_proj", "up_proj", "down_proj")},
+        "input_by_layer": [{"layer": l, **summ(ss[f"input_global_scale:L{l}"])} for l in layers],
+        "weight_by_layer": [{"layer": l, **summ(ss[f"weight_global_scale:L{l}"])} for l in layers],
+        "mhc_attn": summ(ss["hc_attn_scale:all"]), "mhc_ffn": summ(ss["hc_ffn_scale:all"]),
+    }
+
+    # signal flow through all 45 language layers plus the vision tower
+    all_layers = list(range(45))
+    def series(fmt, ls):
+        return [mval(fmt.format(l=l)) for l in ls]
+    payload["flow"] = {
+        "layers": all_layers,
+        "kind": ["mla" if l in full else "kda" for l in all_layers],
+        "input_rms": series("all::language.layer.{l}.input_rms", all_layers),
+        "output_rms": series("all::language.layer.{l}.output_rms", all_layers),
+        "delta_rms": series("all::language.layer.{l}.delta_rms", all_layers),
+        "io_cosine": series("all::language.layer.{l}.io_cosine", all_layers),
+        "mhc_post_rms": series("all::language.layer.{l}.mhc_post_rms", all_layers),
+        "mixer_delta": [mval(f"all::language.layer.{l}.{'mla' if l in full else 'kda'}.delta_rms") for l in all_layers],
+        "mixer_io": [mval(f"all::language.layer.{l}.{'mla' if l in full else 'kda'}.io_cosine") for l in all_layers],
+        "ffn_delta": [mval(f"all::language.layer.{l}.{'moe' if l >= 3 else 'dense_mlp'}.delta_rms") for l in all_layers],
+        "ffn_io": [mval(f"all::language.layer.{l}.{'moe' if l >= 3 else 'dense_mlp'}.io_cosine") for l in all_layers],
+        "domains": {d: series(d + "::language.layer.{l}.delta_rms", all_layers) for d in domains},
+    }
+    sites = {
+        "kda_input": kda_layers, "mla_input": sorted(full),
+        "dense_mlp_input": all_layers, "moe_fc1_input": layers,
+    }
+    actq = {}
+    for site, ls in sites.items():
+        actq[site] = {
+            "layers": ls,
+            "int8": series(f"all::language.layer.{{l}}.{site}.int8_sqnr_db", ls),
+            "fp8": series(f"all::language.layer.{{l}}.{site}.fp8_sqnr_db", ls),
+            "nvfp4_ideal": series(f"all::language.layer.{{l}}.{site}.nvfp4_ideal_sqnr_db", ls),
+            "outlier_ratio": series(f"all::language.layer.{{l}}.{site}.channel_outlier_ratio", ls),
+            "max_abs": series(f"all::language.layer.{{l}}.{site}.activation_max_abs", ls),
+            "rms": series(f"all::language.layer.{{l}}.{site}.activation_rms", ls),
+        }
+    actq["moe_fc1_input"]["nvfp4_deployed"] = series("all::language.layer.{l}.moe_fc1_input.nvfp4_deployed_sqnr_db", layers)
+    payload["actq"] = actq
+    vb = list(range(24))
+    payload["vision_tower"] = {
+        "blocks": vb,
+        "input_rms": series("all::vision.block.{l}.input_rms", vb),
+        "output_rms": series("all::vision.block.{l}.output_rms", vb),
+        "delta_rms": series("all::vision.block.{l}.delta_rms", vb),
+        "io_cosine": series("all::vision.block.{l}.io_cosine", vb),
+        "int8": series("all::vision.block.{l}.input.int8_sqnr_db", vb),
+        "fp8": series("all::vision.block.{l}.input.fp8_sqnr_db", vb),
+        "nvfp4_ideal": series("all::vision.block.{l}.input.nvfp4_ideal_sqnr_db", vb),
+        "outlier_ratio": series("all::vision.block.{l}.input.channel_outlier_ratio", vb),
+        "merger": {k: mval(f"all::vision.merger.{k}") for k in ("input_rms", "output_rms", "delta_rms", "io_cosine")},
+    }
+
+    # paired vision deltas and generation-length receipts
+    payload["vision"]["deltas"] = vision["behaviour"]["paired_original_deltas"]
+    payload["vision"]["generated_tokens"] = {name: arm["generated_tokens"] for name, arm in vision["behaviour"]["arms"].items()}
+    payload["vision"]["arm_text"] = vision["arms"]
+
+    # pruning: per-domain sensitivity, per-layer reach, answer receipts
+    for row in payload["pruning"]:
+        arm = pruning["arms"][row["arm"]]
+        row["by_domain"] = {d: {
+            "edit": finite(v["sequence"]["normalized_edit_similarity"]),
+            "exact": finite(v["sequence"]["sequence_exact"]),
+            "jaccard": finite(v["sequence"]["first_step_topk_jaccard"]),
+            "n": v["sequence"]["n"],
+        } for d, v in arm["by_domain"].items()}
+        li = arm["intervention"]["layers"]
+        row["per_layer_affected"] = [finite(li[str(l)]["affected_token_fraction"]) for l in layers]
+        row["per_layer_mass"] = [finite(li[str(l)]["removed_mass_fraction"]) for l in layers]
+        row["fallback_events"] = int(sum(li[str(l)]["all_selected_pruned_tokens"] for l in layers))
+        row["answer"] = arm["answer"]
+        row["answer_delta"] = arm["answer_delta_vs_baseline"]
+    payload["pruning_baseline"] = pruning["baseline"]
+    payload["stability"]["controls"] = {k: v["rho"] for k, v in stability["controls_vs_exact_reap"].items()}
+    # capture ledger: one row per accepted run, wall time straight from each artifact
+    payload["meta"]["captures"] = [
+        {"id": "01", "key": "inventory", "gpu": False, "wall_s": None},
+        {"id": "02", "key": "scales", "gpu": False, "wall_s": None},
+        {"id": "03", "key": "router", "gpu": True, "wall_s": finite(router["run"].get("wall_s"))},
+        {"id": "04", "key": "contrib", "gpu": True, "wall_s": finite(contrib["run"].get("wall_s"))},
+        {"id": "05", "key": "rich", "gpu": True, "wall_s": finite(rich["run"].get("wall_s"))},
+        {"id": "06", "key": "vision", "gpu": True, "wall_s": finite(vision["run"].get("wall_s"))},
+        {"id": "07", "key": "fc2", "gpu": True, "wall_s": finite(fc2["run"].get("wall_s"))},
+        {"id": "08", "key": "pruning", "gpu": True, "wall_s": finite(pruning["run"].get("wall_s"))},
+    ]
+    payload["meta"]["router_records"] = router["run"]["records"]
+    payload["meta"]["router_tokens"] = router["run"]["estimated_tokens"]
+    payload["meta"]["routed_tokens_per_layer"] = router["layers"][str(layers[0])]["all"]["tokens"]
+    payload["meta"]["domain_records"] = router["run"]["domains"]
+
     (out / "insights.json").write_text(json.dumps(payload, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
 
     # Logical parameter groups for the architecture rail and layer wall.  These

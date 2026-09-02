@@ -96,15 +96,34 @@ Where a number is a guess, the card says so.
 ### GLM-5.3-Flash NVFP4
 
 GLM has its own evidence-led living region rather than forcing MoE data into the
-Qwen charts:
+Qwen charts. Twelve cards, each answering one question with the numbers from one
+capture:
 
-- 12,096 expert cells switchable between exact REAP, route share and sampled
-  output contribution; REAP has 14 domain slices
-- router decisiveness and load inequality through all 42 routed layers
-- split-half ranking stability and controls against frequency-only importance
-- 34 × 64 KDA head half-lives and long-position sparse-indexer reach
-- shared-versus-routed contribution, NVFP4 block-scale structure and FC2 QDQ
-- four causal Vision arms and a five-arm causal REAP stress test
+- a capture receipt with 7 findings that jump to their cards, the 8-capture
+  ledger with wall times, and the runtime pins
+- the expert atlas: 12,096 cells switchable between exact REAP, route share,
+  top-1 share and sampled output contribution; REAP sliced by 14 domains or
+  shown as a log ratio to the global score; rows ranked within a layer; prune
+  sets outlined; a pinnable expert dossier with domain profile, co-routing
+  partners and prune-set membership
+- the router under load: effective experts, top-1 margin, load Gini by depth
+  and by prompt position, plus a co-routing ring of the 16 most frequent or
+  highest-lift pairs of any layer
+- ranking trust: split-half Spearman, keep-set Jaccard by size, three proxy
+  controls and every domain against the global list
+- 34 × 64 KDA memories as half-life or β, sortable, with the head histogram
+  and the position-bucket medians
+- sparse-indexer reach by query position, by returned rank, and how much of
+  each selection lands within 128 / 1,024 / 8,192 tokens
+- signal flow through all 45 layers and the 24 vision blocks
+- activation SQNR under INT8, FP8 and NVFP4 at four boundaries, with the
+  deployed FC1 scale drawn over the ideal one
+- shared versus routed energy and pairwise expert-output cosine
+- NVFP4 as deployed: 19 billion block-scale codes as a histogram, per-layer
+  scale bands, FC2-input QDQ error, global scales and the checkpoint inventory
+- four causal Vision arms with paired win / tie / loss outcomes per benchmark
+- the five-arm causal REAP stress test with per-domain sensitivity and
+  per-layer reach
 
 The architecture dossier is grounded in the released config and primary
 sources. The public data bundle contains aggregates and checksums, not prompts,

@@ -281,3 +281,26 @@ input[type=range] { accent-color: var(--accent); height: 22px; cursor: pointer; 
   .modal-head { padding: 16px 18px 12px; }
   .modal-body { padding: 14px 18px 24px; }
 }
+
+/* ── регион измеренной модели (GLM) ── */
+.glm-tile {
+  border: 1px solid var(--line); background: var(--glass-soft); border-radius: 10px;
+  padding: 13px 15px 12px; min-height: 92px; display: flex; flex-direction: column; gap: 4px;
+}
+.glm-tile-v { font-size: 25px; color: var(--ink); letter-spacing: -0.03em; line-height: 1.1; }
+.glm-tile-n { font-size: 13px; color: var(--muted); line-height: 1.3; }
+.glm-tile-s { font-size: 9.5px; color: var(--ghost); margin-top: 3px; line-height: 1.35; }
+.glm-tile-go { font-size: 10px; color: var(--accent-deep); margin-top: auto; padding-top: 6px; opacity: 0; transition: opacity 140ms; }
+.glm-jump { cursor: pointer; transition: border-color 140ms, transform 140ms; }
+.glm-jump:hover { border-color: var(--accent); transform: translateY(-1px); }
+.glm-jump:hover .glm-tile-go { opacity: 1; }
+.glm-cap {
+  flex: 1; border: 1px solid var(--line); border-radius: 9px; padding: 10px 12px;
+  background: var(--chart-bg); min-width: 0;
+}
+.glm-insp {
+  border: 1px solid var(--line); border-radius: 12px; padding: 18px 20px;
+  background: var(--chart-bg); flex-shrink: 0;
+}
+.glm-link { font-size: 11px; color: var(--accent-deep); cursor: pointer; }
+.glm-link:hover { text-decoration: underline; }

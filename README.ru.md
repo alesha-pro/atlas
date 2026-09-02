@@ -95,15 +95,34 @@ python3 scripts/weight_atlas.py /путь/к/чекпоинту atlas.jsonl --de
 ### GLM-5.3-Flash NVFP4
 
 У GLM свой evidence-led регион живой модели, а не попытка натянуть MoE-данные
-на Qwen-графики:
+на Qwen-графики. Двенадцать карточек, каждая отвечает на один вопрос числами
+из одного capture:
 
-- 12 096 expert-ячеек с переключением exact REAP, route share и sampled output
-  contribution; для REAP есть 14 доменных срезов
-- решительность роутера и неравномерность нагрузки по всем 42 routed-слоям
-- split-half stability ranking и контроли против частоты как proxy importance
-- half-life всех 34 × 64 KDA-голов и дальность sparse indexer на длинных позициях
-- shared против routed, block-scale NVFP4 и FC2 QDQ
-- четыре causal Vision arms и causal REAP stress test из пяти arms
+- паспорт capture: 7 находок с переходом к своим карточкам, реестр 8 captures с
+  wall time и пины рантайма
+- атлас экспертов: 12 096 ячеек с переключением exact REAP, route share, top-1
+  share и sampled output contribution; REAP по 14 доменам или как log-отношение
+  к сводному score; ранжирование внутри слоя; обводка prune-set; закрепляемое
+  досье эксперта с доменным профилем, партнёрами по co-routing и членством в
+  prune-set
+- роутер под нагрузкой: эффективные эксперты, отрыв top-1, Gini нагрузки по
+  глубине и по позиции в промпте, плюс кольцо co-routing для 16 самых частых
+  или самых сродных пар любого слоя
+- доверие к ранжированию: split-half Spearman, Jaccard keep-set по размеру, три
+  прокси-контроля и каждый домен против сводного списка
+- 34 × 64 KDA-памяти как half-life или β, с сортировкой, гистограммой голов и
+  медианами по позиционным бакетам
+- дальность sparse indexer по позиции запроса, по рангу выдачи и доля выбора в
+  пределах 128 / 1024 / 8192 токенов
+- поток сигнала через все 45 слоёв и 24 vision-блока
+- SQNR активаций под INT8, FP8 и NVFP4 на четырёх границах, с deployed scale
+  FC1 поверх идеального
+- энергия shared против routed и попарный cosine выходов экспертов
+- NVFP4 как он развёрнут: 19 млрд кодов block scale гистограммой, полосы scale
+  по слоям, ошибка QDQ входа FC2, global scales и инвентарь чекпоинта
+- четыре causal Vision arms с парными исходами win / tie / loss по бенчмаркам
+- causal REAP stress test из пяти arms с чувствительностью по доменам и
+  охватом по слоям
 
 Архитектурное досье опирается на released config и первичные источники. В
 публичном bundle лежат агрегаты и checksums, но нет prompts, generations,

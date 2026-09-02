@@ -42,6 +42,7 @@ async function boot(slug?: string, keep?: Keep) {
   // scrollIntoView/focus умеют скроллить даже overflow:hidden — гасим
   app.addEventListener('scroll', () => { app.scrollTop = 0; app.scrollLeft = 0; });
   const world = new World(app, isGlm ? { w: 6000, h: 8200 } : dossier ? { w: 9260, h: 4950 } : { w: 6400, h: 3300 });
+  (window as any).__world = world; // отладочный хук для скриншотов
 
   // цветовые пятна фона
   const washes: [number, number, number, number, string][] = [
@@ -102,12 +103,14 @@ async function boot(slug?: string, keep?: Keep) {
   let glmSec: GlmSection | null = null;
   if (isGlm && insights) {
     const startY = Math.max(wall.rect.y + wall.rect.h, dossierSec ? dossierSec.rect.y + dossierSec.rect.h : 0) + 150;
-    glmSec = buildGlmInsights(store, insights, 80, startY);
+    glmSec = buildGlmInsights(store, insights, 80, startY, (r) => world.flyTo(r, { padRight: panelPad(), maxZoom: 1 }));
     world.world.appendChild(glmSec.root);
     glmSec.rect.h = glmSec.root.offsetHeight + 40;
     const needH = glmSec.rect.y + glmSec.rect.h + 260;
     world.size.h = Math.max(world.size.h, needH);
     world.world.style.height = world.size.h + 'px';
+    const needW = glmSec.rect.x + glmSec.rect.w + 120;
+    if (needW > world.size.w) { world.size.w = needW; world.world.style.width = needW + 'px'; }
   }
 
   // ── живая модель (если есть live.json) ──
